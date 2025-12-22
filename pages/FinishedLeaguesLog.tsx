@@ -10,7 +10,7 @@ import {
     LayoutGrid
 } from 'lucide-react';
 import { User, League, LeagueFormat } from '../types';
-import { storage } from '../services/storage';
+import { dataService } from '../services/dataService';
 
 interface FinishedLeaguesLogProps {
     user: User;
@@ -20,12 +20,23 @@ const FinishedLeaguesLog: React.FC<FinishedLeaguesLogProps> = ({ user }) => {
     const [finishedLeagues, setFinishedLeagues] = useState<League[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFormats, setSelectedFormats] = useState<LeagueFormat[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Determine finished leagues based on status
-        const allLeagues = storage.getLeagues();
-        const finished = allLeagues.filter(l => l.status === 'finished');
-        setFinishedLeagues(finished);
+        const loadFinishedLeagues = async () => {
+            try {
+                setLoading(true);
+                const allLeagues = await dataService.getLeagues();
+                const finished = allLeagues.filter(l => l.status === 'finished');
+                setFinishedLeagues(finished);
+            } catch (error) {
+                console.error('Error loading finished leagues:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadFinishedLeagues();
     }, []);
 
     const toggleFormat = (format: LeagueFormat) => {
@@ -50,6 +61,17 @@ const FinishedLeaguesLog: React.FC<FinishedLeaguesLogProps> = ({ user }) => {
             default: return format;
         }
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-400">Loading finished leagues...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
@@ -84,8 +106,8 @@ const FinishedLeaguesLog: React.FC<FinishedLeaguesLogProps> = ({ user }) => {
                             key={format.id}
                             onClick={() => toggleFormat(format.id as LeagueFormat)}
                             className={`px-4 py-3 rounded-xl text-xs font-black tracking-wider transition-all whitespace-nowrap flex items-center gap-2 ${selectedFormats.includes(format.id as LeagueFormat)
-                                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             {selectedFormats.includes(format.id as LeagueFormat) && <CheckCircle className="w-3 h-3" />}
