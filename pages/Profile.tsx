@@ -23,21 +23,18 @@ interface ProfileProps {
     user: User;
 }
 
-// Anime-style character avatars
+// Football/Soccer themed avatars
 const AVATAR_OPTIONS = [
-    // Using Notion Avatars - clean, professional anime-style avatars
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoiYmx1ZSIsInNoYXBlIjoic3F1YXJlIn0',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoicmVkIiwic2hhcGUiOiJzcXVhcmUifQ',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoiZ3JlZW4iLCJzaGFwZSI6InNxdWFyZSJ9',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoicHVycGxlIiwic2hhcGUiOiJzcXVhcmUifQ',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoib3JhbmdlIiwic2hhcGUiOiJzcXVhcmUifQ',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoicGluayIsInNoYXBlIjoic3F1YXJlIn0',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoieWVsbG93Iiwic2hhcGUiOiJzcXVhcmUifQ',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoiY3lhbiIsInNoYXBlIjoic3F1YXJlIn0',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoidGVhbCIsInNoYXBlIjoic3F1YXJlIn0',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoibGltZSIsInNoYXBlIjoic3F1YXJlIn0',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoiaW5kaWdvIiwic2hhcGUiOiJzcXVhcmUifQ',
-    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoiZnVjaHNpYSIsInNoYXBlIjoic3F1YXJlIn0',
+    // Custom Anime Soccer Players (Generated)
+    '/avatars/anime_striker.png',
+    '/avatars/anime_midfielder.png',
+    '/avatars/anime_defender.png',
+    '/avatars/anime_keeper.png',
+    '/avatars/anime_winger.png',
+    // Fallback/Extra options
+    'https://robohash.org/striker?set=set4&size=200x200',
+    'https://robohash.org/captain?set=set4&size=200x200',
+    'https://robohash.org/coach?set=set4&size=200x200',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
