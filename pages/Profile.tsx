@@ -23,18 +23,20 @@ interface ProfileProps {
     user: User;
 }
 
-// Football/Soccer themed avatars
+// Custom Anime Soccer Themed Avatars
 const AVATAR_OPTIONS = [
-    // Custom Anime Soccer Players (Generated)
+    // Original 5
     '/avatars/anime_striker.png',
     '/avatars/anime_midfielder.png',
     '/avatars/anime_defender.png',
     '/avatars/anime_keeper.png',
     '/avatars/anime_winger.png',
-    // Fallback/Extra options
-    'https://robohash.org/striker?set=set4&size=200x200',
-    'https://robohash.org/captain?set=set4&size=200x200',
-    'https://robohash.org/coach?set=set4&size=200x200',
+    // New Additions
+    '/avatars/anime_captain.png',
+    '/avatars/anime_strategist.png',
+    '/avatars/anime_wild.png',
+    '/avatars/anime_princess.png',
+    '/avatars/anime_rookie.png',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
