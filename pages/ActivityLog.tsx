@@ -11,7 +11,7 @@ import {
     Search
 } from 'lucide-react';
 import { User, ActivityLog as ActivityLogType } from '../types';
-import { storage } from '../services/storage';
+import { dataService } from '../services/dataService';
 
 interface ActivityLogProps {
     user: User;
@@ -21,11 +21,23 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ user }) => {
     const [logs, setLogs] = useState<ActivityLogType[]>([]);
     const [filteredLogs, setFilteredLogs] = useState<ActivityLogType[]>([]);
     const [filterType, setFilterType] = useState<string>('all');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const allLogs = storage.getActivityLogs();
-        setLogs(allLogs);
-        setFilteredLogs(allLogs);
+        const loadLogs = async () => {
+            try {
+                setLoading(true);
+                const allLogs = await dataService.getActivityLogs();
+                setLogs(allLogs);
+                setFilteredLogs(allLogs);
+            } catch (error) {
+                console.error('Error loading activity logs:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadLogs();
     }, []);
 
     useEffect(() => {
@@ -89,6 +101,17 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ user }) => {
             year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
         });
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-400">Loading activity logs...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">

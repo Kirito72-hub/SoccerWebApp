@@ -10,7 +10,7 @@ import {
     CheckCircle
 } from 'lucide-react';
 import { User, UserRole } from '../types';
-import { storage } from '../services/storage';
+import { dataService } from '../services/dataService';
 
 interface SettingsProps {
     user: User;
@@ -20,9 +20,22 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setAllUsers(storage.getUsers());
+        const loadUsers = async () => {
+            try {
+                setLoading(true);
+                const users = await dataService.getUsers();
+                setAllUsers(users);
+            } catch (error) {
+                console.error('Error loading users:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadUsers();
     }, []);
 
     const filteredUsers = searchQuery.trim()
@@ -32,11 +45,16 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
         )
         : allUsers;
 
-    const handleRoleChange = (userId: string, newRole: UserRole) => {
-        storage.updateUserRole(userId, newRole);
-        setAllUsers(storage.getUsers());
-        setUpdatingUserId(userId);
-        setTimeout(() => setUpdatingUserId(null), 2000);
+    const handleRoleChange = async (userId: string, newRole: UserRole) => {
+        try {
+            await dataService.updateUserRole(userId, newRole);
+            const users = await dataService.getUsers();
+            setAllUsers(users);
+            setUpdatingUserId(userId);
+            setTimeout(() => setUpdatingUserId(null), 2000);
+        } catch (error) {
+            console.error('Error updating user role:', error);
+        }
     };
 
     const getRoleIcon = (role: UserRole) => {
@@ -81,6 +99,17 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                 </div>
                 <h2 className="text-2xl font-black">ACCESS DENIED</h2>
                 <p className="text-gray-500">Only superusers can access this section.</p>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-400">Loading users...</p>
+                </div>
             </div>
         );
     }
