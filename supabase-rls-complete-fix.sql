@@ -23,11 +23,15 @@ WITH CHECK (true);
 -- UPDATE: Users can update own profile OR superusers can update any user
 DROP POLICY IF EXISTS "Users can update own profile" ON users;
 DROP POLICY IF EXISTS "Superusers can update any user" ON users;
-DROP POLICY IF EXISTS "Users and superusers can update profiles" ON users;
 
-CREATE POLICY "Public update access for users table" 
+CREATE POLICY "Users and superusers can update profiles" 
 ON users FOR UPDATE 
-USING (true);
+USING (
+  -- Since we use custom auth (not Supabase Auth), we can't identify the current user
+  -- in RLS context. We handle authorization at the application level.
+  -- Allow all updates - the app ensures users only update their own profile
+  true
+);
 
 -- DELETE: Only superusers can delete users (optional, usually not needed)
 DROP POLICY IF EXISTS "Superusers can delete users" ON users;

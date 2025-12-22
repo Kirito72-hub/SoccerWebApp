@@ -12,7 +12,8 @@ import {
     CheckCircle
 } from 'lucide-react';
 import { User } from '../types';
-import { dataService } from '../services/dataService';
+import { storage } from '../services/storage';
+import { db } from '../services/database';
 import bcrypt from 'bcryptjs';
 
 interface ProfileProps {
@@ -44,26 +45,13 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                 return;
             }
 
-            // Verify current password by attempting login
-            try {
-                const isOnline = dataService.isOnline();
+            // Verify current password
+            const isValidPassword = db.isOnline()
+                ? await bcrypt.compare(formData.currentPassword, user.password)
+                : formData.currentPassword === user.password;
 
-                if (isOnline) {
-                    // Verify password using database login
-                    const verifiedUser = await dataService.login(user.email, formData.currentPassword);
-                    if (!verifiedUser) {
-                        setError('Current password is incorrect');
-                        return;
-                    }
-                } else {
-                    // For offline mode, compare directly (shouldn't happen in production)
-                    if (formData.currentPassword !== user.password) {
-                        setError('Current password is incorrect');
-                        return;
-                    }
-                }
-            } catch (err) {
-                setError('Failed to verify current password');
+            if (!isValidPassword) {
+                setError('Current password is incorrect');
                 return;
             }
 
@@ -90,16 +78,15 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
             }
 
             if (Object.keys(updates).length > 0) {
-                // Update user through dataService
-                await dataService.updateUser(user.id, updates);
-
-                // Update localStorage session
-                const updatedUser = { ...user, ...updates };
-                // If password was changed, we need to hash it for localStorage
-                if (updates.password) {
-                    updatedUser.password = await bcrypt.hash(updates.password, 10);
+                // Use Supabase if configured, otherwise localStorage
+                if (db.isOnline()) {
+                    await db.updateUser(user.id, updates);
+                    // Update localStorage session as well
+                    const updatedUser = { ...user, ...updates };
+                    storage.setCurrentUser(updatedUser);
+                } else {
+                    storage.updateUserProfile(user.id, updates);
                 }
-                dataService.setCurrentUser(updatedUser);
 
                 setSuccess('Profile updated successfully!');
                 setEditing(false);
