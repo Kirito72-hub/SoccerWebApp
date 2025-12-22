@@ -24,15 +24,19 @@ interface ProfileProps {
 
 // Predefined anime football player avatars
 const AVATAR_OPTIONS = [
-    // Using UI Avatars with football player names
-    'https://ui-avatars.com/api/?name=Striker+Blue&background=4F46E5&color=fff&size=200&bold=true&format=svg',
-    'https://ui-avatars.com/api/?name=Captain+Red&background=DC2626&color=fff&size=200&bold=true&format=svg',
-    'https://ui-avatars.com/api/?name=Defender+Green&background=059669&color=fff&size=200&bold=true&format=svg',
-    'https://ui-avatars.com/api/?name=Midfielder+Gold&background=F59E0B&color=fff&size=200&bold=true&format=svg',
-    'https://ui-avatars.com/api/?name=Keeper+Purple&background=7C3AED&color=fff&size=200&bold=true&format=svg',
-    'https://ui-avatars.com/api/?name=Winger+Cyan&background=06B6D4&color=fff&size=200&bold=true&format=svg',
-    'https://ui-avatars.com/api/?name=Forward+Pink&background=EC4899&color=fff&size=200&bold=true&format=svg',
-    'https://ui-avatars.com/api/?name=Star+Orange&background=EA580C&color=fff&size=200&bold=true&format=svg',
+    // Anime-style football players from various sources
+    'https://i.pravatar.cc/200?img=12',
+    'https://i.pravatar.cc/200?img=13',
+    'https://i.pravatar.cc/200?img=14',
+    'https://i.pravatar.cc/200?img=15',
+    'https://i.pravatar.cc/200?img=33',
+    'https://i.pravatar.cc/200?img=59',
+    'https://i.pravatar.cc/200?img=68',
+    'https://i.pravatar.cc/200?img=70',
+    'https://randomuser.me/api/portraits/men/1.jpg',
+    'https://randomuser.me/api/portraits/men/32.jpg',
+    'https://randomuser.me/api/portraits/men/45.jpg',
+    'https://randomuser.me/api/portraits/women/44.jpg',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
