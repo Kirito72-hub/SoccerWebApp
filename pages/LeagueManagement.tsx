@@ -155,7 +155,7 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
       // Delete league (this will cascade delete matches due to foreign key)
       await dataService.deleteLeague(id);
 
-      // Add activity log
+      // Only log if deletion succeeded (no error thrown above)
       await dataService.createActivityLog({
         type: 'league_deleted',
         userId: user.id,
@@ -173,6 +173,9 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
       setLeagueToDelete(null);
     } catch (error) {
       console.error('Error deleting league:', error);
+      // Show error to user
+      alert('Failed to delete league. You may not have permission to delete this league.');
+      setLeagueToDelete(null);
     }
   };
 
