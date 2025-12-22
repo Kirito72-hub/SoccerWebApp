@@ -24,14 +24,15 @@ interface ProfileProps {
 
 // Predefined anime football player avatars
 const AVATAR_OPTIONS = [
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4&eyes=happy&mouth=smile&top=shortHair&topColor=auburn',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka&backgroundColor=c0aede&eyes=wink&mouth=smile&top=shortHair&topColor=black',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Milo&backgroundColor=ffd5dc&eyes=default&mouth=serious&top=shortHair&topColor=blonde',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Luna&backgroundColor=d1d4f9&eyes=happy&mouth=smile&top=longHair&topColor=brown',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Max&backgroundColor=ffdfbf&eyes=default&mouth=smile&top=shortHair&topColor=red',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Chloe&backgroundColor=c0f0dd&eyes=wink&mouth=smile&top=longHair&topColor=platinum',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver&backgroundColor=ffd6e0&eyes=happy&mouth=smile&top=shortHair&topColor=black',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie&backgroundColor=b6e3f4&eyes=default&mouth=smile&top=longHair&topColor=auburn',
+    // Using UI Avatars with football player names
+    'https://ui-avatars.com/api/?name=Striker+Blue&background=4F46E5&color=fff&size=200&bold=true&format=svg',
+    'https://ui-avatars.com/api/?name=Captain+Red&background=DC2626&color=fff&size=200&bold=true&format=svg',
+    'https://ui-avatars.com/api/?name=Defender+Green&background=059669&color=fff&size=200&bold=true&format=svg',
+    'https://ui-avatars.com/api/?name=Midfielder+Gold&background=F59E0B&color=fff&size=200&bold=true&format=svg',
+    'https://ui-avatars.com/api/?name=Keeper+Purple&background=7C3AED&color=fff&size=200&bold=true&format=svg',
+    'https://ui-avatars.com/api/?name=Winger+Cyan&background=06B6D4&color=fff&size=200&bold=true&format=svg',
+    'https://ui-avatars.com/api/?name=Forward+Pink&background=EC4899&color=fff&size=200&bold=true&format=svg',
+    'https://ui-avatars.com/api/?name=Star+Orange&background=EA580C&color=fff&size=200&bold=true&format=svg',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
@@ -400,8 +401,8 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                                     key={index}
                                     onClick={() => setSelectedAvatar(avatarUrl)}
                                     className={`relative group rounded-2xl overflow-hidden border-4 transition-all hover:scale-105 ${selectedAvatar === avatarUrl
-                                            ? 'border-purple-500 shadow-lg shadow-purple-500/50'
-                                            : 'border-white/10 hover:border-purple-500/50'
+                                        ? 'border-purple-500 shadow-lg shadow-purple-500/50'
+                                        : 'border-white/10 hover:border-purple-500/50'
                                         }`}
                                 >
                                     <img
