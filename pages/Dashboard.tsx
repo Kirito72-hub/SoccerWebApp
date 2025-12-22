@@ -1,11 +1,11 @@
 
-import React, { useMemo } from 'react';
-import { 
-  Trophy, 
-  Users, 
-  Target, 
-  ShieldCheck, 
-  Activity, 
+import React, { useState, useEffect } from 'react';
+import {
+  Trophy,
+  Users,
+  Target,
+  ShieldCheck,
+  Activity,
   Star,
   Zap,
   Flame,
@@ -13,17 +13,43 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { User, UserStats, Match } from '../types';
-import { storage } from '../services/storage';
+import { dataService } from '../services/dataService';
 
 interface DashboardProps {
   user: User;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ user }) => {
-  const stats = storage.getStats().find(s => s.userId === user.id);
-  const allMatches = storage.getMatches().filter(m => m.status === 'completed');
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [allMatches, setAllMatches] = useState<Match[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [userStats, matches, allUsers] = await Promise.all([
+          dataService.getUserStats(user.id),
+          dataService.getMatches(),
+          dataService.getUsers()
+        ]);
+
+        setStats(userStats);
+        setAllMatches(matches.filter(m => m.status === 'completed'));
+        setUsers(allUsers);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user.id]);
+
   const userMatches = allMatches.filter(m => m.homeUserId === user.id || m.awayUserId === user.id);
-  
+
   const winRate = stats?.matchesPlayed ? Math.round(((userMatches.filter(m => {
     const isHome = m.homeUserId === user.id;
     return isHome ? (m.homeScore! > m.awayScore!) : (m.awayScore! > m.homeScore!);
@@ -36,14 +62,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const isHome = m.homeUserId === user.id;
     const won = isHome ? (m.homeScore! > m.awayScore!) : (m.awayScore! > m.homeScore!);
     const lost = isHome ? (m.homeScore! < m.awayScore!) : (m.awayScore! < m.homeScore!);
-    
+
     const entry = opponentsMap.get(oppId) || { wins: 0, losses: 0 };
     if (won) entry.wins++;
     if (lost) entry.losses++;
     opponentsMap.set(oppId, entry);
   });
 
-  const users = storage.getUsers();
   let favOpp = "None";
   let toughOpp = "None";
   let maxWins = 0;
@@ -76,6 +101,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     { name: 'Sun', goals: 6 },
   ];
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -84,12 +120,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           <p className="text-gray-500 font-medium">Welcome back, <span className="text-purple-400">@{user.username.split(' ')[0].toLowerCase()}</span></p>
         </div>
         <div className="flex gap-2">
-           <button className="px-4 py-2 glass border border-white/5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-white/10">
-             <TrendingUp className="w-4 h-4" /> Export Stats
-           </button>
-           <button className="px-4 py-2 bg-purple-600 rounded-xl text-sm font-bold shadow-lg shadow-purple-600/20 hover:scale-105 transition-transform">
-             New League
-           </button>
+          <button className="px-4 py-2 glass border border-white/5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-white/10">
+            <TrendingUp className="w-4 h-4" /> Export Stats
+          </button>
+          <button className="px-4 py-2 bg-purple-600 rounded-xl text-sm font-bold shadow-lg shadow-purple-600/20 hover:scale-105 transition-transform">
+            New League
+          </button>
         </div>
       </div>
 
@@ -127,14 +163,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorGoals" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f2937" />
                 <XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151', borderRadius: '12px' }}
                   itemStyle={{ color: '#8b5cf6' }}
                 />
@@ -150,28 +186,28 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             Quick Activity
           </h3>
           <div className="space-y-6">
-             {userMatches.slice(0, 4).map((match, i) => {
-               const opponent = users.find(u => u.id === (match.homeUserId === user.id ? match.awayUserId : match.homeUserId));
-               const won = match.homeUserId === user.id ? (match.homeScore! > match.awayScore!) : (match.awayScore! > match.homeScore!);
-               return (
-                 <div key={i} className="flex items-center gap-4 group">
-                    <div className={`w-2 h-10 rounded-full ${won ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-bold">vs {opponent?.username}</p>
-                      <p className="text-xs text-gray-500">{new Date(match.date).toLocaleDateString()}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-black text-purple-400">{match.homeScore} - {match.awayScore}</p>
-                      <p className="text-[10px] text-gray-600 uppercase font-black">{won ? 'Victory' : 'Defeat'}</p>
-                    </div>
-                 </div>
-               )
-             })}
-             {userMatches.length === 0 && (
-               <div className="text-center py-10">
-                 <p className="text-gray-500 text-sm">No recent matches found</p>
-               </div>
-             )}
+            {userMatches.slice(0, 4).map((match, i) => {
+              const opponent = users.find(u => u.id === (match.homeUserId === user.id ? match.awayUserId : match.homeUserId));
+              const won = match.homeUserId === user.id ? (match.homeScore! > match.awayScore!) : (match.awayScore! > match.homeScore!);
+              return (
+                <div key={i} className="flex items-center gap-4 group">
+                  <div className={`w-2 h-10 rounded-full ${won ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold">vs {opponent?.username}</p>
+                    <p className="text-xs text-gray-500">{new Date(match.date).toLocaleDateString()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-purple-400">{match.homeScore} - {match.awayScore}</p>
+                    <p className="text-[10px] text-gray-600 uppercase font-black">{won ? 'Victory' : 'Defeat'}</p>
+                  </div>
+                </div>
+              )
+            })}
+            {userMatches.length === 0 && (
+              <div className="text-center py-10">
+                <p className="text-gray-500 text-sm">No recent matches found</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

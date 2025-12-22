@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import RunningLeagues from './pages/RunningLeagues';
@@ -10,29 +9,29 @@ import FinishedLeaguesLog from './pages/FinishedLeaguesLog';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Layout from './components/Layout';
-import { storage } from './services/storage';
+import { dataService } from './services/dataService';
 import { User } from './types';
 
 const App: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(storage.getCurrentUser());
+  const [currentUser, setCurrentUser] = useState<User | null>(dataService.getCurrentUser());
 
   useEffect(() => {
     // Sync storage user on mount
-    const user = storage.getCurrentUser();
+    const user = dataService.getCurrentUser();
     if (user) {
-      storage.ensureUserStats(user.id);
+      dataService.ensureUserStats(user.id);
     }
     setCurrentUser(user);
   }, []);
 
   const handleLogin = (user: User) => {
-    storage.setCurrentUser(user);
-    storage.ensureUserStats(user.id);
+    dataService.setCurrentUser(user);
+    dataService.ensureUserStats(user.id);
     setCurrentUser(user);
   };
 
   const handleLogout = () => {
-    storage.setCurrentUser(null);
+    dataService.setCurrentUser(null);
     setCurrentUser(null);
   };
 
