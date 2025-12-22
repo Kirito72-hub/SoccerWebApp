@@ -23,6 +23,28 @@ export const dataService = {
         return storage.getUsers().find(u => u.id === id) || null;
     },
 
+    async createUser(user: Omit<User, 'id'>): Promise<User> {
+        if (db.isOnline()) {
+            return await db.createUser(user);
+        }
+        return storage.createUser(user);
+    },
+
+    async login(email: string, password: string): Promise<User | null> {
+        if (db.isOnline()) {
+            return await db.login(email, password);
+        }
+        return storage.login(email, password);
+    },
+
+    async updateUser(id: string, updates: Partial<User>): Promise<void> {
+        if (db.isOnline()) {
+            await db.updateUser(id, updates);
+        } else {
+            storage.updateUserProfile(id, updates);
+        }
+    },
+
     async updateUserRole(userId: string, newRole: 'superuser' | 'pro_manager' | 'normal_user'): Promise<void> {
         if (db.isOnline()) {
             await db.updateUserRole(userId, newRole);
