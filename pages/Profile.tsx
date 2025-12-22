@@ -45,13 +45,26 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                 return;
             }
 
-            // Verify current password
-            const isValidPassword = db.isOnline()
-                ? await bcrypt.compare(formData.currentPassword, user.password)
-                : formData.currentPassword === user.password;
+            // Verify current password by attempting login
+            try {
+                const isOnline = await db.isOnline();
 
-            if (!isValidPassword) {
-                setError('Current password is incorrect');
+                if (isOnline) {
+                    // Verify password using database login
+                    const verifiedUser = await db.login(user.email, formData.currentPassword);
+                    if (!verifiedUser) {
+                        setError('Current password is incorrect');
+                        return;
+                    }
+                } else {
+                    // For offline mode, compare directly (shouldn't happen in production)
+                    if (formData.currentPassword !== user.password) {
+                        setError('Current password is incorrect');
+                        return;
+                    }
+                }
+            } catch (err) {
+                setError('Failed to verify current password');
                 return;
             }
 
@@ -79,10 +92,16 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
 
             if (Object.keys(updates).length > 0) {
                 // Use Supabase if configured, otherwise localStorage
-                if (db.isOnline()) {
+                const isOnline = await db.isOnline();
+
+                if (isOnline) {
                     await db.updateUser(user.id, updates);
                     // Update localStorage session as well
                     const updatedUser = { ...user, ...updates };
+                    // If password was changed, we need to hash it for localStorage
+                    if (updates.password) {
+                        updatedUser.password = await bcrypt.hash(updates.password, 10);
+                    }
                     storage.setCurrentUser(updatedUser);
                 } else {
                     storage.updateUserProfile(user.id, updates);
