@@ -29,6 +29,18 @@ USING (
   )
 );
 
+-- 2.5. LEAGUES - UPDATE POLICY
+DROP POLICY IF EXISTS "Admins and superusers can update leagues" ON leagues;
+
+CREATE POLICY "Admins and superusers can update leagues" 
+ON leagues FOR UPDATE 
+USING (
+  admin_id IN (
+    SELECT id FROM users 
+    WHERE LOWER(role) IN ('superuser', 'pro_manager')
+  )
+);
+
 -- 3. MATCHES - INSERT POLICY
 DROP POLICY IF EXISTS "League admins can create matches" ON matches;
 
