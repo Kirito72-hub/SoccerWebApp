@@ -13,7 +13,7 @@ import {
   UserPlus
 } from 'lucide-react';
 import { User, League, Match, LeagueFormat } from '../types';
-import { storage } from '../services/storage';
+import { dataService } from '../services/dataService';
 import { generateFixtures } from '../services/fixtures';
 
 interface LeagueManagementProps {
@@ -26,6 +26,8 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [allMatches, setAllMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Form State
   const [newLeagueName, setNewLeagueName] = useState('');
@@ -37,59 +39,78 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
   const [leagueToDelete, setLeagueToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    // Superusers and Pro Managers can see ALL running leagues
-    // Normal users can only see leagues they created (though they shouldn't access this page)
-    const allLeagues = storage.getLeagues().filter(l => l.status === 'running');
-
-    if (user.role === 'superuser' || user.role === 'pro_manager') {
-      setLeagues(allLeagues);
-    } else {
-      setLeagues(allLeagues.filter(l => l.adminId === user.id));
-    }
-
-    setAllUsers(storage.getUsers());
+    loadData();
   }, [user.id, user.role]);
 
-  const handleCreateLeague = () => {
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [allLeagues, users, matches] = await Promise.all([
+        dataService.getLeagues(),
+        dataService.getUsers(),
+        dataService.getMatches()
+      ]);
+
+      const runningLeagues = allLeagues.filter(l => l.status === 'running');
+
+      if (user.role === 'superuser' || user.role === 'pro_manager') {
+        setLeagues(runningLeagues);
+      } else {
+        setLeagues(runningLeagues.filter(l => l.adminId === user.id));
+      }
+
+      setAllUsers(users);
+      setAllMatches(matches);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateLeague = async () => {
     if (!newLeagueName || selectedParticipants.length < 2) return;
 
-    const newLeague: League = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: newLeagueName,
-      adminId: user.id,
-      format: newFormat,
-      status: 'running',
-      participantIds: selectedParticipants,
-      createdAt: Date.now()
-    };
+    try {
+      const newLeague = await dataService.createLeague({
+        name: newLeagueName,
+        adminId: user.id,
+        format: newFormat,
+        status: 'running',
+        participantIds: selectedParticipants,
+        createdAt: Date.now()
+      });
 
-    const fixtures = generateFixtures(newLeague.id, selectedParticipants, newFormat);
-    const matches: Match[] = fixtures.map(f => ({
-      ...f,
-      id: Math.random().toString(36).substr(2, 9),
-    }));
+      const fixtures = generateFixtures(newLeague.id, selectedParticipants, newFormat);
 
-    const currentLeagues = storage.getLeagues();
-    const currentMatches = storage.getMatches();
-
-    storage.saveLeagues([...currentLeagues, newLeague]);
-    storage.saveMatches([...currentMatches, ...matches]);
-
-    // Add activity log
-    storage.addActivityLog({
-      type: 'league_created',
-      userId: user.id,
-      username: user.username,
-      description: `Created a new league "${newLeagueName}" with ${selectedParticipants.length} participants`,
-      metadata: {
-        leagueId: newLeague.id,
-        leagueName: newLeagueName
+      // Create all matches for the league
+      for (const fixture of fixtures) {
+        await dataService.createMatch({
+          ...fixture,
+          leagueId: newLeague.id
+        });
       }
-    });
 
-    setLeagues([...leagues, newLeague]);
-    setShowCreateModal(false);
-    resetForm();
+      // Add activity log
+      await dataService.createActivityLog({
+        type: 'league_created',
+        userId: user.id,
+        username: user.username,
+        description: `Created a new league "${newLeagueName}" with ${selectedParticipants.length} participants`,
+        timestamp: Date.now(),
+        metadata: {
+          leagueId: newLeague.id,
+          leagueName: newLeagueName
+        }
+      });
+
+      // Reload data
+      await loadData();
+      setShowCreateModal(false);
+      resetForm();
+    } catch (error) {
+      console.error('Error creating league:', error);
+    }
   };
 
   const resetForm = () => {
@@ -98,52 +119,73 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
     setSelectedParticipants([user.id]);
   };
 
-  const handleSaveResult = () => {
+  const handleSaveResult = async () => {
     if (!selectedMatch) return;
 
-    const allMatches = storage.getMatches();
-    const updatedMatches = allMatches.map(m =>
-      m.id === selectedMatch.id
-        ? { ...m, homeScore: scoreHome, awayScore: scoreAway, status: 'completed' as const }
-        : m
-    );
+    try {
+      await dataService.updateMatch(selectedMatch.id, {
+        homeScore: scoreHome,
+        awayScore: scoreAway,
+        status: 'completed'
+      });
 
-    storage.saveMatches(updatedMatches);
-    setShowResultModal(false);
-    setSelectedMatch(null);
+      // Reload matches
+      const matches = await dataService.getMatches();
+      setAllMatches(matches);
+
+      setShowResultModal(false);
+      setSelectedMatch(null);
+    } catch (error) {
+      console.error('Error saving result:', error);
+    }
   };
 
   const handleDeleteLeague = (id: string) => {
     setLeagueToDelete(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!leagueToDelete) return;
 
-    const id = leagueToDelete;
-    const leagueToDeleteObj = leagues.find(l => l.id === id);
-    if (!leagueToDeleteObj) return;
+    try {
+      const id = leagueToDelete;
+      const leagueToDeleteObj = leagues.find(l => l.id === id);
+      if (!leagueToDeleteObj) return;
 
-    const currentLeagues = storage.getLeagues().filter(l => l.id !== id);
-    const currentMatches = storage.getMatches().filter(m => m.leagueId !== id);
-    storage.saveLeagues(currentLeagues);
-    storage.saveMatches(currentMatches);
+      // Delete league (this will cascade delete matches due to foreign key)
+      await dataService.deleteLeague(id);
 
-    // Add activity log
-    storage.addActivityLog({
-      type: 'league_deleted',
-      userId: user.id,
-      username: user.username,
-      description: `Deleted league "${leagueToDeleteObj.name}"`,
-      metadata: {
-        leagueId: id,
-        leagueName: leagueToDeleteObj.name
-      }
-    });
+      // Add activity log
+      await dataService.createActivityLog({
+        type: 'league_deleted',
+        userId: user.id,
+        username: user.username,
+        description: `Deleted league "${leagueToDeleteObj.name}"`,
+        timestamp: Date.now(),
+        metadata: {
+          leagueId: id,
+          leagueName: leagueToDeleteObj.name
+        }
+      });
 
-    setLeagues(leagues.filter(l => l.id !== id));
-    setLeagueToDelete(null);
+      // Reload data
+      await loadData();
+      setLeagueToDelete(null);
+    } catch (error) {
+      console.error('Error deleting league:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading leagues...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
@@ -160,66 +202,76 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {leagues.map(l => (
-          <div key={l.id} className="glass rounded-3xl border border-white/5 flex flex-col h-full hover:border-purple-500/30 transition-all overflow-hidden group">
-            <div className="p-6 bg-gradient-to-br from-purple-600/10 to-transparent border-b border-white/5">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-purple-600 rounded-xl shadow-lg shadow-purple-600/20">
-                  <Trophy className="w-5 h-5" />
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => handleDeleteLeague(l.id)} className="p-2 glass border border-white/5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                  <button className="p-2 glass border border-white/5 rounded-lg text-gray-400 hover:bg-white/10 transition-colors">
-                    <Settings className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              <h3 className="text-xl font-black tracking-tight mb-1">{l.name.toUpperCase()}</h3>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{l.format.replace(/_/g, ' ')}</span>
-                <span className="text-gray-600">•</span>
-                <span className={`text-[10px] font-black uppercase tracking-widest ${l.adminId === user.id ? 'text-purple-400' : 'text-blue-400'}`}>
-                  Admin: {l.adminId === user.id ? 'YOU' : allUsers.find(u => u.id === l.adminId)?.username || 'Unknown'}
-                </span>
-              </div>
-            </div>
-
-            <div className="p-6 flex-1 space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-gray-400">
-                  <Users className="w-4 h-4" />
-                  <span className="text-sm font-bold">{l.participantIds.length} Participants</span>
-                </div>
-                <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-tighter ${l.status === 'running' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-gray-500/10 text-gray-400'}`}>
-                  {l.status}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest">Upcoming Action</p>
-                {storage.getMatches().filter(m => m.leagueId === l.id && m.status === 'pending').slice(0, 3).map(m => {
-                  const h = allUsers.find(u => u.id === m.homeUserId);
-                  const a = allUsers.find(u => u.id === m.awayUserId);
-                  return (
-                    <div key={m.id} className="flex items-center justify-between p-3 glass border border-white/5 rounded-xl group/match hover:border-purple-500/30 transition-all">
-                      <span className="text-xs font-bold truncate w-20">{h?.username} vs {a?.username}</span>
-                      <button
-                        onClick={() => { setSelectedMatch(m); setShowResultModal(true); }}
-                        className="text-[10px] font-black text-purple-400 hover:text-purple-300 flex items-center gap-1"
-                      >
-                        ADD RESULT <ChevronRight className="w-3 h-3" />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+      {leagues.length === 0 ? (
+        <div className="h-96 flex flex-col items-center justify-center space-y-4">
+          <div className="p-6 glass rounded-full border border-purple-500/20 text-purple-400">
+            <Trophy className="w-12 h-12" />
           </div>
-        ))}
-      </div>
+          <h2 className="text-2xl font-black">NO RUNNING LEAGUES</h2>
+          <p className="text-gray-500">Create your first league to get started!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {leagues.map(l => (
+            <div key={l.id} className="glass rounded-3xl border border-white/5 flex flex-col h-full hover:border-purple-500/30 transition-all overflow-hidden group">
+              <div className="p-6 bg-gradient-to-br from-purple-600/10 to-transparent border-b border-white/5">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="p-3 bg-purple-600 rounded-xl shadow-lg shadow-purple-600/20">
+                    <Trophy className="w-5 h-5" />
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleDeleteLeague(l.id)} className="p-2 glass border border-white/5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 glass border border-white/5 rounded-lg text-gray-400 hover:bg-white/10 transition-colors">
+                      <Settings className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <h3 className="text-xl font-black tracking-tight mb-1">{l.name.toUpperCase()}</h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{l.format.replace(/_/g, ' ')}</span>
+                  <span className="text-gray-600">•</span>
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${l.adminId === user.id ? 'text-purple-400' : 'text-blue-400'}`}>
+                    Admin: {l.adminId === user.id ? 'YOU' : allUsers.find(u => u.id === l.adminId)?.username || 'Unknown'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-6 flex-1 space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Users className="w-4 h-4" />
+                    <span className="text-sm font-bold">{l.participantIds.length} Participants</span>
+                  </div>
+                  <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-tighter ${l.status === 'running' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-gray-500/10 text-gray-400'}`}>
+                    {l.status}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest">Upcoming Action</p>
+                  {allMatches.filter(m => m.leagueId === l.id && m.status === 'pending').slice(0, 3).map(m => {
+                    const h = allUsers.find(u => u.id === m.homeUserId);
+                    const a = allUsers.find(u => u.id === m.awayUserId);
+                    return (
+                      <div key={m.id} className="flex items-center justify-between p-3 glass border border-white/5 rounded-xl group/match hover:border-purple-500/30 transition-all">
+                        <span className="text-xs font-bold truncate w-20">{h?.username} vs {a?.username}</span>
+                        <button
+                          onClick={() => { setSelectedMatch(m); setShowResultModal(true); }}
+                          className="text-[10px] font-black text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                        >
+                          ADD RESULT <ChevronRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Create Modal */}
       {showCreateModal && (
