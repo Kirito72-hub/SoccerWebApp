@@ -23,21 +23,25 @@ interface ProfileProps {
     user: User;
 }
 
-// Football/Soccer themed avatars
+// Football/Soccer themed avatars - Anime style
 const AVATAR_OPTIONS = [
-    // Football player themed avatars using RoboHash with different seeds
-    'https://robohash.org/footballer1.png?set=set4&size=200x200',
-    'https://robohash.org/footballer2.png?set=set4&size=200x200',
-    'https://robohash.org/footballer3.png?set=set4&size=200x200',
-    'https://robohash.org/footballer4.png?set=set4&size=200x200',
-    'https://robohash.org/footballer5.png?set=set4&size=200x200',
-    'https://robohash.org/footballer6.png?set=set4&size=200x200',
-    'https://robohash.org/footballer7.png?set=set4&size=200x200',
-    'https://robohash.org/footballer8.png?set=set4&size=200x200',
-    'https://robohash.org/striker.png?set=set4&size=200x200',
-    'https://robohash.org/goalkeeper.png?set=set4&size=200x200',
-    'https://robohash.org/midfielder.png?set=set4&size=200x200',
-    'https://robohash.org/defender.png?set=set4&size=200x200',
+    // Anime characters using various avatar services
+    'https://api.multiavatar.com/striker.svg',
+    'https://api.multiavatar.com/captain.svg',
+    'https://api.multiavatar.com/midfielder.svg',
+    'https://api.multiavatar.com/defender.svg',
+    'https://api.multiavatar.com/goalkeeper.svg',
+    'https://api.multiavatar.com/forward.svg',
+    'https://api.multiavatar.com/winger.svg',
+    'https://api.multiavatar.com/playmaker.svg',
+    'https://api.multiavatar.com/ace.svg',
+    'https://api.multiavatar.com/star.svg',
+    'https://api.multiavatar.com/legend.svg',
+    'https://api.multiavatar.com/champion.svg',
+    'https://api.multiavatar.com/hero.svg',
+    'https://api.multiavatar.com/prodigy.svg',
+    'https://api.multiavatar.com/rookie.svg',
+    'https://api.multiavatar.com/veteran.svg',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
@@ -452,8 +456,8 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                                 <button
                                     onClick={() => setSelectedAvatar(uploadedImage)}
                                     className={`relative group rounded-2xl overflow-hidden border-4 transition-all hover:scale-105 ${selectedAvatar === uploadedImage
-                                            ? 'border-emerald-500 shadow-lg shadow-emerald-500/50'
-                                            : 'border-white/10 hover:border-emerald-500/50'
+                                        ? 'border-emerald-500 shadow-lg shadow-emerald-500/50'
+                                        : 'border-white/10 hover:border-emerald-500/50'
                                         }`}
                                 >
                                     <img
