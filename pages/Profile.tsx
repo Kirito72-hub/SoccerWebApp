@@ -23,25 +23,21 @@ interface ProfileProps {
     user: User;
 }
 
-// Football/Soccer themed avatars - Anime waifu style
+// Anime-style character avatars
 const AVATAR_OPTIONS = [
-    // Using placewaifu.com for anime character images
-    'https://placewaifu.com/image/200/1',
-    'https://placewaifu.com/image/200/2',
-    'https://placewaifu.com/image/200/3',
-    'https://placewaifu.com/image/200/4',
-    'https://placewaifu.com/image/200/5',
-    'https://placewaifu.com/image/200/6',
-    'https://placewaifu.com/image/200/7',
-    'https://placewaifu.com/image/200/8',
-    'https://placewaifu.com/image/200/9',
-    'https://placewaifu.com/image/200/10',
-    'https://placewaifu.com/image/200/11',
-    'https://placewaifu.com/image/200/12',
-    'https://placewaifu.com/image/200/13',
-    'https://placewaifu.com/image/200/14',
-    'https://placewaifu.com/image/200/15',
-    'https://placewaifu.com/image/200/16',
+    // Using Notion Avatars - clean, professional anime-style avatars
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoiYmx1ZSIsInNoYXBlIjoic3F1YXJlIn0',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoicmVkIiwic2hhcGUiOiJzcXVhcmUifQ',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoiZ3JlZW4iLCJzaGFwZSI6InNxdWFyZSJ9',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoicHVycGxlIiwic2hhcGUiOiJzcXVhcmUifQ',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoib3JhbmdlIiwic2hhcGUiOiJzcXVhcmUifQ',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoicGluayIsInNoYXBlIjoic3F1YXJlIn0',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoieWVsbG93Iiwic2hhcGUiOiJzcXVhcmUifQ',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoiY3lhbiIsInNoYXBlIjoic3F1YXJlIn0',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoidGVhbCIsInNoYXBlIjoic3F1YXJlIn0',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoibGltZSIsInNoYXBlIjoic3F1YXJlIn0',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoiaW5kaWdvIiwic2hhcGUiOiJzcXVhcmUifQ',
+    'https://notion-avatar.vercel.app/api/img/eyJmYWNlIjozLCJub3NlIjo1LCJtb3V0aCI6MTAsImV5ZXMiOjUsImV5ZWJyb3dzIjo1LCJnbGFzc2VzIjowLCJoYWlyIjo0LCJhY2Nlc3NvcmllcyI6MCwiZGV0YWlscyI6MCwiYmVhcmQiOjAsImZsaXAiOjAsImNvbG9yIjoiZnVjaHNpYSIsInNoYXBlIjoic3F1YXJlIn0',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
