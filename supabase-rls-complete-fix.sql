@@ -23,16 +23,11 @@ WITH CHECK (true);
 -- UPDATE: Users can update own profile OR superusers can update any user
 DROP POLICY IF EXISTS "Users can update own profile" ON users;
 DROP POLICY IF EXISTS "Superusers can update any user" ON users;
+DROP POLICY IF EXISTS "Users and superusers can update profiles" ON users;
 
-CREATE POLICY "Users and superusers can update profiles" 
+CREATE POLICY "Public update access for users table" 
 ON users FOR UPDATE 
-USING (
-  -- User updating their own profile (check by email since we don't have auth.uid())
-  id IN (SELECT id FROM users WHERE email = email)
-  OR
-  -- OR user is a superuser (can update anyone)
-  id IN (SELECT id FROM users WHERE LOWER(role) = 'superuser')
-);
+USING (true);
 
 -- DELETE: Only superusers can delete users (optional, usually not needed)
 DROP POLICY IF EXISTS "Superusers can delete users" ON users;
