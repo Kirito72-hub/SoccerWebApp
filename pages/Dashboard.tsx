@@ -113,52 +113,52 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-700">
+      <div className="flex flex-col gap-3 lg:gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight">DASHBOARD</h1>
-          <p className="text-gray-500 font-medium">Welcome back, <span className="text-purple-400">@{user.username.split(' ')[0].toLowerCase()}</span></p>
+          <h1 className="text-2xl lg:text-3xl font-black tracking-tight">DASHBOARD</h1>
+          <p className="text-sm lg:text-base text-gray-500 font-medium">Welcome back, <span className="text-purple-400">@{user.username.split(' ')[0].toLowerCase()}</span></p>
         </div>
-        <div className="flex gap-2">
-          <button className="px-4 py-2 glass border border-white/5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-white/10">
-            <TrendingUp className="w-4 h-4" /> Export Stats
+        <div className="flex flex-wrap gap-2">
+          <button className="px-3 lg:px-4 py-2 glass border border-white/5 rounded-xl text-xs lg:text-sm font-bold flex items-center gap-2 hover:bg-white/10">
+            <TrendingUp className="w-3 h-3 lg:w-4 lg:h-4" /> Export Stats
           </button>
-          <button className="px-4 py-2 bg-purple-600 rounded-xl text-sm font-bold shadow-lg shadow-purple-600/20 hover:scale-105 transition-transform">
+          <button className="px-3 lg:px-4 py-2 bg-purple-600 rounded-xl text-xs lg:text-sm font-bold shadow-lg shadow-purple-600/20 hover:scale-105 transition-transform">
             New League
           </button>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         {statCards.map((card, idx) => (
-          <div key={idx} className="glass p-6 rounded-3xl border border-white/5 hover:border-purple-500/30 transition-all group relative overflow-hidden">
-            <div className={`absolute top-0 right-0 w-24 h-24 ${card.bg} rounded-full blur-3xl -mr-12 -mt-12 group-hover:w-32 group-hover:h-32 transition-all`}></div>
-            <div className="flex items-start justify-between mb-4 relative z-10">
-              <div className={`p-3 rounded-2xl ${card.bg} ${card.color}`}>
-                <card.icon className="w-6 h-6" />
+          <div key={idx} className="glass p-4 lg:p-6 rounded-2xl lg:rounded-3xl border border-white/5 hover:border-purple-500/30 transition-all group relative overflow-hidden">
+            <div className={`absolute top-0 right-0 w-16 h-16 lg:w-24 lg:h-24 ${card.bg} rounded-full blur-3xl -mr-8 lg:-mr-12 -mt-8 lg:-mt-12 group-hover:w-20 group-hover:h-20 lg:group-hover:w-32 lg:group-hover:h-32 transition-all`}></div>
+            <div className="flex items-start justify-between mb-3 lg:mb-4 relative z-10">
+              <div className={`p-2 lg:p-3 rounded-xl lg:rounded-2xl ${card.bg} ${card.color}`}>
+                <card.icon className="w-4 h-4 lg:w-6 lg:h-6" />
               </div>
             </div>
-            <p className="text-gray-500 text-sm font-bold mb-1 relative z-10">{card.title.toUpperCase()}</p>
-            <h3 className="text-3xl font-black tracking-tight relative z-10">{card.value}</h3>
+            <p className="text-gray-500 text-[10px] lg:text-sm font-bold mb-1 relative z-10">{card.title.toUpperCase()}</p>
+            <h3 className="text-xl lg:text-3xl font-black tracking-tight relative z-10 truncate">{card.value}</h3>
           </div>
         ))}
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 glass p-8 rounded-3xl border border-white/5">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="font-bold text-lg flex items-center gap-2">
-              <Activity className="w-5 h-5 text-purple-400" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        <div className="lg:col-span-2 glass p-4 lg:p-8 rounded-2xl lg:rounded-3xl border border-white/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 lg:mb-8 gap-3">
+            <h3 className="font-bold text-base lg:text-lg flex items-center gap-2">
+              <Activity className="w-4 h-4 lg:w-5 lg:h-5 text-purple-400" />
               Performance Trend
             </h3>
-            <select className="bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-xs outline-none">
+            <select className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 lg:py-1 text-xs outline-none w-full sm:w-auto">
               <option>Last 7 Days</option>
               <option>Last 30 Days</option>
             </select>
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[200px] sm:h-[250px] lg:h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
@@ -168,44 +168,44 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f2937" />
-                <XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
+                <XAxis dataKey="name" stroke="#6b7280" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="#6b7280" fontSize={10} tickLine={false} axisLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151', borderRadius: '12px' }}
+                  contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151', borderRadius: '12px', fontSize: '12px' }}
                   itemStyle={{ color: '#8b5cf6' }}
                 />
-                <Area type="monotone" dataKey="goals" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorGoals)" />
+                <Area type="monotone" dataKey="goals" stroke="#8b5cf6" strokeWidth={2} fillOpacity={1} fill="url(#colorGoals)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="glass p-8 rounded-3xl border border-white/5">
-          <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-yellow-400" />
+        <div className="glass p-4 lg:p-8 rounded-2xl lg:rounded-3xl border border-white/5">
+          <h3 className="font-bold text-base lg:text-lg mb-4 lg:mb-6 flex items-center gap-2">
+            <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-yellow-400" />
             Quick Activity
           </h3>
-          <div className="space-y-6">
+          <div className="space-y-4 lg:space-y-6">
             {userMatches.slice(0, 4).map((match, i) => {
               const opponent = users.find(u => u.id === (match.homeUserId === user.id ? match.awayUserId : match.homeUserId));
               const won = match.homeUserId === user.id ? (match.homeScore! > match.awayScore!) : (match.awayScore! > match.homeScore!);
               return (
-                <div key={i} className="flex items-center gap-4 group">
-                  <div className={`w-2 h-10 rounded-full ${won ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold">vs {opponent?.username}</p>
-                    <p className="text-xs text-gray-500">{new Date(match.date).toLocaleDateString()}</p>
+                <div key={i} className="flex items-center gap-3 lg:gap-4 group">
+                  <div className={`w-1.5 lg:w-2 h-8 lg:h-10 rounded-full ${won ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs lg:text-sm font-bold truncate">vs {opponent?.username}</p>
+                    <p className="text-[10px] lg:text-xs text-gray-500">{new Date(match.date).toLocaleDateString()}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-black text-purple-400">{match.homeScore} - {match.awayScore}</p>
-                    <p className="text-[10px] text-gray-600 uppercase font-black">{won ? 'Victory' : 'Defeat'}</p>
+                    <p className="text-xs lg:text-sm font-black text-purple-400">{match.homeScore} - {match.awayScore}</p>
+                    <p className="text-[8px] lg:text-[10px] text-gray-600 uppercase font-black">{won ? 'Victory' : 'Defeat'}</p>
                   </div>
                 </div>
               )
             })}
             {userMatches.length === 0 && (
-              <div className="text-center py-10">
-                <p className="text-gray-500 text-sm">No recent matches found</p>
+              <div className="text-center py-8 lg:py-10">
+                <p className="text-gray-500 text-xs lg:text-sm">No recent matches found</p>
               </div>
             )}
           </div>

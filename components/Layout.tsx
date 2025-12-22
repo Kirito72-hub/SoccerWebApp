@@ -237,9 +237,18 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
 
   return (
     <div className="flex h-screen bg-[#0f0f23] text-gray-100 overflow-hidden">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? 'w-64' : 'w-20'
-          } transition-all duration-300 glass border-r border-purple-900/30 flex flex-col h-full z-50`}
+        className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 w-64 lg:w-${sidebarOpen ? '64' : '20'} transition-all duration-300 glass border-r border-purple-900/30 flex flex-col h-full z-50`}
       >
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.5)]">
@@ -253,6 +262,12 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
             <Link
               key={item.name}
               to={item.path}
+              onClick={() => {
+                // Close sidebar on mobile after navigation
+                if (window.innerWidth < 1024) {
+                  setSidebarOpen(false);
+                }
+              }}
               className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-200 group ${location.pathname === item.path
                 ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30'
                 : 'hover:bg-white/5 text-gray-400'
@@ -278,16 +293,18 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-20 flex items-center justify-between px-8 glass border-b border-purple-900/20 z-40">
-          <div className="flex items-center gap-4">
+      <main className="flex-1 flex flex-col overflow-hidden w-full lg:w-auto">
+        <header className="h-16 lg:h-20 flex items-center justify-between px-4 lg:px-8 glass border-b border-purple-900/20 z-40">
+          <div className="flex items-center gap-2 lg:gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2 hover:bg-white/5 rounded-lg text-gray-400"
             >
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-            <div className="hidden md:flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10 w-96 relative">
+
+            {/* Search - Hidden on mobile, shown on tablet+ */}
+            <div className="hidden md:flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10 w-64 lg:w-96 relative">
               <Search className="w-4 h-4 text-gray-500" />
               <input
                 type="text"
@@ -326,28 +343,28 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 lg:gap-6">
             <div className="flex items-center gap-2">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold">{user.username}</p>
-                <p className="text-xs text-purple-400">
+                <p className="text-xs lg:text-sm font-semibold truncate max-w-[100px] lg:max-w-none">{user.username}</p>
+                <p className="text-[10px] lg:text-xs text-purple-400">
                   {user.role === 'superuser' ? 'Superuser' : user.role === 'pro_manager' ? 'Pro Manager' : 'Normal User'}
                 </p>
               </div>
               <img
                 src={user.avatar || `https://picsum.photos/seed/${user.id}/100`}
                 alt="Avatar"
-                className="w-10 h-10 rounded-full border-2 border-purple-600 p-0.5"
+                className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-purple-600 p-0.5"
               />
             </div>
-            <button className="relative p-2 hover:bg-white/5 rounded-lg text-gray-400">
-              <Bell className="w-5 h-5" />
+            <button className="relative p-2 hover:bg-white/5 rounded-lg text-gray-400 hidden sm:block">
+              <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-purple-500 rounded-full"></span>
             </button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 custom-scrollbar">
           <Outlet />
         </div>
       </main>
