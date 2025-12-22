@@ -23,25 +23,25 @@ interface ProfileProps {
     user: User;
 }
 
-// Football/Soccer themed avatars - Anime style
+// Football/Soccer themed avatars - Anime waifu style
 const AVATAR_OPTIONS = [
-    // Anime characters using various avatar services
-    'https://api.multiavatar.com/striker.svg',
-    'https://api.multiavatar.com/captain.svg',
-    'https://api.multiavatar.com/midfielder.svg',
-    'https://api.multiavatar.com/defender.svg',
-    'https://api.multiavatar.com/goalkeeper.svg',
-    'https://api.multiavatar.com/forward.svg',
-    'https://api.multiavatar.com/winger.svg',
-    'https://api.multiavatar.com/playmaker.svg',
-    'https://api.multiavatar.com/ace.svg',
-    'https://api.multiavatar.com/star.svg',
-    'https://api.multiavatar.com/legend.svg',
-    'https://api.multiavatar.com/champion.svg',
-    'https://api.multiavatar.com/hero.svg',
-    'https://api.multiavatar.com/prodigy.svg',
-    'https://api.multiavatar.com/rookie.svg',
-    'https://api.multiavatar.com/veteran.svg',
+    // Using placewaifu.com for anime character images
+    'https://placewaifu.com/image/200/1',
+    'https://placewaifu.com/image/200/2',
+    'https://placewaifu.com/image/200/3',
+    'https://placewaifu.com/image/200/4',
+    'https://placewaifu.com/image/200/5',
+    'https://placewaifu.com/image/200/6',
+    'https://placewaifu.com/image/200/7',
+    'https://placewaifu.com/image/200/8',
+    'https://placewaifu.com/image/200/9',
+    'https://placewaifu.com/image/200/10',
+    'https://placewaifu.com/image/200/11',
+    'https://placewaifu.com/image/200/12',
+    'https://placewaifu.com/image/200/13',
+    'https://placewaifu.com/image/200/14',
+    'https://placewaifu.com/image/200/15',
+    'https://placewaifu.com/image/200/16',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
