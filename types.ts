@@ -1,13 +1,20 @@
 
+
 export type LeagueFormat = 'round_robin_1leg' | 'round_robin_2legs' | 'cup';
 export type LeagueStatus = 'running' | 'finished';
 export type MatchStatus = 'pending' | 'completed';
+export type UserRole = 'superuser' | 'pro_manager' | 'normal_user';
 
 export interface User {
   id: string;
   email: string;
-  username: string;
+  password: string;
+  username: string; // nickname
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
   avatar?: string;
+  role: UserRole;
 }
 
 export interface League {
@@ -54,4 +61,21 @@ export interface TableRow {
   ga: number;
   gd: number;
   points: number;
+}
+
+export type ActivityType = 'league_created' | 'league_deleted' | 'match_result' | 'league_started' | 'league_finished';
+
+export interface ActivityLog {
+  id: string;
+  type: ActivityType;
+  userId: string;
+  username: string;
+  description: string;
+  timestamp: number;
+  metadata?: {
+    leagueId?: string;
+    leagueName?: string;
+    matchId?: string;
+    score?: string;
+  };
 }

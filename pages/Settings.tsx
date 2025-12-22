@@ -1,0 +1,207 @@
+
+import React, { useState, useEffect } from 'react';
+import {
+    Shield,
+    Search,
+    Users,
+    Crown,
+    UserCog,
+    User as UserIcon,
+    CheckCircle
+} from 'lucide-react';
+import { User, UserRole } from '../types';
+import { storage } from '../services/storage';
+
+interface SettingsProps {
+    user: User;
+}
+
+const Settings: React.FC<SettingsProps> = ({ user }) => {
+    const [allUsers, setAllUsers] = useState<User[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+
+    useEffect(() => {
+        setAllUsers(storage.getUsers());
+    }, []);
+
+    const filteredUsers = searchQuery.trim()
+        ? allUsers.filter(u =>
+            u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            u.email.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : allUsers;
+
+    const handleRoleChange = (userId: string, newRole: UserRole) => {
+        storage.updateUserRole(userId, newRole);
+        setAllUsers(storage.getUsers());
+        setUpdatingUserId(userId);
+        setTimeout(() => setUpdatingUserId(null), 2000);
+    };
+
+    const getRoleIcon = (role: UserRole) => {
+        switch (role) {
+            case 'superuser':
+                return <Crown className="w-4 h-4 text-yellow-400" />;
+            case 'pro_manager':
+                return <UserCog className="w-4 h-4 text-purple-400" />;
+            case 'normal_user':
+                return <UserIcon className="w-4 h-4 text-blue-400" />;
+        }
+    };
+
+    const getRoleBadgeColor = (role: UserRole) => {
+        switch (role) {
+            case 'superuser':
+                return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30';
+            case 'pro_manager':
+                return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
+            case 'normal_user':
+                return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+        }
+    };
+
+    const getRoleLabel = (role: UserRole) => {
+        switch (role) {
+            case 'superuser':
+                return 'Superuser';
+            case 'pro_manager':
+                return 'Pro Manager';
+            case 'normal_user':
+                return 'Normal User';
+        }
+    };
+
+    // Only superusers can access this page
+    if (user.role !== 'superuser') {
+        return (
+            <div className="h-full flex flex-col items-center justify-center space-y-4">
+                <div className="p-6 glass rounded-full border border-red-500/20 text-red-400">
+                    <Shield className="w-12 h-12" />
+                </div>
+                <h2 className="text-2xl font-black">ACCESS DENIED</h2>
+                <p className="text-gray-500">Only superusers can access this section.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <h1 className="text-3xl font-black tracking-tight">SETTINGS</h1>
+                    <p className="text-gray-500 font-medium">Manage user roles and permissions</p>
+                </div>
+            </div>
+
+            {/* User Role Management Panel */}
+            <div className="glass rounded-3xl border border-white/5 p-8">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-purple-600/20 rounded-xl">
+                        <Shield className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-black">User Authority Management</h2>
+                        <p className="text-sm text-gray-500">Control user roles and permissions</p>
+                    </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative mb-6">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <input
+                        type="text"
+                        placeholder="Search users by name or email..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full glass bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-white focus:border-purple-600 outline-none transition-all font-bold"
+                    />
+                </div>
+
+                {/* Role Legend */}
+                <div className="flex flex-wrap gap-4 mb-6 p-4 glass bg-white/5 rounded-2xl">
+                    <div className="flex items-center gap-2">
+                        <Crown className="w-4 h-4 text-yellow-400" />
+                        <span className="text-xs font-bold text-gray-400">Superuser: Full Access</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <UserCog className="w-4 h-4 text-purple-400" />
+                        <span className="text-xs font-bold text-gray-400">Pro Manager: Create/Manage Leagues</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <UserIcon className="w-4 h-4 text-blue-400" />
+                        <span className="text-xs font-bold text-gray-400">Normal User: View Only</span>
+                    </div>
+                </div>
+
+                {/* Users List */}
+                <div className="space-y-3">
+                    {filteredUsers.map((u) => (
+                        <div
+                            key={u.id}
+                            className="glass rounded-2xl border border-white/5 p-5 hover:border-purple-500/30 transition-all"
+                        >
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-4 flex-1">
+                                    <img
+                                        src={u.avatar || `https://picsum.photos/seed/${u.id}/100`}
+                                        alt={u.username}
+                                        className="w-12 h-12 rounded-full border-2 border-purple-500/30"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <p className="font-bold">{u.username}</p>
+                                            {u.id === user.id && (
+                                                <span className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-[10px] font-black rounded-md">
+                                                    YOU
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-sm text-gray-500">{u.email}</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    {/* Current Role Badge */}
+                                    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${getRoleBadgeColor(u.role)}`}>
+                                        {getRoleIcon(u.role)}
+                                        <span className="text-xs font-black">{getRoleLabel(u.role)}</span>
+                                    </div>
+
+                                    {/* Role Change Dropdown */}
+                                    {u.id !== user.id && (
+                                        <select
+                                            value={u.role}
+                                            onChange={(e) => handleRoleChange(u.id, e.target.value as UserRole)}
+                                            className="glass bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm font-bold focus:border-purple-600 outline-none transition-all cursor-pointer"
+                                        >
+                                            <option value="superuser" className="bg-[#1a1a2e]">Superuser</option>
+                                            <option value="pro_manager" className="bg-[#1a1a2e]">Pro Manager</option>
+                                            <option value="normal_user" className="bg-[#1a1a2e]">Normal User</option>
+                                        </select>
+                                    )}
+
+                                    {updatingUserId === u.id && (
+                                        <div className="flex items-center gap-2 text-emerald-400 animate-in fade-in duration-300">
+                                            <CheckCircle className="w-5 h-5" />
+                                            <span className="text-xs font-bold">Updated!</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+
+                    {filteredUsers.length === 0 && (
+                        <div className="text-center py-12">
+                            <Users className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                            <p className="text-gray-500">No users found matching your search.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Settings;
