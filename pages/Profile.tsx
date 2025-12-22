@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     User as UserIcon,
     Mail,
@@ -11,7 +11,8 @@ import {
     Shield,
     CheckCircle,
     Camera,
-    X
+    X,
+    Upload
 } from 'lucide-react';
 import { User } from '../types';
 import { storage } from '../services/storage';
@@ -22,21 +23,21 @@ interface ProfileProps {
     user: User;
 }
 
-// Predefined anime football player avatars
+// Football/Soccer themed avatars
 const AVATAR_OPTIONS = [
-    // Anime-style football players from various sources
-    'https://i.pravatar.cc/200?img=12',
-    'https://i.pravatar.cc/200?img=13',
-    'https://i.pravatar.cc/200?img=14',
-    'https://i.pravatar.cc/200?img=15',
-    'https://i.pravatar.cc/200?img=33',
-    'https://i.pravatar.cc/200?img=59',
-    'https://i.pravatar.cc/200?img=68',
-    'https://i.pravatar.cc/200?img=70',
-    'https://randomuser.me/api/portraits/men/1.jpg',
-    'https://randomuser.me/api/portraits/men/32.jpg',
-    'https://randomuser.me/api/portraits/men/45.jpg',
-    'https://randomuser.me/api/portraits/women/44.jpg',
+    // Football player themed avatars using RoboHash with different seeds
+    'https://robohash.org/footballer1.png?set=set4&size=200x200',
+    'https://robohash.org/footballer2.png?set=set4&size=200x200',
+    'https://robohash.org/footballer3.png?set=set4&size=200x200',
+    'https://robohash.org/footballer4.png?set=set4&size=200x200',
+    'https://robohash.org/footballer5.png?set=set4&size=200x200',
+    'https://robohash.org/footballer6.png?set=set4&size=200x200',
+    'https://robohash.org/footballer7.png?set=set4&size=200x200',
+    'https://robohash.org/footballer8.png?set=set4&size=200x200',
+    'https://robohash.org/striker.png?set=set4&size=200x200',
+    'https://robohash.org/goalkeeper.png?set=set4&size=200x200',
+    'https://robohash.org/midfielder.png?set=set4&size=200x200',
+    'https://robohash.org/defender.png?set=set4&size=200x200',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
@@ -47,6 +48,8 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
     const [error, setError] = useState('');
     const [showAvatarPicker, setShowAvatarPicker] = useState(false);
     const [selectedAvatar, setSelectedAvatar] = useState(user.avatar || '');
+    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = useState({
         email: user.email,
@@ -154,6 +157,32 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
             console.error('Avatar update error:', err);
             setError(err.message || 'Failed to update avatar');
         }
+    };
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Check file size (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            setError('Image size must be less than 2MB');
+            return;
+        }
+
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            setError('Please upload an image file');
+            return;
+        }
+
+        // Convert to base64
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result as string;
+            setUploadedImage(base64String);
+            setSelectedAvatar(base64String);
+        };
+        reader.readAsDataURL(file);
     };
 
     const getRoleBadgeColor = () => {
@@ -398,8 +427,52 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                             </button>
                         </div>
 
+                        {/* Upload Button */}
+                        <div className="flex gap-3">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileUpload}
+                                className="hidden"
+                            />
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex-1 px-4 py-3 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 rounded-xl text-emerald-400 font-bold text-sm transition-all hover:scale-105 flex items-center justify-center gap-2"
+                            >
+                                <Upload className="w-4 h-4" />
+                                Upload Your Own Picture
+                            </button>
+                        </div>
+
                         {/* Avatar Grid */}
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                            {/* Show uploaded image first if exists */}
+                            {uploadedImage && (
+                                <button
+                                    onClick={() => setSelectedAvatar(uploadedImage)}
+                                    className={`relative group rounded-2xl overflow-hidden border-4 transition-all hover:scale-105 ${selectedAvatar === uploadedImage
+                                            ? 'border-emerald-500 shadow-lg shadow-emerald-500/50'
+                                            : 'border-white/10 hover:border-emerald-500/50'
+                                        }`}
+                                >
+                                    <img
+                                        src={uploadedImage}
+                                        alt="Uploaded"
+                                        className="w-full h-full object-cover aspect-square"
+                                    />
+                                    {selectedAvatar === uploadedImage && (
+                                        <div className="absolute inset-0 bg-emerald-600/30 flex items-center justify-center">
+                                            <CheckCircle className="w-8 h-8 text-white" />
+                                        </div>
+                                    )}
+                                    <div className="absolute top-1 right-1 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                                        YOUR PHOTO
+                                    </div>
+                                </button>
+                            )}
+
+                            {/* Preset avatars */}
                             {AVATAR_OPTIONS.map((avatarUrl, index) => (
                                 <button
                                     key={index}
