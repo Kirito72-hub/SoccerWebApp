@@ -48,12 +48,6 @@ const AVATAR_OPTIONS = [
     '/avatars/anime_wall.png',
     '/avatars/anime_prodigy.png',
     '/avatars/anime_twin_a.png',
-    // External Anime Avatars (High Quality)
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4&eyes=happy&mouth=smile&top=shortHair&topColor=auburn',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Kai&backgroundColor=ffdfbf&eyes=wink&mouth=smile&top=shortHair&topColor=blue',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Leo&backgroundColor=c0aede&eyes=default&mouth=serious&top=shortHair&topColor=black',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Sora&backgroundColor=d1d4f9&eyes=happy&mouth=smile&top=longHair&topColor=platinum',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Ryu&backgroundColor=ffd5dc&eyes=default&mouth=smile&top=shortHair&topColor=red',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
