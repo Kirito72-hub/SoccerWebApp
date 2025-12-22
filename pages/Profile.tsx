@@ -48,12 +48,12 @@ const AVATAR_OPTIONS = [
     '/avatars/anime_wall.png',
     '/avatars/anime_prodigy.png',
     '/avatars/anime_twin_a.png',
-    // New Anime Recruits (Lorelei Style - High Quality)
-    'https://api.dicebear.com/7.x/lorelei/svg?seed=Striker&backgroundColor=b6e3f4',
-    'https://api.dicebear.com/7.x/lorelei/svg?seed=Captain&backgroundColor=ffdfbf',
-    'https://api.dicebear.com/7.x/lorelei/svg?seed=Keeper&backgroundColor=c0aede',
-    'https://api.dicebear.com/7.x/lorelei/svg?seed=Winger&backgroundColor=d1d4f9',
-    'https://api.dicebear.com/7.x/lorelei/svg?seed=Coach&backgroundColor=ffd5dc',
+    // Reinforcements (Best of the Squad)
+    '/avatars/anime_striker.png',
+    '/avatars/anime_captain.png',
+    '/avatars/anime_phantom.png',
+    '/avatars/anime_wild.png',
+    '/avatars/anime_acrobat.png',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
