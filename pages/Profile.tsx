@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { User } from '../types';
 import { storage } from '../services/storage';
+import { db } from '../services/database';
+import bcrypt from 'bcryptjs';
 
 interface ProfileProps {
     user: User;
@@ -32,13 +34,23 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
         confirmPassword: ''
     });
 
-    const handleSave = () => {
+    const handleSave = async () => {
         setError('');
         setSuccess('');
 
         // Validate current password if changing password
         if (formData.newPassword) {
-            if (formData.currentPassword !== user.password) {
+            if (!formData.currentPassword) {
+                setError('Current password is required to change password');
+                return;
+            }
+
+            // Verify current password
+            const isValidPassword = db.isOnline()
+                ? await bcrypt.compare(formData.currentPassword, user.password)
+                : formData.currentPassword === user.password;
+
+            if (!isValidPassword) {
                 setError('Current password is incorrect');
                 return;
             }
@@ -66,7 +78,16 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
             }
 
             if (Object.keys(updates).length > 0) {
-                storage.updateUserProfile(user.id, updates);
+                // Use Supabase if configured, otherwise localStorage
+                if (db.isOnline()) {
+                    await db.updateUser(user.id, updates);
+                    // Update localStorage session as well
+                    const updatedUser = { ...user, ...updates };
+                    storage.setCurrentUser(updatedUser);
+                } else {
+                    storage.updateUserProfile(user.id, updates);
+                }
+
                 setSuccess('Profile updated successfully!');
                 setEditing(false);
                 setFormData({
@@ -75,11 +96,15 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                     newPassword: '',
                     confirmPassword: ''
                 });
+
+                // Reload page to reflect changes
+                setTimeout(() => window.location.reload(), 1500);
             } else {
                 setError('No changes to save');
             }
-        } catch (err) {
-            setError('Failed to update profile');
+        } catch (err: any) {
+            console.error('Profile update error:', err);
+            setError(err.message || 'Failed to update profile');
         }
     };
 

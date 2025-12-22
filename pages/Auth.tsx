@@ -14,6 +14,7 @@ import {
     LogIn
 } from 'lucide-react';
 import { User as UserType } from '../types';
+import { db } from '../services/database';
 import { storage } from '../services/storage';
 
 interface AuthProps {
@@ -48,15 +49,30 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         setLoading(true);
 
         try {
-            const user = storage.login(loginEmail, loginPassword);
+            // Check if Supabase is configured
+            if (db.isOnline()) {
+                // Use Supabase
+                const user = await db.login(loginEmail, loginPassword);
 
-            if (user) {
-                onLogin(user);
+                if (user) {
+                    storage.setCurrentUser(user); // Also save to localStorage for session
+                    onLogin(user);
+                } else {
+                    setError('Invalid email or password');
+                }
             } else {
-                setError('Invalid email or password');
+                // Fallback to localStorage
+                const user = storage.login(loginEmail, loginPassword);
+
+                if (user) {
+                    onLogin(user);
+                } else {
+                    setError('Invalid email or password');
+                }
             }
-        } catch (err) {
-            setError('An error occurred during login');
+        } catch (err: any) {
+            console.error('Login error:', err);
+            setError(err.message || 'An error occurred during login');
         } finally {
             setLoading(false);
         }
@@ -88,17 +104,35 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         }
 
         try {
-            const newUser = storage.register({
-                firstName: signupData.firstName,
-                lastName: signupData.lastName,
-                username: signupData.username,
-                email: signupData.email,
-                password: signupData.password,
-                dateOfBirth: signupData.dateOfBirth
-            });
+            // Check if Supabase is configured
+            if (db.isOnline()) {
+                // Use Supabase
+                const newUser = await db.register({
+                    firstName: signupData.firstName,
+                    lastName: signupData.lastName,
+                    username: signupData.username,
+                    email: signupData.email,
+                    password: signupData.password,
+                    dateOfBirth: signupData.dateOfBirth
+                });
 
-            onLogin(newUser);
+                storage.setCurrentUser(newUser); // Also save to localStorage for session
+                onLogin(newUser);
+            } else {
+                // Fallback to localStorage
+                const newUser = storage.register({
+                    firstName: signupData.firstName,
+                    lastName: signupData.lastName,
+                    username: signupData.username,
+                    email: signupData.email,
+                    password: signupData.password,
+                    dateOfBirth: signupData.dateOfBirth
+                });
+
+                onLogin(newUser);
+            }
         } catch (err: any) {
+            console.error('Signup error:', err);
             setError(err.message || 'An error occurred during signup');
         } finally {
             setLoading(false);
