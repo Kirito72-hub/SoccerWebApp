@@ -16,34 +16,55 @@ import {
   GitBranch
 } from 'lucide-react';
 import { User, League, Match, TableRow } from '../types';
-import { storage } from '../services/storage';
+import { dataService } from '../services/dataService';
 
 interface RunningLeaguesProps {
   user: User;
 }
 
 const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
-  // Changed default tab from 'table' to 'matches'
   const [activeTab, setActiveTab] = useState<'table' | 'matches' | 'bracket'>('matches');
   const [leagues, setLeagues] = useState<League[]>([]);
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Modal state for editing match results
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
   const [homeScore, setHomeScore] = useState<number>(0);
   const [awayScore, setAwayScore] = useState<number>(0);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const allLeagues = storage.getLeagues().filter(l => l.participantIds.includes(user.id) && l.status === 'running');
-    setLeagues(allLeagues);
-    if (allLeagues.length > 0 && !selectedLeagueId) {
-      setSelectedLeagueId(allLeagues[0].id);
+    loadData();
+  }, [user.id]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [allLeagues, allMatches, allUsers] = await Promise.all([
+        dataService.getLeagues(),
+        dataService.getMatches(),
+        dataService.getUsers()
+      ]);
+
+      const userLeagues = allLeagues.filter(
+        l => l.participantIds.includes(user.id) && l.status === 'running'
+      );
+
+      setLeagues(userLeagues);
+      if (userLeagues.length > 0 && !selectedLeagueId) {
+        setSelectedLeagueId(userLeagues[0].id);
+      }
+      setMatches(allMatches);
+      setUsers(allUsers);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
     }
-    setMatches(storage.getMatches());
-    setUsers(storage.getUsers());
-  }, [user.id, selectedLeagueId]);
+  };
 
   const selectedLeague = leagues.find(l => l.id === selectedLeagueId);
   const leagueMatches = matches.filter(m => m.leagueId === selectedLeagueId);
@@ -97,106 +118,99 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
   }, [selectedLeague, leagueMatches, users]);
 
   const handleMatchClick = (match: Match) => {
-    // Only superusers and pro_managers can edit match results
     if (user.role === 'normal_user') return;
 
     setEditingMatch(match);
-    // Set default values to 0:0 or existing scores if match is completed
     if (match.status === 'completed') {
       setHomeScore(match.homeScore || 0);
       setAwayScore(match.awayScore || 0);
     } else {
-      // Always default to 0:0 for new results
       setHomeScore(0);
       setAwayScore(0);
     }
   };
 
-  const handleSaveResult = () => {
-    if (!editingMatch) return;
+  const handleSaveResult = async () => {
+    if (!editingMatch || !selectedLeague) return;
 
-    const updatedMatch: Match = {
-      ...editingMatch,
-      homeScore,
-      awayScore,
-      status: 'completed'
-    };
+    try {
+      setSaving(true);
 
-    storage.updateMatch(updatedMatch);
-
-    // Add activity log for match result
-    const homeUser = users.find(u => u.id === editingMatch.homeUserId);
-    const awayUser = users.find(u => u.id === editingMatch.awayUserId);
-    if (homeUser && awayUser && selectedLeague) {
-      storage.addActivityLog({
-        type: 'match_result',
-        userId: user.id,
-        username: user.username,
-        description: `Added result: ${homeUser.username} ${homeScore} - ${awayScore} ${awayUser.username}`,
-        metadata: {
-          leagueId: selectedLeagueId!,
-          leagueName: selectedLeague.name,
-          matchId: editingMatch.id,
-          score: `${homeScore} - ${awayScore}`
-        }
+      // Update match
+      await dataService.updateMatch(editingMatch.id, {
+        homeScore,
+        awayScore,
+        status: 'completed'
       });
-    }
 
-    // For cup format, check if we need to generate next round
-    if (selectedLeague?.format === 'cup') {
-      const allMatches = storage.getMatches().filter(m => m.leagueId === selectedLeagueId);
-      const currentRound = updatedMatch.round || 1;
+      // Add activity log
+      const homeUser = users.find(u => u.id === editingMatch.homeUserId);
+      const awayUser = users.find(u => u.id === editingMatch.awayUserId);
+      if (homeUser && awayUser) {
+        await dataService.createActivityLog({
+          type: 'match_result',
+          userId: user.id,
+          username: user.username,
+          description: `Added result: ${homeUser.username} ${homeScore} - ${awayScore} ${awayUser.username}`,
+          timestamp: Date.now(),
+          metadata: {
+            leagueId: selectedLeagueId!,
+            leagueName: selectedLeague.name,
+            matchId: editingMatch.id,
+            score: `${homeScore} - ${awayScore}`
+          }
+        });
+      }
 
-      // Get all matches in the current round
-      const currentRoundMatches = allMatches.filter(m => m.round === currentRound);
+      // For cup format, check if we need to generate next round
+      if (selectedLeague?.format === 'cup') {
+        const allMatches = await dataService.getMatches();
+        const leagueMatches = allMatches.filter(m => m.leagueId === selectedLeagueId);
+        const currentRound = editingMatch.round || 1;
 
-      // Check if all matches in current round are completed
-      const allCompleted = currentRoundMatches.every(m => m.status === 'completed');
+        const currentRoundMatches = leagueMatches.filter(m => m.round === currentRound);
+        const allCompleted = currentRoundMatches.every(m => m.status === 'completed');
 
-      if (allCompleted && currentRoundMatches.length > 1) {
-        // Check if next round already exists
-        const nextRoundExists = allMatches.some(m => m.round === currentRound + 1);
+        if (allCompleted && currentRoundMatches.length > 1) {
+          const nextRoundExists = leagueMatches.some(m => m.round === currentRound + 1);
 
-        if (!nextRoundExists) {
-          // Generate next round matches with winners
-          const winners: string[] = [];
-          currentRoundMatches.forEach(m => {
-            if (m.homeScore! > m.awayScore!) {
-              winners.push(m.homeUserId);
-            } else if (m.awayScore! > m.homeScore!) {
-              winners.push(m.awayUserId);
-            } else {
-              // In case of draw, home team advances (or implement penalty shootout logic)
-              winners.push(m.homeUserId);
-            }
-          });
+          if (!nextRoundExists) {
+            const winners: string[] = [];
+            currentRoundMatches.forEach(m => {
+              if (m.homeScore! > m.awayScore!) {
+                winners.push(m.homeUserId);
+              } else if (m.awayScore! > m.homeScore!) {
+                winners.push(m.awayUserId);
+              } else {
+                winners.push(m.homeUserId);
+              }
+            });
 
-          // Create next round matches
-          const nextRoundMatches: Match[] = [];
-          for (let i = 0; i < winners.length; i += 2) {
-            if (winners[i + 1]) {
-              const newMatch: Match = {
-                id: `match_${Date.now()}_${i}`,
-                leagueId: selectedLeagueId!,
-                homeUserId: winners[i],
-                awayUserId: winners[i + 1],
-                status: 'pending',
-                date: Date.now() + 86400000, // Next day
-                round: currentRound + 1
-              };
-              nextRoundMatches.push(newMatch);
+            // Create next round matches
+            for (let i = 0; i < winners.length; i += 2) {
+              if (winners[i + 1]) {
+                await dataService.createMatch({
+                  leagueId: selectedLeagueId!,
+                  homeUserId: winners[i],
+                  awayUserId: winners[i + 1],
+                  status: 'pending',
+                  date: Date.now() + 86400000,
+                  round: currentRound + 1
+                });
+              }
             }
           }
-
-          // Save new matches
-          const updatedMatches = [...allMatches, ...nextRoundMatches];
-          storage.saveMatches(updatedMatches);
         }
       }
-    }
 
-    setMatches(storage.getMatches());
-    setEditingMatch(null);
+      // Reload matches
+      await loadData();
+      setEditingMatch(null);
+    } catch (error) {
+      console.error('Error saving result:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCloseModal = () => {
@@ -205,97 +219,97 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
     setAwayScore(0);
   };
 
-  // Check if all matches in the league are completed
   const areAllMatchesCompleted = (leagueId: string) => {
     const leagueMatches = matches.filter(m => m.leagueId === leagueId);
     return leagueMatches.length > 0 && leagueMatches.every(m => m.status === 'completed');
   };
 
-  const handleFinishLeague = () => {
+  const handleFinishLeague = async () => {
     if (!selectedLeague) return;
 
-    const leagueId = selectedLeague.id;
+    try {
+      setSaving(true);
+      const leagueId = selectedLeague.id;
 
-    // Update league status to finished
-    const allLeagues = storage.getLeagues();
-    const updatedLeagues = allLeagues.map(l =>
-      l.id === leagueId
-        ? { ...l, status: 'finished' as const, finishedAt: Date.now() }
-        : l
-    );
-    storage.saveLeagues(updatedLeagues);
+      // Update league status to finished
+      await dataService.updateLeague(leagueId, {
+        status: 'finished',
+        finishedAt: Date.now()
+      });
 
-    // Update user stats for all participants
-    const leagueMatches = matches.filter(m => m.leagueId === leagueId);
-    const statsUpdates: Record<string, { played: number; goalsScored: number; goalsConceded: number }> = {};
+      // Calculate stats from matches
+      const leagueMatches = matches.filter(m => m.leagueId === leagueId);
+      const statsUpdates: Record<string, { played: number; goalsScored: number; goalsConceded: number }> = {};
 
-    // Calculate stats from matches
-    leagueMatches.forEach(match => {
-      if (match.status === 'completed') {
-        if (!statsUpdates[match.homeUserId]) {
-          statsUpdates[match.homeUserId] = { played: 0, goalsScored: 0, goalsConceded: 0 };
+      leagueMatches.forEach(match => {
+        if (match.status === 'completed') {
+          if (!statsUpdates[match.homeUserId]) {
+            statsUpdates[match.homeUserId] = { played: 0, goalsScored: 0, goalsConceded: 0 };
+          }
+          if (!statsUpdates[match.awayUserId]) {
+            statsUpdates[match.awayUserId] = { played: 0, goalsScored: 0, goalsConceded: 0 };
+          }
+
+          statsUpdates[match.homeUserId].played++;
+          statsUpdates[match.homeUserId].goalsScored += match.homeScore || 0;
+          statsUpdates[match.homeUserId].goalsConceded += match.awayScore || 0;
+
+          statsUpdates[match.awayUserId].played++;
+          statsUpdates[match.awayUserId].goalsScored += match.awayScore || 0;
+          statsUpdates[match.awayUserId].goalsConceded += match.homeScore || 0;
         }
-        if (!statsUpdates[match.awayUserId]) {
-          statsUpdates[match.awayUserId] = { played: 0, goalsScored: 0, goalsConceded: 0 };
-        }
+      });
 
-        statsUpdates[match.homeUserId].played++;
-        statsUpdates[match.homeUserId].goalsScored += match.homeScore || 0;
-        statsUpdates[match.homeUserId].goalsConceded += match.awayScore || 0;
+      // Determine champion
+      const champion = tableData.length > 0 ? tableData[0].userId : null;
 
-        statsUpdates[match.awayUserId].played++;
-        statsUpdates[match.awayUserId].goalsScored += match.awayScore || 0;
-        statsUpdates[match.awayUserId].goalsConceded += match.homeScore || 0;
-      }
-    });
+      // Update each user's stats
+      for (const [userId, stats] of Object.entries(statsUpdates)) {
+        const currentStats = await dataService.getUserStats(userId);
+        const isChampion = userId === champion;
 
-    // Determine champion (top of table)
-    const champion = tableData.length > 0 ? tableData[0].userId : null;
-
-    // Update each user's stats
-    const allStats = storage.getStats();
-    Object.entries(statsUpdates).forEach(([userId, stats]) => {
-      const currentStats = allStats.find(s => s.userId === userId);
-      const isChampion = userId === champion;
-
-      if (currentStats) {
-        currentStats.matchesPlayed += stats.played;
-        currentStats.leaguesParticipated += 1;
-        currentStats.goalsScored += stats.goalsScored;
-        currentStats.goalsConceded += stats.goalsConceded;
-        currentStats.championshipsWon += (isChampion ? 1 : 0);
-        currentStats.updatedAt = Date.now();
-      } else {
-        allStats.push({
-          userId,
-          matchesPlayed: stats.played,
-          leaguesParticipated: 1,
-          goalsScored: stats.goalsScored,
-          goalsConceded: stats.goalsConceded,
-          championshipsWon: isChampion ? 1 : 0,
+        await dataService.updateUserStats(userId, {
+          matchesPlayed: (currentStats?.matchesPlayed || 0) + stats.played,
+          leaguesParticipated: (currentStats?.leaguesParticipated || 0) + 1,
+          goalsScored: (currentStats?.goalsScored || 0) + stats.goalsScored,
+          goalsConceded: (currentStats?.goalsConceded || 0) + stats.goalsConceded,
+          championshipsWon: (currentStats?.championshipsWon || 0) + (isChampion ? 1 : 0),
           updatedAt: Date.now()
         });
       }
-    });
-    storage.saveStats(allStats);
 
-    // Add activity log
-    storage.addActivityLog({
-      type: 'league_finished',
-      userId: user.id,
-      username: user.username,
-      description: `Finished league "${selectedLeague.name}"`,
-      metadata: {
-        leagueId: selectedLeague.id,
-        leagueName: selectedLeague.name
-      }
-    });
+      // Add activity log
+      await dataService.createActivityLog({
+        type: 'league_finished',
+        userId: user.id,
+        username: user.username,
+        description: `Finished league "${selectedLeague.name}"`,
+        timestamp: Date.now(),
+        metadata: {
+          leagueId: selectedLeague.id,
+          leagueName: selectedLeague.name
+        }
+      });
 
-    // Refresh leagues list (will remove this league from running leagues)
-    const runningLeagues = storage.getLeagues().filter(l => l.participantIds.includes(user.id) && l.status === 'running');
-    setLeagues(runningLeagues);
-    setSelectedLeagueId(runningLeagues.length > 0 ? runningLeagues[0].id : null);
+      // Reload data
+      await loadData();
+    } catch (error) {
+      console.error('Error finishing league:', error);
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading leagues...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (leagues.length === 0) {
     return (
@@ -331,7 +345,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Switched tab order: Matches first, Table/Bracket second */}
           <div className="flex bg-white/5 p-1 rounded-2xl border border-white/5">
             <button
               onClick={() => setActiveTab('matches')}
@@ -356,18 +369,17 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
             )}
           </div>
 
-          {/* Finish League Button - Only for superusers and pro_managers */}
           {(user.role === 'superuser' || user.role === 'pro_manager') && (
             <button
               onClick={handleFinishLeague}
-              disabled={!selectedLeagueId || !areAllMatchesCompleted(selectedLeagueId)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-sm transition-all ${selectedLeagueId && areAllMatchesCompleted(selectedLeagueId)
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20'
-                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              disabled={!selectedLeagueId || !areAllMatchesCompleted(selectedLeagueId) || saving}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-sm transition-all ${selectedLeagueId && areAllMatchesCompleted(selectedLeagueId) && !saving
+                ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20'
+                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                 }`}
             >
               <CheckCircle2 className="w-4 h-4" />
-              FINISH LEAGUE
+              {saving ? 'FINISHING...' : 'FINISH LEAGUE'}
             </button>
           )}
         </div>
@@ -423,7 +435,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
         <div className="glass rounded-3xl border border-white/5 p-8 overflow-x-auto">
           <div className="min-w-max">
             {(() => {
-              // Group matches by round for bracket visualization
               const rounds: Record<number, Match[]> = {};
               leagueMatches.forEach(m => {
                 const round = m.round || 1;
@@ -434,7 +445,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
               const sortedRounds = Object.keys(rounds).map(Number).sort((a, b) => a - b);
               const maxRound = Math.max(...sortedRounds);
 
-              // Round names for tournament
               const getRoundName = (round: number, maxRound: number) => {
                 const roundsFromEnd = maxRound - round;
                 if (roundsFromEnd === 0) return 'FINAL';
@@ -447,7 +457,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                 <div className="flex gap-12 items-start">
                   {sortedRounds.map((roundNum, roundIndex) => (
                     <div key={roundNum} className="flex flex-col gap-6">
-                      {/* Round Header */}
                       <div className="text-center mb-4">
                         <div className="inline-block px-6 py-2 bg-purple-600/20 border border-purple-500/30 rounded-full">
                           <h3 className="text-sm font-black text-purple-400 uppercase tracking-wider">
@@ -456,7 +465,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                         </div>
                       </div>
 
-                      {/* Matches in this round */}
                       <div className="flex flex-col gap-8 relative">
                         {rounds[roundNum].map((m, matchIndex) => {
                           const home = users.find(u => u.id === m.homeUserId);
@@ -467,7 +475,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
 
                           return (
                             <div key={m.id} className="relative">
-                              {/* Connecting line to next round */}
                               {roundIndex < sortedRounds.length - 1 && (
                                 <div className="absolute left-full top-1/2 w-12 h-0.5 bg-purple-500/20 z-0" style={{ transform: 'translateY(-50%)' }}></div>
                               )}
@@ -476,7 +483,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                                 onClick={() => handleMatchClick(m)}
                                 className="glass rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer hover:scale-105 w-64 relative z-10"
                               >
-                                {/* Home Team */}
                                 <div className={`flex items-center justify-between p-4 border-b border-white/5 ${homeWon ? 'bg-purple-600/10' : ''}`}>
                                   <div className="flex items-center gap-3 flex-1">
                                     <img
@@ -493,7 +499,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                                   </span>
                                 </div>
 
-                                {/* Away Team */}
                                 <div className={`flex items-center justify-between p-4 ${awayWon ? 'bg-purple-600/10' : ''}`}>
                                   <div className="flex items-center gap-3 flex-1">
                                     <img
@@ -510,7 +515,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                                   </span>
                                 </div>
 
-                                {/* Match Status Badge */}
                                 {!isCompleted && (
                                   <div className="absolute -top-2 -right-2 px-2 py-1 bg-orange-500/20 border border-orange-500/30 rounded-full">
                                     <span className="text-[9px] font-black text-orange-400 uppercase">Pending</span>
@@ -524,9 +528,7 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                     </div>
                   ))}
 
-                  {/* Champion Trophy */}
                   {(() => {
-                    // Only show champion if the final round has exactly 1 match and it's completed
                     const finalRoundMatches = rounds[maxRound] || [];
                     const isTrueFinal = finalRoundMatches.length === 1;
                     const finalMatch = finalRoundMatches[0];
@@ -564,16 +566,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1 bg-white/5 px-4 py-3 rounded-2xl border border-white/5 flex items-center gap-3">
-              <Search className="w-4 h-4 text-gray-500" />
-              <input type="text" placeholder="Filter by player name..." className="bg-transparent border-none focus:ring-0 text-sm w-full" />
-            </div>
-            <button className="px-6 py-3 glass border border-white/5 rounded-2xl text-sm font-bold flex items-center gap-2">
-              <Filter className="w-4 h-4" /> Filters
-            </button>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {leagueMatches.sort((a, b) => a.date - b.date).map((m, i) => {
               const home = users.find(u => u.id === m.homeUserId);
@@ -633,7 +625,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
             </div>
 
             <div className="space-y-6">
-              {/* Home Team */}
               <div className="flex items-center gap-4">
                 <div className="flex-1 flex items-center gap-3">
                   <img
@@ -654,12 +645,10 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                 />
               </div>
 
-              {/* VS Divider */}
               <div className="flex items-center justify-center">
                 <div className="px-4 py-2 bg-white/5 rounded-full text-xs font-black text-gray-500">VS</div>
               </div>
 
-              {/* Away Team */}
               <div className="flex items-center gap-4">
                 <div className="flex-1 flex items-center gap-3">
                   <img
@@ -681,20 +670,30 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-3 pt-4">
               <button
                 onClick={handleCloseModal}
-                className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-bold transition-colors"
+                disabled={saving}
+                className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-bold transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveResult}
-                className="flex-1 px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-xl font-bold shadow-lg shadow-purple-600/20 transition-all hover:scale-105 flex items-center justify-center gap-2"
+                disabled={saving}
+                className="flex-1 px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-xl font-bold shadow-lg shadow-purple-600/20 transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <Save className="w-4 h-4" />
-                Save Result
+                {saving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Save Result
+                  </>
+                )}
               </button>
             </div>
           </div>
