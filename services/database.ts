@@ -16,7 +16,19 @@ export const db = {
             .order('created_at', { ascending: true });
 
         if (error) throw error;
-        return data || [];
+
+        // Convert snake_case to camelCase
+        return (data || []).map(user => ({
+            id: user.id,
+            email: user.email,
+            password: user.password,
+            username: user.username,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            dateOfBirth: user.date_of_birth,
+            role: user.role,
+            avatar: user.avatar
+        }));
     },
 
     async getUserById(id: string): Promise<User | null> {
@@ -27,7 +39,19 @@ export const db = {
             .single();
 
         if (error) return null;
-        return data;
+
+        // Convert snake_case to camelCase
+        return {
+            id: data.id,
+            email: data.email,
+            password: data.password,
+            username: data.username,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            dateOfBirth: data.date_of_birth,
+            role: data.role,
+            avatar: data.avatar
+        };
     },
 
     async createUser(userData: Omit<User, 'id' | 'avatar'>): Promise<User> {
@@ -37,26 +61,53 @@ export const db = {
         const { data, error } = await supabase
             .from('users')
             .insert([{
-                ...userData,
+                email: userData.email,
                 password: hashedPassword,
+                username: userData.username,
+                first_name: userData.firstName,
+                last_name: userData.lastName,
+                date_of_birth: userData.dateOfBirth,
+                role: userData.role,
                 avatar: `https://picsum.photos/seed/${userData.username}/200`
             }])
             .select()
             .single();
 
         if (error) throw error;
-        return data;
+
+        // Convert snake_case back to camelCase for our app
+        return {
+            id: data.id,
+            email: data.email,
+            password: data.password,
+            username: data.username,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            dateOfBirth: data.date_of_birth,
+            role: data.role,
+            avatar: data.avatar
+        };
     },
 
     async updateUser(id: string, updates: Partial<User>): Promise<void> {
         // Hash password if being updated
+        const dbUpdates: any = {};
+
+        if (updates.email) dbUpdates.email = updates.email;
+        if (updates.username) dbUpdates.username = updates.username;
+        if (updates.firstName) dbUpdates.first_name = updates.firstName;
+        if (updates.lastName) dbUpdates.last_name = updates.lastName;
+        if (updates.dateOfBirth) dbUpdates.date_of_birth = updates.dateOfBirth;
+        if (updates.role) dbUpdates.role = updates.role;
+        if (updates.avatar) dbUpdates.avatar = updates.avatar;
+
         if (updates.password) {
-            updates.password = await bcrypt.hash(updates.password, 10);
+            dbUpdates.password = await bcrypt.hash(updates.password, 10);
         }
 
         const { error } = await supabase
             .from('users')
-            .update(updates)
+            .update(dbUpdates)
             .eq('id', id);
 
         if (error) throw error;
@@ -84,7 +135,18 @@ export const db = {
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) return null;
 
-        return user;
+        // Convert snake_case to camelCase
+        return {
+            id: user.id,
+            email: user.email,
+            password: user.password,
+            username: user.username,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            dateOfBirth: user.date_of_birth,
+            role: user.role,
+            avatar: user.avatar
+        };
     },
 
     async register(userData: Omit<User, 'id' | 'role' | 'avatar'>): Promise<User> {
@@ -123,6 +185,7 @@ export const db = {
         // Convert participant_ids from array to match our type
         return (data || []).map(league => ({
             ...league,
+            adminId: league.admin_id,
             createdAt: new Date(league.created_at).getTime(),
             finishedAt: league.finished_at ? new Date(league.finished_at).getTime() : undefined,
             participantIds: league.participant_ids || []
@@ -140,6 +203,7 @@ export const db = {
 
         return {
             ...data,
+            adminId: data.admin_id,
             createdAt: new Date(data.created_at).getTime(),
             finishedAt: data.finished_at ? new Date(data.finished_at).getTime() : undefined,
             participantIds: data.participant_ids || []
