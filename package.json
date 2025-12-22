@@ -1,7 +1,7 @@
 {
   "name": "rakla-football-manager",
   "private": true,
-  "version": "1.0.0-beta.01",
+  "version": "1.0.0-beta.02",
   "type": "module",
   "scripts": {
     "dev": "vite",
