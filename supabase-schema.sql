@@ -93,7 +93,9 @@ CREATE POLICY "Superusers can update any user" ON users FOR UPDATE USING (
 
 -- Leagues Policies
 CREATE POLICY "Anyone can view leagues" ON leagues FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can create leagues" ON leagues FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "Pro managers and superusers can create leagues" ON leagues FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (role = 'pro_manager' OR role = 'superuser'))
+);
 CREATE POLICY "Admins and superusers can update leagues" ON leagues FOR UPDATE USING (
   admin_id = auth.uid() OR 
   EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role IN ('superuser', 'pro_manager'))
