@@ -425,5 +425,54 @@ export const db = {
             }]);
 
         if (error) throw error;
+    },
+
+    // ==================== DATABASE RESET ====================
+
+    async resetDatabase(preserveSuperusers: boolean = true): Promise<void> {
+        try {
+            // Get all superusers before deletion
+            let superusers: any[] = [];
+            if (preserveSuperusers) {
+                const { data } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('role', 'superuser');
+                superusers = data || [];
+            }
+
+            // Delete all data from tables (order matters due to foreign keys)
+            await supabase.from('activity_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            await supabase.from('leagues').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            await supabase.from('user_stats').delete().neq('user_id', '00000000-0000-0000-0000-000000000000');
+
+            // Delete all users except superusers
+            if (preserveSuperusers && superusers.length > 0) {
+                const superuserIds = superusers.map(u => u.id);
+                await supabase.from('users').delete().not('id', 'in', `(${superuserIds.map(id => `'${id}'`).join(',')})`);
+
+                // Reset superuser stats
+                for (const su of superusers) {
+                    await supabase.from('user_stats').upsert({
+                        user_id: su.id,
+                        matches_played: 0,
+                        leagues_participated: 0,
+                        goals_scored: 0,
+                        goals_conceded: 0,
+                        championships_won: 0,
+                        updated_at: new Date().toISOString()
+                    });
+                }
+            } else {
+                // Delete all users
+                await supabase.from('users').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            }
+
+            console.log('Database reset complete');
+        } catch (error) {
+            console.error('Error resetting database:', error);
+            throw error;
+        }
     }
 };

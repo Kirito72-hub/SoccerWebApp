@@ -7,7 +7,9 @@ import {
     Crown,
     UserCog,
     User as UserIcon,
-    CheckCircle
+    CheckCircle,
+    Trash2,
+    AlertTriangle
 } from 'lucide-react';
 import { User, UserRole } from '../types';
 import { dataService } from '../services/dataService';
@@ -21,6 +23,8 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
+    const [resetting, setResetting] = useState(false);
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -54,6 +58,25 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
             setTimeout(() => setUpdatingUserId(null), 2000);
         } catch (error) {
             console.error('Error updating user role:', error);
+        }
+    };
+
+    const handleResetDatabase = async () => {
+        try {
+            setResetting(true);
+            await dataService.resetDatabase(true); // Preserve superusers
+
+            // Reload users
+            const users = await dataService.getUsers();
+            setAllUsers(users);
+
+            setShowResetConfirm(false);
+            alert('Database reset successfully! All data except superuser accounts has been deleted.');
+        } catch (error) {
+            console.error('Error resetting database:', error);
+            alert('Failed to reset database: ' + (error as Error).message);
+        } finally {
+            setResetting(false);
         }
     };
 
@@ -115,12 +138,22 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     }
 
     return (
-        <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-6 lg:space-y-8 animate-in slide-in-from-right-4 duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight">SETTINGS</h1>
-                    <p className="text-gray-500 font-medium">Manage user roles and permissions</p>
+                    <h1 className="text-2xl lg:text-3xl font-black tracking-tight">SETTINGS</h1>
+                    <p className="text-sm lg:text-base text-gray-500 font-medium">Manage user roles and permissions</p>
                 </div>
+
+                {/* Reset Database Button */}
+                <button
+                    onClick={() => setShowResetConfirm(true)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 rounded-xl text-red-400 font-bold text-sm transition-all hover:scale-105"
+                >
+                    <Trash2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">Reset Database</span>
+                    <span className="sm:hidden">Reset DB</span>
+                </button>
             </div>
 
             {/* User Role Management Panel */}
@@ -229,6 +262,65 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                     )}
                 </div>
             </div>
+
+            {/* Reset Database Confirmation Modal */}
+            {showResetConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <div className="glass rounded-3xl border border-red-500/30 p-6 lg:p-8 max-w-md w-full space-y-6 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-red-600/20 rounded-xl">
+                                <AlertTriangle className="w-8 h-8 text-red-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl lg:text-2xl font-black text-red-400">Reset Database?</h3>
+                                <p className="text-xs lg:text-sm text-gray-400">This action cannot be undone</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 text-sm lg:text-base">
+                            <p className="text-gray-300">
+                                This will <strong className="text-red-400">permanently delete</strong>:
+                            </p>
+                            <ul className="list-disc list-inside space-y-1 text-gray-400 ml-2">
+                                <li>All leagues and matches</li>
+                                <li>All activity logs</li>
+                                <li>All user accounts (except superusers)</li>
+                                <li>All user statistics</li>
+                            </ul>
+                            <p className="text-emerald-400 font-bold mt-4">
+                                ✓ Superuser accounts will be preserved
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3 pt-4">
+                            <button
+                                onClick={() => setShowResetConfirm(false)}
+                                disabled={resetting}
+                                className="flex-1 px-4 py-3 glass border border-white/10 rounded-xl font-bold text-sm hover:bg-white/5 transition-all disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleResetDatabase}
+                                disabled={resetting}
+                                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold text-sm shadow-lg shadow-red-600/20 transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {resetting ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Resetting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 className="w-4 h-4" />
+                                        Reset Database
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

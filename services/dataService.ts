@@ -189,6 +189,16 @@ export const dataService = {
         storage.setCurrentUser(user);
     },
 
+    // ==================== DATABASE MANAGEMENT ====================
+
+    async resetDatabase(preserveSuperusers: boolean = true): Promise<void> {
+        if (db.isOnline()) {
+            await db.resetDatabase(preserveSuperusers);
+        } else {
+            throw new Error('Database reset is only available when connected to Supabase');
+        }
+    },
+
     // ==================== UTILITY ====================
 
     isOnline(): boolean {
