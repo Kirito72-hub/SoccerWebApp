@@ -9,7 +9,9 @@ import {
     EyeOff,
     Calendar,
     Shield,
-    CheckCircle
+    CheckCircle,
+    Camera,
+    X
 } from 'lucide-react';
 import { User } from '../types';
 import { storage } from '../services/storage';
@@ -20,12 +22,26 @@ interface ProfileProps {
     user: User;
 }
 
+// Predefined anime football player avatars
+const AVATAR_OPTIONS = [
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4&eyes=happy&mouth=smile&top=shortHair&topColor=auburn',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka&backgroundColor=c0aede&eyes=wink&mouth=smile&top=shortHair&topColor=black',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Milo&backgroundColor=ffd5dc&eyes=default&mouth=serious&top=shortHair&topColor=blonde',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Luna&backgroundColor=d1d4f9&eyes=happy&mouth=smile&top=longHair&topColor=brown',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Max&backgroundColor=ffdfbf&eyes=default&mouth=smile&top=shortHair&topColor=red',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Chloe&backgroundColor=c0f0dd&eyes=wink&mouth=smile&top=longHair&topColor=platinum',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver&backgroundColor=ffd6e0&eyes=happy&mouth=smile&top=shortHair&topColor=black',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie&backgroundColor=b6e3f4&eyes=default&mouth=smile&top=longHair&topColor=auburn',
+];
+
 const Profile: React.FC<ProfileProps> = ({ user }) => {
     const [editing, setEditing] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
+    const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+    const [selectedAvatar, setSelectedAvatar] = useState(user.avatar || '');
 
     const [formData, setFormData] = useState({
         email: user.email,
@@ -108,6 +124,33 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
         }
     };
 
+    const handleAvatarSave = async (avatarUrl: string) => {
+        try {
+            setError('');
+            setSuccess('');
+
+            // Update avatar in database
+            if (db.isOnline()) {
+                await db.updateUser(user.id, { avatar: avatarUrl });
+                // Update localStorage session as well
+                const updatedUser = { ...user, avatar: avatarUrl };
+                storage.setCurrentUser(updatedUser);
+            } else {
+                storage.updateUserProfile(user.id, { avatar: avatarUrl });
+            }
+
+            setSelectedAvatar(avatarUrl);
+            setShowAvatarPicker(false);
+            setSuccess('Avatar updated successfully!');
+
+            // Reload page to reflect changes
+            setTimeout(() => window.location.reload(), 1500);
+        } catch (err: any) {
+            console.error('Avatar update error:', err);
+            setError(err.message || 'Failed to update avatar');
+        }
+    };
+
     const getRoleBadgeColor = () => {
         switch (user.role) {
             case 'superuser':
@@ -153,11 +196,22 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
             <div className="grid md:grid-cols-3 gap-6">
                 {/* Profile Card */}
                 <div className="glass rounded-3xl border border-white/5 p-8 flex flex-col items-center text-center">
-                    <img
-                        src={user.avatar || `https://picsum.photos/seed/${user.id}/200`}
-                        alt={user.username}
-                        className="w-32 h-32 rounded-full border-4 border-purple-600 shadow-lg shadow-purple-600/30 mb-4"
-                    />
+                    {/* Clickable Avatar with Camera Icon */}
+                    <div className="relative group cursor-pointer mb-4" onClick={() => setShowAvatarPicker(true)}>
+                        <img
+                            src={selectedAvatar || user.avatar || `https://picsum.photos/seed/${user.id}/200`}
+                            alt={user.username}
+                            className="w-32 h-32 rounded-full border-4 border-purple-600 shadow-lg shadow-purple-600/30 transition-all group-hover:border-purple-500 group-hover:scale-105"
+                        />
+                        {/* Camera Icon Indicator */}
+                        <div className="absolute bottom-0 right-0 p-2 bg-purple-600 rounded-full border-4 border-[#0f0f23] shadow-lg group-hover:bg-purple-500 transition-all">
+                            <Camera className="w-4 h-4 text-white" />
+                        </div>
+                        {/* Hover Overlay */}
+                        <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <p className="text-white text-xs font-bold">Change Avatar</p>
+                        </div>
+                    </div>
                     <h2 className="text-2xl font-black mb-1">{user.username}</h2>
                     <p className="text-gray-500 text-sm mb-4">{user.firstName} {user.lastName}</p>
 
@@ -316,6 +370,74 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Avatar Picker Modal */}
+            {showAvatarPicker && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <div className="glass rounded-3xl border border-purple-500/30 p-6 lg:p-8 max-w-2xl w-full space-y-6 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-purple-600/20 rounded-xl">
+                                    <Camera className="w-6 h-6 text-purple-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl lg:text-2xl font-black">Choose Your Avatar</h3>
+                                    <p className="text-xs lg:text-sm text-gray-400">Select a football player avatar</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowAvatarPicker(false)}
+                                className="p-2 hover:bg-white/10 rounded-lg text-gray-400 transition-colors"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        {/* Avatar Grid */}
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                            {AVATAR_OPTIONS.map((avatarUrl, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setSelectedAvatar(avatarUrl)}
+                                    className={`relative group rounded-2xl overflow-hidden border-4 transition-all hover:scale-105 ${selectedAvatar === avatarUrl
+                                            ? 'border-purple-500 shadow-lg shadow-purple-500/50'
+                                            : 'border-white/10 hover:border-purple-500/50'
+                                        }`}
+                                >
+                                    <img
+                                        src={avatarUrl}
+                                        alt={`Avatar ${index + 1}`}
+                                        className="w-full h-full object-cover aspect-square"
+                                    />
+                                    {selectedAvatar === avatarUrl && (
+                                        <div className="absolute inset-0 bg-purple-600/30 flex items-center justify-center">
+                                            <CheckCircle className="w-8 h-8 text-white" />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 pt-4">
+                            <button
+                                onClick={() => setShowAvatarPicker(false)}
+                                className="flex-1 px-4 py-3 glass border border-white/10 rounded-xl font-bold text-sm hover:bg-white/5 transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleAvatarSave(selectedAvatar)}
+                                disabled={!selectedAvatar}
+                                className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-500 rounded-xl font-bold text-sm shadow-lg shadow-purple-600/20 transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <Save className="w-4 h-4" />
+                                Save Avatar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

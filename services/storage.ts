@@ -132,7 +132,7 @@ export const storage = {
     return newUser;
   },
 
-  updateUserProfile: (userId: string, updates: { email?: string; password?: string }) => {
+  updateUserProfile: (userId: string, updates: { email?: string; password?: string; avatar?: string }) => {
     const users = storage.getUsers();
     const updatedUsers = users.map(u => {
       if (u.id === userId) {
