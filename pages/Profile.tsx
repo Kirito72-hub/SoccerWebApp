@@ -37,6 +37,10 @@ const AVATAR_OPTIONS = [
     '/avatars/anime_wild.png',
     '/avatars/anime_princess.png',
     '/avatars/anime_rookie.png',
+    // Newest Additions
+    '/avatars/anime_veteran.png',
+    '/avatars/anime_acrobat.png',
+    '/avatars/anime_phantom.png',
 ];
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
