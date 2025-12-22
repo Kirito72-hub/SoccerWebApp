@@ -85,6 +85,7 @@ ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
 
 -- Users Policies
 CREATE POLICY "Users can view all users" ON users FOR SELECT USING (true);
+CREATE POLICY "Anyone can create an account" ON users FOR INSERT WITH CHECK (true);
 CREATE POLICY "Users can update own profile" ON users FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Superusers can update any user" ON users FOR UPDATE USING (
   EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'superuser')
