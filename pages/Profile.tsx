@@ -477,10 +477,10 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                             </div>
                             <button
                                 onClick={() => handleNotificationToggle('leagues')}
-                                className={`relative w-14 h-7 rounded-full transition-all flex-shrink-0 ${notificationSettings.leagues ? 'bg-purple-600' : 'bg-gray-700'
+                                className={`relative w-12 h-7 rounded-full transition-all flex-shrink-0 ${notificationSettings.leagues ? 'bg-purple-600' : 'bg-gray-700'
                                     }`}
                             >
-                                <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${notificationSettings.leagues ? 'translate-x-7' : 'translate-x-0'
+                                <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${notificationSettings.leagues ? 'translate-x-5' : 'translate-x-0'
                                     }`} />
                             </button>
                         </div>
@@ -502,10 +502,10 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                             </div>
                             <button
                                 onClick={() => handleNotificationToggle('matches')}
-                                className={`relative w-14 h-7 rounded-full transition-all flex-shrink-0 ${notificationSettings.matches ? 'bg-emerald-600' : 'bg-gray-700'
+                                className={`relative w-12 h-7 rounded-full transition-all flex-shrink-0 ${notificationSettings.matches ? 'bg-emerald-600' : 'bg-gray-700'
                                     }`}
                             >
-                                <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${notificationSettings.matches ? 'translate-x-7' : 'translate-x-0'
+                                <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${notificationSettings.matches ? 'translate-x-5' : 'translate-x-0'
                                     }`} />
                             </button>
                         </div>
@@ -527,10 +527,10 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                             </div>
                             <button
                                 onClick={() => handleNotificationToggle('news')}
-                                className={`relative w-14 h-7 rounded-full transition-all flex-shrink-0 ${notificationSettings.news ? 'bg-blue-600' : 'bg-gray-700'
+                                className={`relative w-12 h-7 rounded-full transition-all flex-shrink-0 ${notificationSettings.news ? 'bg-blue-600' : 'bg-gray-700'
                                     }`}
                             >
-                                <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${notificationSettings.news ? 'translate-x-7' : 'translate-x-0'
+                                <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${notificationSettings.news ? 'translate-x-5' : 'translate-x-0'
                                     }`} />
                             </button>
                         </div>
