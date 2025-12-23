@@ -10,10 +10,12 @@ import {
     CheckCircle,
     Trash2,
     AlertTriangle,
-    UserX
+    UserX,
+    Wifi
 } from 'lucide-react';
 import { User, UserRole } from '../types';
 import { dataService } from '../services/dataService';
+import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 
 interface SettingsProps {
     user: User;
@@ -31,6 +33,8 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     const [deleting, setDeleting] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [deletedCount, setDeletedCount] = useState(0);
+    const [realtimeConnected, setRealtimeConnected] = useState(false);
+    const [flashUserId, setFlashUserId] = useState<string | null>(null);
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -46,7 +50,65 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
         };
 
         loadUsers();
+        setRealtimeConnected(true);
     }, []);
+
+    // Realtime subscription for user changes
+    useRealtimeSubscription({
+        table: 'users',
+        event: '*',
+        enabled: dataService.isOnline() && !loading,
+        onUpdate: (updatedUser) => {
+            setAllUsers(prev =>
+                prev.map(u => {
+                    if (u.id === updatedUser.id) {
+                        // Flash effect for updated user
+                        setFlashUserId(updatedUser.id);
+                        setTimeout(() => setFlashUserId(null), 1500);
+
+                        return {
+                            id: updatedUser.id,
+                            email: updatedUser.email,
+                            password: updatedUser.password,
+                            username: updatedUser.username,
+                            firstName: updatedUser.first_name,
+                            lastName: updatedUser.last_name,
+                            dateOfBirth: updatedUser.date_of_birth,
+                            role: updatedUser.role,
+                            avatar: updatedUser.avatar
+                        };
+                    }
+                    return u;
+                })
+            );
+        },
+        onDelete: (deletedUser) => {
+            setAllUsers(prev => prev.filter(u => u.id !== deletedUser.id));
+            // Remove from selected if it was selected
+            setSelectedUsers(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(deletedUser.id);
+                return newSet;
+            });
+        },
+        onInsert: (newUser) => {
+            const user: User = {
+                id: newUser.id,
+                email: newUser.email,
+                password: newUser.password,
+                username: newUser.username,
+                firstName: newUser.first_name,
+                lastName: newUser.last_name,
+                dateOfBirth: newUser.date_of_birth,
+                role: newUser.role,
+                avatar: newUser.avatar
+            };
+            setAllUsers(prev => [...prev, user]);
+            // Flash effect for new user
+            setFlashUserId(user.id);
+            setTimeout(() => setFlashUserId(null), 1500);
+        }
+    });
 
     const filteredUsers = searchQuery.trim()
         ? allUsers.filter(u =>
@@ -202,7 +264,15 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
         <div className="space-y-6 lg:space-y-8 animate-in slide-in-from-right-4 duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl lg:text-3xl font-black tracking-tight">SETTINGS</h1>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-2xl lg:text-3xl font-black tracking-tight">SETTINGS</h1>
+                        {realtimeConnected && dataService.isOnline() && (
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-600/20 border border-emerald-500/30 rounded-lg">
+                                <Wifi className="w-3 h-3 text-emerald-400 animate-pulse" />
+                                <span className="text-[10px] font-bold text-emerald-400">LIVE</span>
+                            </div>
+                        )}
+                    </div>
                     <p className="text-sm lg:text-base text-gray-500 font-medium">Manage user roles and permissions</p>
                 </div>
 
@@ -291,7 +361,10 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                     {filteredUsers.map((u) => (
                         <div
                             key={u.id}
-                            className="glass rounded-xl lg:rounded-2xl border border-white/5 p-3 sm:p-4 lg:p-5 hover:border-purple-500/30 transition-all"
+                            className={`glass rounded-xl lg:rounded-2xl border p-3 sm:p-4 lg:p-5 hover:border-purple-500/30 transition-all ${flashUserId === u.id
+                                    ? 'border-emerald-500/50 bg-emerald-500/10 animate-pulse'
+                                    : 'border-white/5'
+                                }`}
                         >
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                                 <div className="flex items-center gap-3 flex-1">

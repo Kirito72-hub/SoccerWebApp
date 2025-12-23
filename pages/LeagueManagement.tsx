@@ -10,11 +10,13 @@ import {
   X,
   Trophy,
   ChevronRight,
-  UserPlus
+  UserPlus,
+  Wifi
 } from 'lucide-react';
 import { User, League, Match, LeagueFormat } from '../types';
 import { dataService } from '../services/dataService';
 import { generateFixtures } from '../services/fixtures';
+import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 
 interface LeagueManagementProps {
   user: User;
@@ -37,6 +39,9 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
   const [scoreHome, setScoreHome] = useState<number>(0);
   const [scoreAway, setScoreAway] = useState<number>(0);
   const [leagueToDelete, setLeagueToDelete] = useState<string | null>(null);
+  const [realtimeConnected, setRealtimeConnected] = useState(false);
+  const [flashLeagueId, setFlashLeagueId] = useState<string | null>(null);
+  const [flashMatchId, setFlashMatchId] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -61,12 +66,88 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
 
       setAllUsers(users);
       setAllMatches(matches);
+      setRealtimeConnected(true);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Realtime subscription for leagues
+  useRealtimeSubscription({
+    table: 'leagues',
+    event: '*',
+    enabled: dataService.isOnline() && !loading,
+    onInsert: (newLeague) => {
+      const league: League = {
+        id: newLeague.id,
+        name: newLeague.name,
+        adminId: newLeague.admin_id,
+        format: newLeague.format,
+        status: newLeague.status,
+        participantIds: newLeague.participant_ids || [],
+        createdAt: new Date(newLeague.created_at).getTime(),
+        finishedAt: newLeague.finished_at ? new Date(newLeague.finished_at).getTime() : undefined
+      };
+
+      // Only add if user has permission to see it
+      if (league.status === 'running') {
+        if (user.role === 'superuser' || user.role === 'pro_manager' || league.adminId === user.id) {
+          setLeagues(prev => [...prev, league]);
+          setFlashLeagueId(league.id);
+          setTimeout(() => setFlashLeagueId(null), 2000);
+        }
+      }
+    },
+    onUpdate: (updatedLeague) => {
+      setLeagues(prev =>
+        prev.map(l => {
+          if (l.id === updatedLeague.id) {
+            setFlashLeagueId(updatedLeague.id);
+            setTimeout(() => setFlashLeagueId(null), 2000);
+
+            return {
+              ...l,
+              name: updatedLeague.name,
+              status: updatedLeague.status,
+              participantIds: updatedLeague.participant_ids || l.participantIds,
+              finishedAt: updatedLeague.finished_at ? new Date(updatedLeague.finished_at).getTime() : undefined
+            };
+          }
+          return l;
+        })
+      );
+    },
+    onDelete: (deletedLeague) => {
+      setLeagues(prev => prev.filter(l => l.id !== deletedLeague.id));
+    }
+  });
+
+  // Realtime subscription for matches
+  useRealtimeSubscription({
+    table: 'matches',
+    event: '*',
+    enabled: dataService.isOnline() && !loading,
+    onUpdate: (updatedMatch) => {
+      setAllMatches(prev =>
+        prev.map(m => {
+          if (m.id === updatedMatch.id) {
+            setFlashMatchId(updatedMatch.id);
+            setTimeout(() => setFlashMatchId(null), 2000);
+
+            return {
+              ...m,
+              homeScore: updatedMatch.home_score,
+              awayScore: updatedMatch.away_score,
+              status: updatedMatch.status
+            };
+          }
+          return m;
+        })
+      );
+    }
+  });
 
   const handleCreateLeague = async () => {
     if (!newLeagueName || selectedParticipants.length < 2) return;
@@ -97,7 +178,6 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
         userId: user.id,
         username: user.username,
         description: `Created a new league "${newLeagueName}" with ${selectedParticipants.length} participants`,
-        timestamp: Date.now(),
         metadata: {
           leagueId: newLeague.id,
           leagueName: newLeagueName
