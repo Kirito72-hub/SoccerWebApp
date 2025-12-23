@@ -31,6 +31,15 @@ export const dataService = {
         }
     },
 
+    async deleteUser(userId: string): Promise<void> {
+        if (db.isOnline()) {
+            await db.deleteUser(userId);
+        } else {
+            const users = storage.getUsers().filter(u => u.id !== userId);
+            storage.saveUsers(users);
+        }
+    },
+
     // ==================== LEAGUE OPERATIONS ====================
 
     async getLeagues(): Promise<League[]> {

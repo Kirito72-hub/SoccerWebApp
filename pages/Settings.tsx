@@ -9,7 +9,8 @@ import {
     User as UserIcon,
     CheckCircle,
     Trash2,
-    AlertTriangle
+    AlertTriangle,
+    UserX
 } from 'lucide-react';
 import { User, UserRole } from '../types';
 import { dataService } from '../services/dataService';
@@ -25,6 +26,9 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     const [loading, setLoading] = useState(true);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
     const [resetting, setResetting] = useState(false);
+    const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -79,6 +83,53 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
             setResetting(false);
         }
     };
+
+    const handleSelectUser = (userId: string) => {
+        const newSelected = new Set(selectedUsers);
+        if (newSelected.has(userId)) {
+            newSelected.delete(userId);
+        } else {
+            newSelected.add(userId);
+        }
+        setSelectedUsers(newSelected);
+    };
+
+    const handleSelectAll = () => {
+        if (selectedUsers.size === selectableUsers.length) {
+            setSelectedUsers(new Set());
+        } else {
+            const allSelectableIds = selectableUsers.map(u => u.id);
+            setSelectedUsers(new Set(allSelectableIds));
+        }
+    };
+
+    const handleDeleteSelected = async () => {
+        try {
+            setDeleting(true);
+
+            // Delete each selected user
+            for (const userId of selectedUsers) {
+                await dataService.deleteUser(userId);
+            }
+
+            // Reload users
+            const users = await dataService.getUsers();
+            setAllUsers(users);
+            setSelectedUsers(new Set());
+            setShowDeleteConfirm(false);
+
+            alert(`Successfully deleted ${selectedUsers.size} user(s)`);
+        } catch (error) {
+            console.error('Error deleting users:', error);
+            alert('Failed to delete users: ' + (error as Error).message);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    // Users that can be selected (not superusers, not current user)
+    const selectableUsers = filteredUsers.filter(u => u.role !== 'superuser' && u.id !== user.id);
+    const allSelectableSelected = selectableUsers.length > 0 && selectedUsers.size === selectableUsers.length;
 
     const getRoleIcon = (role: UserRole) => {
         switch (role) {
@@ -196,6 +247,35 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                     </div>
                 </div>
 
+                {/* Bulk Actions Bar */}
+                {selectableUsers.length > 0 && (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 p-3 lg:p-4 glass bg-white/5 rounded-xl lg:rounded-2xl border border-white/10">
+                        <div className="flex items-center gap-3">
+                            <input
+                                type="checkbox"
+                                checked={allSelectableSelected}
+                                onChange={handleSelectAll}
+                                className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-600 focus:ring-purple-600 focus:ring-offset-gray-900 cursor-pointer"
+                            />
+                            <span className="text-sm font-bold text-gray-400">
+                                {selectedUsers.size > 0
+                                    ? `${selectedUsers.size} user(s) selected`
+                                    : 'Select all'}
+                            </span>
+                        </div>
+
+                        {selectedUsers.size > 0 && (
+                            <button
+                                onClick={() => setShowDeleteConfirm(true)}
+                                className="flex items-center gap-2 px-3 lg:px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 rounded-lg lg:rounded-xl text-red-400 font-bold text-sm transition-all hover:scale-105"
+                            >
+                                <UserX className="w-4 h-4" />
+                                <span>Delete Selected ({selectedUsers.size})</span>
+                            </button>
+                        )}
+                    </div>
+                )}
+
                 {/* Users List */}
                 <div className="space-y-3">
                     {filteredUsers.map((u) => (
@@ -205,6 +285,16 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                         >
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                                 <div className="flex items-center gap-3 flex-1">
+                                    {/* Checkbox for selectable users */}
+                                    {u.role !== 'superuser' && u.id !== user.id && (
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedUsers.has(u.id)}
+                                            onChange={() => handleSelectUser(u.id)}
+                                            className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-purple-600 focus:ring-purple-600 focus:ring-offset-gray-900 cursor-pointer flex-shrink-0"
+                                        />
+                                    )}
+
                                     <img
                                         src={u.avatar || `/avatars/anime_striker.png`}
                                         alt={u.username}
@@ -314,6 +404,62 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                                     <>
                                         <Trash2 className="w-4 h-4" />
                                         Reset Database
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Users Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <div className="glass rounded-3xl border border-red-500/30 p-6 lg:p-8 max-w-md w-full space-y-6 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-red-600/20 rounded-xl">
+                                <UserX className="w-8 h-8 text-red-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl lg:text-2xl font-black text-red-400">Delete Users?</h3>
+                                <p className="text-xs lg:text-sm text-gray-400">This action cannot be undone</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 text-sm lg:text-base">
+                            <p className="text-gray-300">
+                                You are about to <strong className="text-red-400">permanently delete</strong>:
+                            </p>
+                            <div className="p-3 glass bg-red-600/10 rounded-xl border border-red-500/20">
+                                <p className="font-bold text-red-400 text-lg">{selectedUsers.size} user account(s)</p>
+                            </div>
+                            <p className="text-gray-400 text-xs">
+                                All associated data including stats and activity will be removed.
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3 pt-4">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                disabled={deleting}
+                                className="flex-1 px-4 py-3 glass border border-white/10 rounded-xl font-bold text-sm hover:bg-white/5 transition-all disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteSelected}
+                                disabled={deleting}
+                                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold text-sm shadow-lg shadow-red-600/20 transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {deleting ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <UserX className="w-4 h-4" />
+                                        Delete {selectedUsers.size} User(s)
                                     </>
                                 )}
                             </button>
