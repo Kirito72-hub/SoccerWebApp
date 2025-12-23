@@ -29,6 +29,8 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [deletedCount, setDeletedCount] = useState(0);
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -106,6 +108,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     const handleDeleteSelected = async () => {
         try {
             setDeleting(true);
+            const count = selectedUsers.size;
 
             // Delete each selected user
             for (const userId of selectedUsers) {
@@ -118,7 +121,14 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
             setSelectedUsers(new Set());
             setShowDeleteConfirm(false);
 
-            alert(`Successfully deleted ${selectedUsers.size} user(s)`);
+            // Show success message
+            setDeletedCount(count);
+            setShowSuccessMessage(true);
+
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 3000);
         } catch (error) {
             console.error('Error deleting users:', error);
             alert('Failed to delete users: ' + (error as Error).message);
@@ -464,6 +474,43 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                                 )}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Message Modal */}
+            {showSuccessMessage && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <div className="glass rounded-2xl lg:rounded-3xl border border-emerald-500/30 p-6 lg:p-8 max-w-sm w-full space-y-4 animate-in zoom-in-95 duration-300 shadow-2xl shadow-emerald-500/20">
+                        <div className="flex flex-col items-center text-center space-y-4">
+                            {/* Success Icon */}
+                            <div className="p-4 bg-emerald-600/20 rounded-full">
+                                <CheckCircle className="w-12 h-12 lg:w-16 lg:h-16 text-emerald-400" />
+                            </div>
+
+                            {/* Success Message */}
+                            <div>
+                                <h3 className="text-xl lg:text-2xl font-black text-emerald-400 mb-2">
+                                    Successfully Deleted!
+                                </h3>
+                                <p className="text-sm lg:text-base text-gray-300">
+                                    <span className="font-bold text-emerald-400">{deletedCount}</span> user{deletedCount !== 1 ? 's' : ''} {deletedCount !== 1 ? 'have' : 'has'} been removed
+                                </p>
+                            </div>
+
+                            {/* Auto-dismiss indicator */}
+                            <div className="w-full bg-white/10 rounded-full h-1 overflow-hidden">
+                                <div className="h-full bg-emerald-400 rounded-full w-full"></div>
+                            </div>
+                        </div>
+
+                        {/* Close button */}
+                        <button
+                            onClick={() => setShowSuccessMessage(false)}
+                            className="w-full px-4 py-2.5 glass border border-emerald-500/30 rounded-xl font-bold text-sm text-emerald-400 hover:bg-emerald-600/10 transition-all"
+                        >
+                            Close
+                        </button>
                     </div>
                 </div>
             )}
