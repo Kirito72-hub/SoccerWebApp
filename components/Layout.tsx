@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { User, UserStats, Match } from '../types';
 import { dataService } from '../services/dataService';
+import { useNotificationSystem } from '../hooks/useNotificationSystem';
 
 interface LayoutProps {
   user: User;
@@ -184,6 +185,9 @@ const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Ma
 };
 
 const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
+  // Initialize Notification System
+  useNotificationSystem(user);
+
   // Start sidebar closed on mobile, open on desktop
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
   const [searchQuery, setSearchQuery] = useState('');
