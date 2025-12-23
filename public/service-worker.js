@@ -1,0 +1,100 @@
+const CACHE_NAME = 'rakla-pwa-v1';
+const STATIC_ASSETS = [
+    '/',
+    '/index.html',
+    '/manifest.json',
+    '/icons/icon.svg'
+];
+
+// Install event - cache static assets
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(STATIC_ASSETS);
+        })
+    );
+    self.skipWaiting();
+});
+
+// Activate event - cleanup old caches
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+    self.clients.claim();
+});
+
+// Fetch event - serve from cache, then network
+self.addEventListener('fetch', (event) => {
+    // Skip cross-origin requests
+    if (!event.request.url.startsWith(self.location.origin)) {
+        return;
+    }
+
+    // Skip API requests (let them go to network)
+    if (event.request.url.includes('/rest/v1/')) {
+        return;
+    }
+
+    event.respondWith(
+        caches.match(event.request).then((response) => {
+            // Return cached response if found
+            if (response) {
+                return response;
+            }
+
+            // Otherwise fetch from network
+            return fetch(event.request).then((response) => {
+                // Don't cache non-successful responses
+                if (!response || response.status !== 200 || response.type !== 'basic') {
+                    return response;
+                }
+
+                // Clone response to cache it
+                const responseToCache = response.clone();
+
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, responseToCache);
+                });
+
+                return response;
+            });
+        })
+    );
+});
+
+// Push notification event
+self.addEventListener('push', (event) => {
+    if (!event.data) return;
+
+    const data = event.data.json();
+    const options = {
+        body: data.body,
+        icon: '/icons/icon.svg',
+        badge: '/icons/icon.svg',
+        data: {
+            url: data.url || '/'
+        }
+    };
+
+    event.waitUntil(
+        self.registration.showNotification(data.title, options)
+    );
+});
+
+// Notification click event
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    event.waitUntil(
+        clients.openWindow(event.notification.data.url)
+    );
+});

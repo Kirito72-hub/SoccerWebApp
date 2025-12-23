@@ -204,8 +204,18 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
         reader.readAsDataURL(file);
     };
 
-    const handleNotificationToggle = (type: 'leagues' | 'matches' | 'news') => {
+    const handleNotificationToggle = async (type: 'leagues' | 'matches' | 'news') => {
         const newValue = !notificationSettings[type];
+
+        // Request permission if enabling
+        if (newValue && 'Notification' in window && Notification.permission !== 'granted') {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                setError('Notification permission denied. Please enable them in your browser settings.');
+                return;
+            }
+        }
+
         setNotificationSettings(prev => ({
             ...prev,
             [type]: newValue

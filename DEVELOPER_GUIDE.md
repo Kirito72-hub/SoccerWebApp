@@ -126,6 +126,17 @@ WITH CHECK (
 - `debug-rls-policy.sql` - Diagnostic queries
 - `RLS_FIX_COMPLETE.md` - Documentation
 
+### **Phase 4: Optimization & PWA (v1.3.0-beta)**
+
+**Enhancements:**
+- ✨ **Avatar Consistency** - Unified avatar system
+- 🔔 **Notification Settings** - User preferences UI
+- 📱 **PWA Integration** - Fully installable app
+  - Manifest implementation
+  - Service Worker for offline support
+  - Custom install prompt
+  - Push notification readiness
+
 ---
 
 ## 🏗️ Architecture
