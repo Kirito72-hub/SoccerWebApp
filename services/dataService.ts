@@ -170,9 +170,9 @@ export const dataService = {
         return storage.getActivityLogs().slice(0, limit);
     },
 
-    async createActivityLog(log: Omit<ActivityLog, 'id'>): Promise<void> {
+    async createActivityLog(log: Omit<ActivityLog, 'id' | 'timestamp'>): Promise<void> {
         if (db.isOnline()) {
-            await db.createActivityLog(log);
+            await db.createActivityLog({ ...log, timestamp: Date.now() });
         } else {
             storage.addActivityLog(log);
         }

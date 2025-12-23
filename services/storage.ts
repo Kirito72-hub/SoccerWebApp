@@ -58,6 +58,22 @@ export const storage = {
   getLeagues: (): League[] => JSON.parse(localStorage.getItem(STORAGE_KEYS.LEAGUES) || '[]'),
   saveLeagues: (leagues: League[]) => localStorage.setItem(STORAGE_KEYS.LEAGUES, JSON.stringify(leagues)),
 
+  createLeague: (league: Omit<League, 'id'>): League => {
+    const leagues = storage.getLeagues();
+    const newLeague: League = {
+      ...league,
+      id: Math.random().toString(36).substr(2, 9)
+    };
+    leagues.push(newLeague);
+    storage.saveLeagues(leagues);
+    return newLeague;
+  },
+
+  deleteLeague: (id: string): void => {
+    const leagues = storage.getLeagues().filter(l => l.id !== id);
+    storage.saveLeagues(leagues);
+  },
+
   getMatches: (): Match[] => JSON.parse(localStorage.getItem(STORAGE_KEYS.MATCHES) || '[]'),
   saveMatches: (matches: Match[]) => localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(matches)),
 
