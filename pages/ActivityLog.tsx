@@ -18,6 +18,20 @@ interface ActivityLogProps {
 }
 
 const ActivityLog: React.FC<ActivityLogProps> = ({ user }) => {
+    // AUTHORIZATION CHECK: Only superusers can view activity logs
+    if (user.role !== 'superuser') {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="text-center space-y-4">
+                    <div className="text-6xl">🚫</div>
+                    <h1 className="text-3xl font-black text-red-400">ACCESS DENIED</h1>
+                    <p className="text-gray-400">You don't have permission to view activity logs.</p>
+                    <p className="text-sm text-gray-500">Required role: Superuser</p>
+                </div>
+            </div>
+        );
+    }
+
     const [logs, setLogs] = useState<ActivityLogType[]>([]);
     const [filteredLogs, setFilteredLogs] = useState<ActivityLogType[]>([]);
     const [filterType, setFilterType] = useState<string>('all');
