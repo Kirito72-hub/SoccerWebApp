@@ -147,7 +147,10 @@ export const db = {
             .delete()
             .eq('id', id);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase delete error:', error);
+            throw new Error(`Failed to delete user: ${error.message}`);
+        }
     },
 
     async login(email: string, password: string): Promise<User | null> {
