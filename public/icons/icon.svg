@@ -1,6 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#1a1a2e"/>
-  <circle cx="256" cy="256" r="230" fill="#7c3aed" opacity="0.2"/>
-  <path d="M256 120L300 210L400 225L325 295L345 390L256 340L167 390L187 295L112 225L212 210L256 120Z" fill="#10b981"/>
-  <text x="256" y="350" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="white" text-anchor="middle">R</text>
+  <defs>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <rect x="56" y="56" width="400" height="400" rx="100" fill="#9333ea" filter="url(#glow)"/>
+  
+  <!-- Trophy Icon -->
+  <path d="M156 136 C 156 160 156 186 166 210 C 176 234 196 256 216 266 L 216 316 L 196 316 C 180 316 176 336 176 336 L 336 336 C 336 336 332 316 316 316 L 296 316 L 296 266 C 316 256 336 234 346 210 C 356 186 356 160 356 136 Z M 196 156 L 316 156 L 316 176 C 316 196 306 216 296 226 L 216 226 C 206 216 196 196 196 176 Z" fill="white" stroke="white" stroke-width="20" stroke-linejoin="round"/>
+  
+  <!-- Trophy handles -->
+  <path d="M156 166 C 136 166 116 176 116 206 C 116 236 136 246 156 246" fill="none" stroke="white" stroke-width="20" stroke-linecap="round"/>
+  <path d="M356 166 C 376 166 396 176 396 206 C 396 236 376 246 356 246" fill="none" stroke="white" stroke-width="20" stroke-linecap="round"/>
 </svg>
