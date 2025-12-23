@@ -94,7 +94,13 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
 
       // Only add if user has permission to see it
       if (league.status === 'running') {
-        if (user.role === 'superuser' || user.role === 'pro_manager' || league.adminId === user.id) {
+        const canSeeLeague =
+          user.role === 'superuser' ||
+          user.role === 'pro_manager' ||
+          league.adminId === user.id ||
+          league.participantIds.includes(user.id); // FIXED: Check if user is a participant!
+
+        if (canSeeLeague) {
           setLeagues(prev => [...prev, league]);
           setFlashLeagueId(league.id);
           setTimeout(() => setFlashLeagueId(null), 2000);
