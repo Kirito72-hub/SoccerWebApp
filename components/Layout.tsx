@@ -184,7 +184,8 @@ const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Ma
 };
 
 const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Start sidebar closed on mobile, open on desktop
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [selectedUserForStats, setSelectedUserForStats] = useState<User | null>(null);

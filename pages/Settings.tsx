@@ -157,26 +157,26 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
             </div>
 
             {/* User Role Management Panel */}
-            <div className="glass rounded-3xl border border-white/5 p-8">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 bg-purple-600/20 rounded-xl">
-                        <Shield className="w-6 h-6 text-purple-400" />
+            <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-4 sm:p-6 lg:p-8">
+                <div className="flex items-center gap-3 mb-4 lg:mb-6">
+                    <div className="p-2 lg:p-3 bg-purple-600/20 rounded-xl">
+                        <Shield className="w-5 h-5 lg:w-6 lg:h-6 text-purple-400" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black">User Authority Management</h2>
-                        <p className="text-sm text-gray-500">Control user roles and permissions</p>
+                        <h2 className="text-lg lg:text-xl font-black">User Authority Management</h2>
+                        <p className="text-xs lg:text-sm text-gray-500">Control user roles and permissions</p>
                     </div>
                 </div>
 
                 {/* Search Bar */}
-                <div className="relative mb-6">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <div className="relative mb-4 lg:mb-6">
+                    <Search className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 w-4 h-4 lg:w-5 lg:h-5 text-gray-500" />
                     <input
                         type="text"
-                        placeholder="Search users by name or email..."
+                        placeholder="Search users..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full glass bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-white focus:border-purple-600 outline-none transition-all font-bold"
+                        className="w-full glass bg-white/5 border border-white/10 rounded-xl lg:rounded-2xl pl-10 lg:pl-12 pr-4 lg:pr-6 py-3 lg:py-4 text-sm lg:text-base text-white focus:border-purple-600 outline-none transition-all font-bold"
                     />
                 </div>
 
@@ -201,33 +201,33 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                     {filteredUsers.map((u) => (
                         <div
                             key={u.id}
-                            className="glass rounded-2xl border border-white/5 p-5 hover:border-purple-500/30 transition-all"
+                            className="glass rounded-xl lg:rounded-2xl border border-white/5 p-3 sm:p-4 lg:p-5 hover:border-purple-500/30 transition-all"
                         >
-                            <div className="flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-4 flex-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                                <div className="flex items-center gap-3 flex-1">
                                     <img
-                                        src={u.avatar || `https://picsum.photos/seed/${u.id}/100`}
+                                        src={u.avatar || `/avatars/anime_striker.png`}
                                         alt={u.username}
-                                        className="w-12 h-12 rounded-full border-2 border-purple-500/30"
+                                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-purple-500/30 flex-shrink-0"
                                     />
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <p className="font-bold">{u.username}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <p className="font-bold text-sm sm:text-base truncate">{u.username}</p>
                                             {u.id === user.id && (
-                                                <span className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-[10px] font-black rounded-md">
+                                                <span className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-[10px] font-black rounded-md flex-shrink-0">
                                                     YOU
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-sm text-gray-500">{u.email}</p>
+                                        <p className="text-xs sm:text-sm text-gray-500 truncate">{u.email}</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
                                     {/* Current Role Badge */}
-                                    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${getRoleBadgeColor(u.role)}`}>
+                                    <div className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl border ${getRoleBadgeColor(u.role)} flex-shrink-0`}>
                                         {getRoleIcon(u.role)}
-                                        <span className="text-xs font-black">{getRoleLabel(u.role)}</span>
+                                        <span className="text-[10px] sm:text-xs font-black whitespace-nowrap">{getRoleLabel(u.role)}</span>
                                     </div>
 
                                     {/* Role Change Dropdown */}
@@ -235,7 +235,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                                         <select
                                             value={u.role}
                                             onChange={(e) => handleRoleChange(u.id, e.target.value as UserRole)}
-                                            className="glass bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm font-bold focus:border-purple-600 outline-none transition-all cursor-pointer"
+                                            className="glass bg-white/5 border border-white/10 rounded-lg sm:rounded-xl px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold focus:border-purple-600 outline-none transition-all cursor-pointer flex-shrink-0"
                                         >
                                             <option value="superuser" className="bg-[#1a1a2e]">Superuser</option>
                                             <option value="pro_manager" className="bg-[#1a1a2e]">Pro Manager</option>
@@ -244,9 +244,9 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                                     )}
 
                                     {updatingUserId === u.id && (
-                                        <div className="flex items-center gap-2 text-emerald-400 animate-in fade-in duration-300">
-                                            <CheckCircle className="w-5 h-5" />
-                                            <span className="text-xs font-bold">Updated!</span>
+                                        <div className="flex items-center gap-1.5 text-emerald-400 animate-in fade-in duration-300">
+                                            <CheckCircle className="w-4 h-4" />
+                                            <span className="text-xs font-bold hidden sm:inline">Updated!</span>
                                         </div>
                                     )}
                                 </div>

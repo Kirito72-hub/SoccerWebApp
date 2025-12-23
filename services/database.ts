@@ -2,6 +2,34 @@ import { supabase, isSupabaseConfigured } from './supabase';
 import { User, League, Match, UserStats, ActivityLog } from '../types';
 import bcrypt from 'bcryptjs';
 
+// Default anime avatar options for new users
+const DEFAULT_AVATARS = [
+    '/avatars/anime_striker.png',
+    '/avatars/anime_midfielder.png',
+    '/avatars/anime_defender.png',
+    '/avatars/anime_keeper.png',
+    '/avatars/anime_winger.png',
+    '/avatars/anime_captain.png',
+    '/avatars/anime_strategist.png',
+    '/avatars/anime_wild.png',
+    '/avatars/anime_princess.png',
+    '/avatars/anime_rookie.png',
+    '/avatars/anime_veteran.png',
+    '/avatars/anime_acrobat.png',
+    '/avatars/anime_phantom.png',
+    '/avatars/anime_coach.png',
+    '/avatars/anime_analyst.png',
+    '/avatars/anime_speedster.png',
+    '/avatars/anime_wall.png',
+    '/avatars/anime_prodigy.png',
+    '/avatars/anime_twin_a.png',
+];
+
+// Helper function to get random avatar
+const getRandomAvatar = (): string => {
+    return DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)];
+};
+
 // Database service that works with Supabase
 export const db = {
     // Check if using Supabase or localStorage
@@ -68,7 +96,7 @@ export const db = {
                 last_name: userData.lastName,
                 date_of_birth: userData.dateOfBirth,
                 role: userData.role,
-                avatar: `https://picsum.photos/seed/${userData.username}/200`
+                avatar: getRandomAvatar()
             }])
             .select()
             .single();

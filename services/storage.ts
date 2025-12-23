@@ -10,6 +10,34 @@ const STORAGE_KEYS = {
   ACTIVITY_LOGS: 'rakla_activity_logs'
 };
 
+// Default anime avatar options for new users
+const DEFAULT_AVATARS = [
+  '/avatars/anime_striker.png',
+  '/avatars/anime_midfielder.png',
+  '/avatars/anime_defender.png',
+  '/avatars/anime_keeper.png',
+  '/avatars/anime_winger.png',
+  '/avatars/anime_captain.png',
+  '/avatars/anime_strategist.png',
+  '/avatars/anime_wild.png',
+  '/avatars/anime_princess.png',
+  '/avatars/anime_rookie.png',
+  '/avatars/anime_veteran.png',
+  '/avatars/anime_acrobat.png',
+  '/avatars/anime_phantom.png',
+  '/avatars/anime_coach.png',
+  '/avatars/anime_analyst.png',
+  '/avatars/anime_speedster.png',
+  '/avatars/anime_wall.png',
+  '/avatars/anime_prodigy.png',
+  '/avatars/anime_twin_a.png',
+];
+
+// Helper function to get random avatar
+const getRandomAvatar = (): string => {
+  return DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)];
+};
+
 // Initial Seed Data - CONFIGURE YOUR SUPERUSER HERE
 // Replace these values with your own information before deploying
 const DEFAULT_USERS: User[] = [
@@ -120,7 +148,7 @@ export const storage = {
       ...userData,
       id: Math.random().toString(36).substr(2, 9),
       role: 'normal_user', // All new users start as normal users
-      avatar: `https://picsum.photos/seed/${userData.username}/200`
+      avatar: getRandomAvatar()
     };
 
     users.push(newUser);
