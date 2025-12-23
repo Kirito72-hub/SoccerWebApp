@@ -51,7 +51,7 @@ class NotificationService {
 
     // Helper to check user preferences
     private isEnabled(userId: string, type: 'leagues' | 'matches' | 'news'): boolean {
-        return localStorage.getItem(`notifications_${type}_${userId}`) === 'true';
+        return localStorage.getItem(`notifications_${type}_${userId}`) !== 'false';
     }
 
     // Send actual browser notification
