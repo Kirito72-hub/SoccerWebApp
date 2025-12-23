@@ -28,12 +28,18 @@ export const useRealtimeSubscription = ({
     enabled = true
 }: UseRealtimeSubscriptionOptions) => {
     useEffect(() => {
-        if (!enabled) return;
+        if (!enabled) {
+            console.log(`[Realtime] Subscription disabled for ${table}`);
+            return;
+        }
 
-        const channelName = `${table}-${Date.now()}`;
+        // Use a unique channel name with timestamp to avoid conflicts
+        const channelName = `${table}-realtime-${Math.random().toString(36).substr(2, 9)}`;
         let channel: RealtimeChannel;
 
         const setupSubscription = () => {
+            console.log(`[Realtime] Setting up subscription for ${table}...`);
+
             channel = supabase.channel(channelName);
 
             const config: any = {
@@ -46,28 +52,41 @@ export const useRealtimeSubscription = ({
                 config.filter = filter;
             }
 
+            console.log(`[Realtime] Config:`, config);
+
             channel.on(
                 'postgres_changes',
                 config,
                 (payload) => {
-                    console.log(`[Realtime] ${table} change:`, payload.eventType, payload);
+                    console.log(`[Realtime] 🔴 ${table} ${payload.eventType}:`, payload);
 
                     switch (payload.eventType) {
                         case 'INSERT':
+                            console.log(`[Realtime] Calling onInsert for ${table}`);
                             onInsert?.(payload.new);
                             break;
                         case 'UPDATE':
+                            console.log(`[Realtime] Calling onUpdate for ${table}`);
                             onUpdate?.(payload.new);
                             break;
                         case 'DELETE':
+                            console.log(`[Realtime] Calling onDelete for ${table}`);
                             onDelete?.(payload.old);
                             break;
                     }
                 }
             );
 
-            channel.subscribe((status) => {
-                console.log(`[Realtime] ${table} subscription status:`, status);
+            channel.subscribe((status, err) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log(`[Realtime] ✅ Successfully subscribed to ${table}`);
+                } else if (status === 'CHANNEL_ERROR') {
+                    console.error(`[Realtime] ❌ Channel error for ${table}:`, err);
+                } else if (status === 'TIMED_OUT') {
+                    console.error(`[Realtime] ⏱️ Subscription timed out for ${table}`);
+                } else {
+                    console.log(`[Realtime] Status for ${table}:`, status);
+                }
             });
         };
 
@@ -75,8 +94,8 @@ export const useRealtimeSubscription = ({
 
         return () => {
             if (channel) {
-                channel.unsubscribe();
-                console.log(`[Realtime] Unsubscribed from ${table}`);
+                console.log(`[Realtime] 🔌 Unsubscribing from ${table}`);
+                supabase.removeChannel(channel);
             }
         };
     }, [table, event, filter, onInsert, onUpdate, onDelete, enabled]);

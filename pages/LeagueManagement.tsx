@@ -17,6 +17,7 @@ import { User, League, Match, LeagueFormat } from '../types';
 import { dataService } from '../services/dataService';
 import { generateFixtures } from '../services/fixtures';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
+import { getAvatarByUserId } from '../utils/avatarUtils';
 
 interface LeagueManagementProps {
   user: User;
@@ -479,7 +480,7 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
 
             <div className="flex items-center justify-between mb-10">
               <div className="flex-1 flex flex-col items-center gap-4">
-                <img src={`https://picsum.photos/seed/${selectedMatch.homeUserId}/80`} className="w-20 h-20 rounded-full border-2 border-purple-600" />
+                <img src={getAvatarByUserId(selectedMatch.homeUserId, allUsers)} className="w-20 h-20 rounded-full border-2 border-purple-600" />
                 <p className="font-black text-center">{allUsers.find(u => u.id === selectedMatch.homeUserId)?.username}</p>
               </div>
               <div className="flex items-center gap-4">
@@ -498,7 +499,7 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
                 />
               </div>
               <div className="flex-1 flex flex-col items-center gap-4">
-                <img src={`https://picsum.photos/seed/${selectedMatch.awayUserId}/80`} className="w-20 h-20 rounded-full border-2 border-purple-600" />
+                <img src={getAvatarByUserId(selectedMatch.awayUserId, allUsers)} className="w-20 h-20 rounded-full border-2 border-purple-600" />
                 <p className="font-black text-center">{allUsers.find(u => u.id === selectedMatch.awayUserId)?.username}</p>
               </div>
             </div>

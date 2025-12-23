@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { User, League, Match, TableRow } from '../types';
 import { dataService } from '../services/dataService';
+import { getAvatarByUserId } from '../utils/avatarUtils';
 
 interface RunningLeaguesProps {
   user: User;
@@ -413,7 +414,7 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
-                        <img src={`https://picsum.photos/seed/${row.userId}/40`} className="w-8 h-8 rounded-full border border-white/10" alt="" />
+                        <img src={getAvatarByUserId(row.userId, users)} className="w-8 h-8 rounded-full border border-white/10" alt="" />
                         <span className={`font-bold ${row.userId === user.id ? 'text-purple-400' : ''}`}>{row.username}</span>
                       </div>
                     </td>
@@ -486,7 +487,7 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                                 <div className={`flex items-center justify-between p-4 border-b border-white/5 ${homeWon ? 'bg-purple-600/10' : ''}`}>
                                   <div className="flex items-center gap-3 flex-1">
                                     <img
-                                      src={`https://picsum.photos/seed/${home?.id}/40`}
+                                      src={getAvatarByUserId(home?.id || '', users)}
                                       className="w-8 h-8 rounded-full border border-white/10"
                                       alt=""
                                     />
@@ -502,7 +503,7 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                                 <div className={`flex items-center justify-between p-4 ${awayWon ? 'bg-purple-600/10' : ''}`}>
                                   <div className="flex items-center gap-3 flex-1">
                                     <img
-                                      src={`https://picsum.photos/seed/${away?.id}/40`}
+                                      src={getAvatarByUserId(away?.id || '', users)}
                                       className="w-8 h-8 rounded-full border border-white/10"
                                       alt=""
                                     />
@@ -547,7 +548,7 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                             return (
                               <div className="flex flex-col items-center gap-2">
                                 <img
-                                  src={`https://picsum.photos/seed/${winner?.id}/60`}
+                                  src={getAvatarByUserId(winner?.id || '', users)}
                                   className="w-12 h-12 rounded-full border-2 border-yellow-400 shadow-lg"
                                   alt=""
                                 />
@@ -577,7 +578,7 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                   className="glass p-6 rounded-3xl border border-white/5 hover:border-purple-500/20 transition-all flex items-center justify-between group cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <div className="flex-1 flex flex-col items-center gap-2 text-center">
-                    <img src={`https://picsum.photos/seed/${home?.id}/40`} className="w-12 h-12 rounded-full border-2 border-white/5 group-hover:border-purple-500/30 transition-all" alt="" />
+                    <img src={getAvatarByUserId(home?.id || '', users)} className="w-12 h-12 rounded-full border-2 border-white/5 group-hover:border-purple-500/30 transition-all" alt="" />
                     <p className="text-sm font-bold truncate w-24">{home?.username}</p>
                   </div>
 
@@ -600,7 +601,7 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
                   </div>
 
                   <div className="flex-1 flex flex-col items-center gap-2 text-center">
-                    <img src={`https://picsum.photos/seed/${away?.id}/40`} className="w-12 h-12 rounded-full border-2 border-white/5 group-hover:border-purple-500/30 transition-all" alt="" />
+                    <img src={getAvatarByUserId(away?.id || '', users)} className="w-12 h-12 rounded-full border-2 border-white/5 group-hover:border-purple-500/30 transition-all" alt="" />
                     <p className="text-sm font-bold truncate w-24">{away?.username}</p>
                   </div>
                 </div>
@@ -628,7 +629,7 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
               <div className="flex items-center gap-4">
                 <div className="flex-1 flex items-center gap-3">
                   <img
-                    src={`https://picsum.photos/seed/${editingMatch.homeUserId}/40`}
+                    src={getAvatarByUserId(editingMatch.homeUserId, users)}
                     className="w-12 h-12 rounded-full border-2 border-purple-500/30"
                     alt=""
                   />
@@ -652,7 +653,7 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
               <div className="flex items-center gap-4">
                 <div className="flex-1 flex items-center gap-3">
                   <img
-                    src={`https://picsum.photos/seed/${editingMatch.awayUserId}/40`}
+                    src={getAvatarByUserId(editingMatch.awayUserId, users)}
                     className="w-12 h-12 rounded-full border-2 border-purple-500/30"
                     alt=""
                   />
