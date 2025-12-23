@@ -38,8 +38,8 @@ if (user.role === 'normal_user') {
 | **Running Leagues** | `/#/leagues` | ✅ Allow | ✅ Allow | ✅ Allow | None (public) |
 | **League Management** | `/#/manage` | ❌ **DENY** | ✅ Allow | ✅ Allow | ✅ **PROTECTED** |
 | **Settings** | `/#/settings` | ❌ **DENY** | ❌ **DENY** | ✅ Allow | ✅ **PROTECTED** |
+| **Activity Log** | `/#/log` | ❌ **DENY** | ❌ **DENY** | ✅ Allow | ✅ **PROTECTED** |
 | **Profile** | `/#/profile` | ✅ Allow | ✅ Allow | ✅ Allow | None (public) |
-| **Activity Log** | `/#/log` | ✅ Allow | ✅ Allow | ✅ Allow | None (public) |
 | **Finished Leagues** | `/#/leagues-log` | ✅ Allow | ✅ Allow | ✅ Allow | None (public) |
 | **Realtime Test** | `/#/realtime-test` | ✅ Allow | ✅ Allow | ✅ Allow | None (debug) |
 
@@ -52,7 +52,6 @@ if (user.role === 'normal_user') {
 - ✅ View dashboard
 - ✅ View running leagues they participate in
 - ✅ View match results
-- ✅ View activity logs
 - ✅ View finished leagues
 - ✅ Edit own profile
 
@@ -64,6 +63,7 @@ if (user.role === 'normal_user') {
 - ❌ Change user roles
 - ❌ Access settings
 - ❌ Delete users
+- ❌ **View activity logs**
 
 ### **Pro Manager** (`pro_manager`)
 **Can:**
@@ -78,6 +78,7 @@ if (user.role === 'normal_user') {
 - ❌ Access settings
 - ❌ Delete users
 - ❌ Manage other users' leagues
+- ❌ **View activity logs**
 
 ### **Superuser** (`superuser`)
 **Can:**
@@ -115,11 +116,12 @@ if (user.role === 'normal_user') {
 
 - [x] Settings page protected (superuser only)
 - [x] League Management protected (pro_manager + superuser)
+- [x] Activity Log protected (superuser only)
 - [x] User deletion protected (superuser only, RLS)
 - [x] Cannot delete superusers
 - [x] Cannot delete yourself
 - [x] Realtime respects permissions
-- [x] Activity logs accessible to all (read-only)
+- [x] Activity logs accessible to superuser only
 - [x] Profile changes limited to own profile
 
 ---
@@ -153,6 +155,7 @@ if (user.role === 'normal_user') {
 ### **Authorization Checks:**
 - `pages/Settings.tsx` - Line 240: Superuser check
 - `pages/LeagueManagement.tsx` - Line 27: Pro Manager + Superuser check
+- `pages/ActivityLog.tsx` - Line 21: Superuser check
 
 ### **RLS Policies:**
 - `supabase-rls-user-deletion.sql` - User deletion policies
