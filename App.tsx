@@ -8,6 +8,7 @@ import ActivityLog from './pages/ActivityLog';
 import FinishedLeaguesLog from './pages/FinishedLeaguesLog';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import RealtimeTest from './pages/RealtimeTest';
 import Layout from './components/Layout';
 import { dataService } from './services/dataService';
 import { User } from './types';
@@ -52,6 +53,7 @@ const App: React.FC = () => {
             <Route path="/log" element={<ActivityLog user={currentUser} />} />
             <Route path="/leagues-log" element={<FinishedLeaguesLog user={currentUser} />} />
             <Route path="/settings" element={<Settings user={currentUser} />} />
+            <Route path="/realtime-test" element={<RealtimeTest />} />
           </Route>
         )}
 
