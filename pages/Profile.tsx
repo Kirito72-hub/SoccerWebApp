@@ -12,7 +12,9 @@ import {
     CheckCircle,
     Camera,
     X,
-    Upload
+    Upload,
+    Bell,
+    BellOff
 } from 'lucide-react';
 import { User } from '../types';
 import { storage } from '../services/storage';
@@ -60,6 +62,13 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
     const [selectedAvatar, setSelectedAvatar] = useState(user.avatar || '');
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Notification Settings
+    const [notificationSettings, setNotificationSettings] = useState({
+        leagues: localStorage.getItem(`notifications_leagues_${user.id}`) !== 'false',
+        matches: localStorage.getItem(`notifications_matches_${user.id}`) !== 'false',
+        news: localStorage.getItem(`notifications_news_${user.id}`) !== 'false'
+    });
 
     const [formData, setFormData] = useState({
         email: user.email,
@@ -193,6 +202,20 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
             setSelectedAvatar(base64String);
         };
         reader.readAsDataURL(file);
+    };
+
+    const handleNotificationToggle = (type: 'leagues' | 'matches' | 'news') => {
+        const newValue = !notificationSettings[type];
+        setNotificationSettings(prev => ({
+            ...prev,
+            [type]: newValue
+        }));
+        // Save to localStorage
+        localStorage.setItem(`notifications_${type}_${user.id}`, String(newValue));
+
+        // Show success message
+        setSuccess(`${type.charAt(0).toUpperCase() + type.slice(1)} notifications ${newValue ? 'enabled' : 'disabled'}`);
+        setTimeout(() => setSuccess(''), 3000);
     };
 
     const getRoleBadgeColor = () => {
@@ -411,6 +434,103 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
                                 </p>
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {/* Notification Settings */}
+                <div className="md:col-span-2 glass rounded-3xl border border-white/5 p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 bg-purple-600/20 rounded-xl">
+                            <Bell className="w-6 h-6 text-purple-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-black">Notification Settings</h3>
+                            <p className="text-sm text-gray-500">Manage your push notification preferences</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        {/* Leagues Notifications */}
+                        <div className="flex items-center justify-between p-4 glass bg-white/5 rounded-xl border border-white/10 hover:border-purple-500/30 transition-all group">
+                            <div className="flex items-center gap-4">
+                                <div className={`p-3 rounded-xl transition-all ${notificationSettings.leagues ? 'bg-purple-600/20' : 'bg-gray-600/20'}`}>
+                                    {notificationSettings.leagues ? (
+                                        <Bell className="w-5 h-5 text-purple-400" />
+                                    ) : (
+                                        <BellOff className="w-5 h-5 text-gray-500" />
+                                    )}
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-white">League Notifications</h4>
+                                    <p className="text-xs text-gray-500">Get notified about league updates and new leagues</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => handleNotificationToggle('leagues')}
+                                className={`relative w-14 h-7 rounded-full transition-all ${notificationSettings.leagues ? 'bg-purple-600' : 'bg-gray-700'
+                                    }`}
+                            >
+                                <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${notificationSettings.leagues ? 'translate-x-7' : 'translate-x-0'
+                                    }`} />
+                            </button>
+                        </div>
+
+                        {/* Matches Notifications */}
+                        <div className="flex items-center justify-between p-4 glass bg-white/5 rounded-xl border border-white/10 hover:border-purple-500/30 transition-all group">
+                            <div className="flex items-center gap-4">
+                                <div className={`p-3 rounded-xl transition-all ${notificationSettings.matches ? 'bg-emerald-600/20' : 'bg-gray-600/20'}`}>
+                                    {notificationSettings.matches ? (
+                                        <Bell className="w-5 h-5 text-emerald-400" />
+                                    ) : (
+                                        <BellOff className="w-5 h-5 text-gray-500" />
+                                    )}
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-white">Match Notifications</h4>
+                                    <p className="text-xs text-gray-500">Get notified about match results and score updates</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => handleNotificationToggle('matches')}
+                                className={`relative w-14 h-7 rounded-full transition-all ${notificationSettings.matches ? 'bg-emerald-600' : 'bg-gray-700'
+                                    }`}
+                            >
+                                <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${notificationSettings.matches ? 'translate-x-7' : 'translate-x-0'
+                                    }`} />
+                            </button>
+                        </div>
+
+                        {/* News Notifications */}
+                        <div className="flex items-center justify-between p-4 glass bg-white/5 rounded-xl border border-white/10 hover:border-purple-500/30 transition-all group">
+                            <div className="flex items-center gap-4">
+                                <div className={`p-3 rounded-xl transition-all ${notificationSettings.news ? 'bg-blue-600/20' : 'bg-gray-600/20'}`}>
+                                    {notificationSettings.news ? (
+                                        <Bell className="w-5 h-5 text-blue-400" />
+                                    ) : (
+                                        <BellOff className="w-5 h-5 text-gray-500" />
+                                    )}
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-white">News Notifications</h4>
+                                    <p className="text-xs text-gray-500">Get notified about app updates and announcements</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => handleNotificationToggle('news')}
+                                className={`relative w-14 h-7 rounded-full transition-all ${notificationSettings.news ? 'bg-blue-600' : 'bg-gray-700'
+                                    }`}
+                            >
+                                <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${notificationSettings.news ? 'translate-x-7' : 'translate-x-0'
+                                    }`} />
+                            </button>
+                        </div>
+
+                        {/* Info Note */}
+                        <div className="p-4 bg-purple-600/10 border border-purple-500/30 rounded-xl">
+                            <p className="text-xs text-purple-300">
+                                <strong>Note:</strong> Push notifications require PWA installation. Install the app on your device to receive notifications even when the app is closed.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
