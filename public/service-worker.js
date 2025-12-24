@@ -1,9 +1,9 @@
-const CACHE_NAME = 'rakla-pwa-v1.3.9';
+const CACHE_NAME = 'rakla-pwa-v1.4.0';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
-    '/manifest.json',
-    '/icons/icon.svg'
+    '/manifest.json'
+    // Removed /icons/icon.svg - file doesn't exist and was causing SW to fail
 ];
 
 // Install event - cache static assets
