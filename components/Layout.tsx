@@ -204,8 +204,8 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
 
   // Update unread count
   useEffect(() => {
-    const updateUnreadCount = () => {
-      const count = notificationStorage.getUnreadCount(user.id);
+    const updateUnreadCount = async () => {
+      const count = await notificationStorage.getUnreadCount(user.id);
       setUnreadCount(count);
     };
 
@@ -411,8 +411,9 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
           onClose={() => {
             setShowNotificationCenter(false);
             // Update unread count after closing
-            const count = notificationStorage.getUnreadCount(user.id);
-            setUnreadCount(count);
+            notificationStorage.getUnreadCount(user.id).then(count => {
+              setUnreadCount(count);
+            });
           }}
         />
       )}

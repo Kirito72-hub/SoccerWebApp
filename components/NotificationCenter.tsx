@@ -14,30 +14,30 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
         loadNotifications();
     }, [userId]);
 
-    const loadNotifications = () => {
-        const notifs = notificationStorage.getNotifications(userId);
+    const loadNotifications = async () => {
+        const notifs = await notificationStorage.getNotifications(userId);
         setNotifications(notifs);
     };
 
-    const handleMarkAsRead = (notificationId: string) => {
-        notificationStorage.markAsRead(userId, notificationId);
-        loadNotifications();
+    const handleMarkAsRead = async (notificationId: string) => {
+        await notificationStorage.markAsRead(userId, notificationId);
+        await loadNotifications();
     };
 
-    const handleMarkAllAsRead = () => {
-        notificationStorage.markAllAsRead(userId);
-        loadNotifications();
+    const handleMarkAllAsRead = async () => {
+        await notificationStorage.markAllAsRead(userId);
+        await loadNotifications();
     };
 
-    const handleDelete = (notificationId: string) => {
-        notificationStorage.deleteNotification(userId, notificationId);
-        loadNotifications();
+    const handleDelete = async (notificationId: string) => {
+        await notificationStorage.deleteNotification(userId, notificationId);
+        await loadNotifications();
     };
 
-    const handleClearAll = () => {
+    const handleClearAll = async () => {
         if (confirm('Clear all notifications?')) {
-            notificationStorage.clearAll(userId);
-            loadNotifications();
+            await notificationStorage.clearAll(userId);
+            await loadNotifications();
         }
     };
 
@@ -54,8 +54,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
         }
     };
 
-    const formatTime = (timestamp: number) => {
+    const formatTime = (created_at: string) => {
         const now = Date.now();
+        const timestamp = new Date(created_at).getTime();
         const diff = now - timestamp;
         const minutes = Math.floor(diff / 60000);
         const hours = Math.floor(diff / 3600000);
@@ -125,8 +126,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
                             <div
                                 key={notification.id}
                                 className={`p-4 rounded-xl border transition-all group ${notification.read
-                                        ? 'bg-white/5 border-white/5'
-                                        : 'bg-purple-600/10 border-purple-500/30'
+                                    ? 'bg-white/5 border-white/5'
+                                    : 'bg-purple-600/10 border-purple-500/30'
                                     }`}
                             >
                                 <div className="flex items-start gap-3">
@@ -141,7 +142,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
                                                 {notification.title}
                                             </h3>
                                             <span className="text-[10px] text-gray-600 whitespace-nowrap">
-                                                {formatTime(notification.timestamp)}
+                                                {formatTime(notification.created_at)}
                                             </span>
                                         </div>
                                         <p className={`text-xs mt-1 ${notification.read ? 'text-gray-600' : 'text-gray-400'

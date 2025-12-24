@@ -1,34 +1,39 @@
 /**
  * Notification Storage Service
- * Manages in-app notification history
+ * Manages notifications in Supabase for cross-device sync
  */
+
+import { supabase } from './supabase';
 
 export interface NotificationItem {
     id: string;
+    user_id: string;
     type: 'league' | 'match' | 'news' | 'system';
     title: string;
     message: string;
-    timestamp: number;
     read: boolean;
-    icon?: string;
+    created_at: string;
 }
 
 class NotificationStorage {
-    private readonly STORAGE_KEY = 'rakla_notifications';
-    private readonly MAX_NOTIFICATIONS = 50; // Keep last 50 notifications
-
     /**
-     * Get all notifications for current user
+     * Get all notifications for current user from Supabase
      */
-    getNotifications(userId: string): NotificationItem[] {
+    async getNotifications(userId: string): Promise<NotificationItem[]> {
         try {
-            const key = `${this.STORAGE_KEY}_${userId}`;
-            const stored = localStorage.getItem(key);
-            if (!stored) return [];
+            const { data, error } = await supabase
+                .from('notifications')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(50);
 
-            const notifications = JSON.parse(stored) as NotificationItem[];
-            // Sort by timestamp (newest first)
-            return notifications.sort((a, b) => b.timestamp - a.timestamp);
+            if (error) {
+                console.error('Error loading notifications:', error);
+                return [];
+            }
+
+            return data || [];
         } catch (error) {
             console.error('Error loading notifications:', error);
             return [];
@@ -36,97 +41,124 @@ class NotificationStorage {
     }
 
     /**
-     * Add a new notification
+     * Add a new notification to Supabase
      */
-    addNotification(userId: string, notification: Omit<NotificationItem, 'id' | 'timestamp' | 'read'>): void {
+    async addNotification(userId: string, notification: Omit<NotificationItem, 'id' | 'user_id' | 'created_at' | 'read'>): Promise<void> {
         try {
-            const notifications = this.getNotifications(userId);
+            const { error } = await supabase
+                .from('notifications')
+                .insert({
+                    user_id: userId,
+                    type: notification.type,
+                    title: notification.title,
+                    message: notification.message,
+                    read: false
+                });
 
-            const newNotification: NotificationItem = {
-                ...notification,
-                id: `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                timestamp: Date.now(),
-                read: false
-            };
+            if (error) {
+                console.error('Error adding notification:', error);
+                return;
+            }
 
-            // Add to beginning of array
-            notifications.unshift(newNotification);
-
-            // Keep only last MAX_NOTIFICATIONS
-            const trimmed = notifications.slice(0, this.MAX_NOTIFICATIONS);
-
-            // Save
-            const key = `${this.STORAGE_KEY}_${userId}`;
-            localStorage.setItem(key, JSON.stringify(trimmed));
-
-            console.log('📬 Notification added:', newNotification);
+            console.log('📬 Notification added to database:', notification.title);
         } catch (error) {
             console.error('Error adding notification:', error);
         }
     }
 
     /**
-     * Mark notification as read
+     * Mark notification as read in Supabase
      */
-    markAsRead(userId: string, notificationId: string): void {
+    async markAsRead(userId: string, notificationId: string): Promise<void> {
         try {
-            const notifications = this.getNotifications(userId);
-            const updated = notifications.map(n =>
-                n.id === notificationId ? { ...n, read: true } : n
-            );
+            const { error } = await supabase
+                .from('notifications')
+                .update({ read: true })
+                .eq('id', notificationId)
+                .eq('user_id', userId);
 
-            const key = `${this.STORAGE_KEY}_${userId}`;
-            localStorage.setItem(key, JSON.stringify(updated));
+            if (error) {
+                console.error('Error marking notification as read:', error);
+            }
         } catch (error) {
             console.error('Error marking notification as read:', error);
         }
     }
 
     /**
-     * Mark all notifications as read
+     * Mark all notifications as read in Supabase
      */
-    markAllAsRead(userId: string): void {
+    async markAllAsRead(userId: string): Promise<void> {
         try {
-            const notifications = this.getNotifications(userId);
-            const updated = notifications.map(n => ({ ...n, read: true }));
+            const { error } = await supabase
+                .from('notifications')
+                .update({ read: true })
+                .eq('user_id', userId)
+                .eq('read', false);
 
-            const key = `${this.STORAGE_KEY}_${userId}`;
-            localStorage.setItem(key, JSON.stringify(updated));
+            if (error) {
+                console.error('Error marking all as read:', error);
+            }
         } catch (error) {
             console.error('Error marking all as read:', error);
         }
     }
 
     /**
-     * Get unread count
+     * Get unread count from Supabase
      */
-    getUnreadCount(userId: string): number {
-        const notifications = this.getNotifications(userId);
-        return notifications.filter(n => !n.read).length;
+    async getUnreadCount(userId: string): Promise<number> {
+        try {
+            const { count, error } = await supabase
+                .from('notifications')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', userId)
+                .eq('read', false);
+
+            if (error) {
+                console.error('Error getting unread count:', error);
+                return 0;
+            }
+
+            return count || 0;
+        } catch (error) {
+            console.error('Error getting unread count:', error);
+            return 0;
+        }
     }
 
     /**
-     * Clear all notifications
+     * Clear all notifications from Supabase
      */
-    clearAll(userId: string): void {
+    async clearAll(userId: string): Promise<void> {
         try {
-            const key = `${this.STORAGE_KEY}_${userId}`;
-            localStorage.removeItem(key);
+            const { error } = await supabase
+                .from('notifications')
+                .delete()
+                .eq('user_id', userId);
+
+            if (error) {
+                console.error('Error clearing notifications:', error);
+            }
         } catch (error) {
             console.error('Error clearing notifications:', error);
         }
     }
 
     /**
-     * Delete specific notification
+     * Delete specific notification from Supabase
      */
-    deleteNotification(userId: string, notificationId: string): void {
+    async deleteNotification(userId: string, notificationId: string): Promise<void> {
         try {
-            const notifications = this.getNotifications(userId);
-            const filtered = notifications.filter(n => n.id !== notificationId);
+            const { error } = await supabase
+                .from('notifications')
+                .delete()
+                .eq('id', notificationId)
+                .eq('user_id', userId);
 
-            const key = `${this.STORAGE_KEY}_${userId}`;
-            localStorage.setItem(key, JSON.stringify(filtered));
+            if (error) {
+                console.error('Error deleting notification:', error);
+            }
         } catch (error) {
             console.error('Error deleting notification:', error);
         }
