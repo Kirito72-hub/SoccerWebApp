@@ -116,72 +116,19 @@ class NotificationService {
         tag?: string
     ) {
         // Save to notification storage (in-app notification center) - MUST AWAIT!
-        const savedNotification = await notificationStorage.addNotification(userId, {
+        await notificationStorage.addNotification(userId, {
             type,
             title,
             message: body
         });
 
-        // Send browser push notification if permission granted
-        if (!this.hasPermission()) {
-            console.log('⚠️ Browser notifications not permitted');
-            return;
-        }
+        // NOTE: We no longer send browser notifications directly here!
+        // Instead, we rely on the T-Rex Solution (Realtime subscription in Layout.tsx)
+        // to trigger notifications when the database INSERT event is received.
+        // This prevents duplicate notifications on the sender's device and ensures
+        // consistent behavior across all devices (sender and receivers).
 
-        console.log('🔔 Sending browser push notification:', title);
-
-        // Use consistent tag based on DB ID if available
-        const notificationTag = savedNotification ? `notification-${savedNotification.id}` : (tag || `notification-${Date.now()}`);
-
-        // Enhanced notification options
-        const notificationOptions: NotificationOptions = {
-            body,
-            icon: '/icons/pwa-192x192.png',  // Fixed: Use existing PWA icon
-            badge: '/icons/pwa-192x192.png', // Fixed: Use existing PWA icon
-            tag: notificationTag,
-            vibrate: [200, 100, 200, 100, 200], // Vibration pattern
-            requireInteraction: true, // Stays visible until user interacts
-            silent: false, // Play sound
-            renotify: true, // Alert even if tag exists
-            timestamp: Date.now(),
-            data: {
-                url: window.location.origin,
-                type,
-                userId
-            },
-            actions: [
-                {
-                    action: 'view',
-                    title: 'View'
-                },
-                {
-                    action: 'close',
-                    title: 'Dismiss'
-                }
-            ]
-        };
-
-        try {
-            // Try to use Service Worker registration (preferred for PWA)
-            if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
-                const registration = await navigator.serviceWorker.ready;
-                await registration.showNotification(title, notificationOptions);
-                console.log('✅ Browser notification sent via Service Worker');
-            } else {
-                // Fallback to standard Notification API
-                const notification = new Notification(title, notificationOptions);
-
-                // Handle notification click
-                notification.onclick = () => {
-                    window.focus();
-                    notification.close();
-                };
-
-                console.log('✅ Browser notification sent via Notification API');
-            }
-        } catch (error) {
-            console.error('❌ Failed to send browser notification:', error);
-        }
+        console.log('📬 Notification saved to database. T-Rex will handle system notification.');
     }
 
     // --- MAIN TRIGGERS ---
@@ -307,13 +254,10 @@ class NotificationService {
     async broadcastNews(type: 'appUpdate' | 'announcement', customMessage?: string) {
         try {
             const users = await dataService.getUsers();
-
-            // Execute sequentially to prevent race conditions/rate limits
-            console.log(`📢 Starting broadcast to ${users.length} users...`);
-            for (const user of users) {
-                await this.handleNews(type, user.id, customMessage);
-            }
-            console.log(`✅ Broadcast complete to ${users.length} users`);
+            users.forEach(user => {
+                this.handleNews(type, user.id, customMessage);
+            });
+            console.log(`📢 Broadcast sent to ${users.length} users`);
         } catch (error) {
             console.error('Error broadcasting news:', error);
         }

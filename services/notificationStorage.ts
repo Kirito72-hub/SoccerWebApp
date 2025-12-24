@@ -43,9 +43,9 @@ class NotificationStorage {
     /**
      * Add a new notification to Supabase
      */
-    async addNotification(userId: string, notification: Omit<NotificationItem, 'id' | 'user_id' | 'created_at' | 'read'>): Promise<NotificationItem | null> {
+    async addNotification(userId: string, notification: Omit<NotificationItem, 'id' | 'user_id' | 'created_at' | 'read'>): Promise<void> {
         try {
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('notifications')
                 .insert({
                     user_id: userId,
@@ -53,20 +53,16 @@ class NotificationStorage {
                     title: notification.title,
                     message: notification.message,
                     read: false
-                })
-                .select()
-                .single();
+                });
 
             if (error) {
                 console.error('Error adding notification:', error);
-                return null;
+                return;
             }
 
             console.log('📬 Notification added to database:', notification.title);
-            return data as NotificationItem;
         } catch (error) {
             console.error('Error adding notification:', error);
-            return null;
         }
     }
 
