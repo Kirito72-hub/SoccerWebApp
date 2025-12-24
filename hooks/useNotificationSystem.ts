@@ -26,9 +26,10 @@ export const useNotificationSystem = (user: User | null) => {
                             return;
                         }
 
-                        // Check if user is involved
-                        const isHome = newMatch.homeUserId === user.id;
-                        const isAway = newMatch.awayUserId === user.id;
+
+                        // Check if user is involved (Supabase uses snake_case!)
+                        const isHome = (newMatch as any).home_user_id === user.id;
+                        const isAway = (newMatch as any).away_user_id === user.id;
 
                         if (!isHome && !isAway) {
                             console.log('⏭️ User not involved in match, skipping');
@@ -42,9 +43,9 @@ export const useNotificationSystem = (user: User | null) => {
                             return;
                         }
 
-                        // Calculate result
-                        const userScore = isHome ? newMatch.homeScore : newMatch.awayScore;
-                        const opponentScore = isHome ? newMatch.awayScore : newMatch.homeScore;
+                        // Calculate result (Supabase uses snake_case!)
+                        const userScore = isHome ? (newMatch as any).home_score : (newMatch as any).away_score;
+                        const opponentScore = isHome ? (newMatch as any).away_score : (newMatch as any).home_score;
 
                         if (userScore === undefined || opponentScore === undefined) {
                             console.log('⏭️ Scores undefined, skipping');
@@ -102,8 +103,10 @@ export const useNotificationSystem = (user: User | null) => {
                         const newLeague = payload.new as League;
                         const eventType = payload.eventType; // INSERT, UPDATE, DELETE
 
-                        // Check if user is participant
-                        if (!newLeague || !newLeague.participantIds || !newLeague.participantIds.includes(user.id)) {
+
+                        // Check if user is participant (Supabase uses snake_case!)
+                        const participantIds = (newLeague as any).participant_ids || [];
+                        if (!newLeague || !participantIds || !participantIds.includes(user.id)) {
                             console.log('⏭️ User not participant in league, skipping');
                             return;
                         }
