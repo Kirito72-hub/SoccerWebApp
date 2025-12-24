@@ -122,27 +122,62 @@ class NotificationService {
             message: body
         });
 
-        // Send browser notification if permission granted
-        if (!this.hasPermission()) return;
+        // Send browser push notification if permission granted
+        if (!this.hasPermission()) {
+            console.log('⚠️ Browser notifications not permitted');
+            return;
+        }
 
-        // Try to use Service Worker registration if available (for mobile support)
-        if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
-            navigator.serviceWorker.ready.then(registration => {
-                registration.showNotification(title, {
-                    body,
-                    icon: '/icons/icon.svg',
-                    badge: '/icons/icon.svg',
-                    tag,
-                    vibrate: [200, 100, 200]
-                } as any);
-            });
-        } else {
-            // Fallback to standard Notification API
-            new Notification(title, {
-                body,
-                icon: '/icons/icon.svg',
-                tag
-            });
+        console.log('🔔 Sending browser push notification:', title);
+
+        // Enhanced notification options
+        const notificationOptions: NotificationOptions = {
+            body,
+            icon: '/icons/icon-192x192.png',
+            badge: '/icons/icon-72x72.png',
+            tag: tag || `notification-${Date.now()}`,
+            vibrate: [200, 100, 200, 100, 200], // Vibration pattern
+            requireInteraction: true, // Stays visible until user interacts
+            silent: false, // Play sound
+            timestamp: Date.now(),
+            data: {
+                url: window.location.origin,
+                type,
+                userId
+            },
+            actions: [
+                {
+                    action: 'view',
+                    title: 'View',
+                    icon: '/icons/icon-72x72.png'
+                },
+                {
+                    action: 'close',
+                    title: 'Dismiss'
+                }
+            ]
+        };
+
+        try {
+            // Try to use Service Worker registration (preferred for PWA)
+            if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+                const registration = await navigator.serviceWorker.ready;
+                await registration.showNotification(title, notificationOptions);
+                console.log('✅ Browser notification sent via Service Worker');
+            } else {
+                // Fallback to standard Notification API
+                const notification = new Notification(title, notificationOptions);
+
+                // Handle notification click
+                notification.onclick = () => {
+                    window.focus();
+                    notification.close();
+                };
+
+                console.log('✅ Browser notification sent via Notification API');
+            }
+        } catch (error) {
+            console.error('❌ Failed to send browser notification:', error);
         }
     }
 
