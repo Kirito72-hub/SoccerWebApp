@@ -84,6 +84,69 @@ export const useNotificationSystem = (user: User | null) => {
                         } else {
                             console.log('✅ Match notification saved! T-Rex will handle the rest 🦖');
                         }
+
+                        // Table Position Check (Every 3 matches)
+                        const leagueId = (newMatch as any).league_id;
+                        const counterKey = `match_count_${leagueId}_${user.id}`;
+                        const currentCount = parseInt(localStorage.getItem(counterKey) || '0') + 1;
+                        localStorage.setItem(counterKey, currentCount.toString());
+
+                        if (currentCount % 3 === 0) {
+                            console.log('📊 3 matches completed! Checking table position...');
+
+                            // Get all matches for this league
+                            const { data: allMatches } = await supabase
+                                .from('matches')
+                                .select('*')
+                                .eq('league_id', leagueId)
+                                .eq('status', 'completed');
+
+                            // Get league info
+                            const { data: leagueData } = await supabase
+                                .from('leagues')
+                                .select('*')
+                                .eq('id', leagueId)
+                                .single();
+
+                            if (allMatches && leagueData) {
+                                // Calculate standings
+                                const participantIds = leagueData.participant_ids || [];
+                                const standings = participantIds.map((pid: string) => {
+                                    const stats = { id: pid, points: 0, gd: 0, gf: 0 };
+                                    allMatches.forEach((m: any) => {
+                                        if (m.home_user_id === pid || m.away_user_id === pid) {
+                                            const isHome = m.home_user_id === pid;
+                                            const pScore = isHome ? m.home_score : m.away_score;
+                                            const oScore = isHome ? m.away_score : m.home_score;
+
+                                            if (pScore > oScore) stats.points += 3;
+                                            else if (pScore === oScore) stats.points += 1;
+                                            stats.gd += (pScore - oScore);
+                                            stats.gf += pScore;
+                                        }
+                                    });
+                                    return stats;
+                                }).sort((a: any, b: any) => b.points - a.points || b.gd - a.gd || b.gf - a.gf);
+
+                                const rank = standings.findIndex((s: any) => s.id === user.id) + 1;
+
+                                let rankMessage = `You are currently sitting at #${rank} in the tables. 📊`;
+                                if (rank === 1) rankMessage = "You are TOP of the league! 🥇 Everyone is chasing you!";
+                                else if (rank === standings.length) rankMessage = "Currently bottom of the pile... 📉 Time to wake up!";
+
+                                // Save table position notification
+                                await supabase
+                                    .from('notifications')
+                                    .insert({
+                                        user_id: user.id,
+                                        type: 'match',
+                                        title: 'League Update 📋',
+                                        message: rankMessage
+                                    });
+
+                                console.log('✅ Table position notification saved!');
+                            }
+                        }
                     } catch (error) {
                         console.error('❌ Error in match update handler:', error);
                     }
