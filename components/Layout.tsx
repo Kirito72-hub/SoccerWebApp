@@ -213,7 +213,7 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
 
     updateUnreadCount();
 
-    // Subscribe to Realtime updates for notifications
+    // Subscribe to Realtime updates for notifications + Trigger System Notification
     const channel = supabase
       .channel('layout-notifications')
       .on(
@@ -224,9 +224,33 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
           table: 'notifications',
           filter: `user_id=eq.${user.id}`
         },
-        (payload) => {
+        async (payload) => {
           console.log('🔔 Notification change detected:', payload.eventType);
           updateUnreadCount(); // Update count when notifications change
+
+          // If NEW notification received, trigger system notification
+          if (payload.eventType === 'INSERT' && payload.new) {
+            const newNotif = payload.new as any;
+            console.log('📬 New notification received via Realtime:', newNotif.title);
+
+            // Trigger Service Worker notification
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+              navigator.serviceWorker.controller.postMessage({
+                type: 'SHOW_NOTIFICATION',
+                title: newNotif.title,
+                options: {
+                  body: newNotif.message,
+                  icon: '/icons/pwa-192x192.png',
+                  badge: '/icons/pwa-192x192.png',
+                  tag: `notification-${newNotif.id}`,
+                  data: {
+                    url: window.location.origin,
+                    type: newNotif.type
+                  }
+                }
+              });
+            }
+          }
         }
       )
       .subscribe();
