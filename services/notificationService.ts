@@ -1,39 +1,91 @@
 import { dataService } from './dataService';
 import { User, Match, League } from '../types';
 
-// Message Banks - Modern, funny, minimal emoji
+// Message Banks - Funny, short, emoji-rich
+
+// WIN MESSAGES - Encouraging & Celebratory 🎉
 const WIN_MESSAGES = [
-    "Boom! 3 points for you! 🚀",
-    "Absolute masterclass! ⚽🔥",
-    "You dropped this 👑 (It's a win)",
-    "Clean sheet? Maybe. Win? Definitely. 😎",
-    "Cooking with gas! 🍳 Keep the streak alive!",
-    "Ez game, ez life. GG! 🎮",
-    "They had families, you know... 💀 Great win!",
-    "Another one bites the dust 🎵 Victory is yours!"
+    "Boom! 3 points in the bag! 🚀⚽",
+    "Absolute masterclass! 🔥👑",
+    "Victory tastes sweet! 🍯🏆",
+    "They didn't stand a chance! 😎💪",
+    "Clean sheet, dirty win! 🧼⚽",
+    "Ez game, ez life! 🎮✨",
+    "That's how champions play! 👑⚡",
+    "Another W for the collection! 📈🥇",
+    "Goals? We got 'em! 🎯🔥",
+    "Cooking with gas! 🍳💨",
+    "You dropped this 👑",
+    "Flawless victory! 💎⚽",
+    "They had families, you know... 💀😅",
+    "Screaming GOLAZO! 📢🎉",
+    "That's how we roll! ⚽➡️🌟"
 ];
 
+// LOSS MESSAGES - Consolation & Encouraging 💪
 const LOSS_MESSAGES = [
-    "Oof. That one crazy... 🤕",
-    "Even Messi has off days. 🐐 Chin up!",
-    "Mission failed, we'll get 'em next time. 🫡",
-    "Controller disconnected? 🎮 Happens to the best of us.",
-    "Tactical defeat. Lulling them into false security. 🧠",
-    "Rough day at the office. Regroup and go again! 💪",
-    "The script was against you today. 📜",
-    "Unlucky! The comeback story starts now. 📈"
+    "Tough one, but we bounce back! 💪🔄",
+    "Even Messi has off days 🐐💙",
+    "Lost the battle, not the war! ⚔️📈",
+    "Shake it off! Next one's ours 👊✨",
+    "Learning experience unlocked 📚🎓",
+    "Plot twist: Comeback incoming! 🎬🚀",
+    "Rough patch, but champions rise! 🌅💪",
+    "Controller disconnected? 🎮 Happens!",
+    "They got lucky today 🍀 We'll get 'em!",
+    "Tactical L. Redemption loading... ⏳🔥",
+    "Not our day, but our time will come! ⏰✨",
+    "Heads up! We're still in this! 🦁💙",
+    "Every champion loses sometimes 🏆📉",
+    "Unlucky! The comeback starts now 📈⚡"
 ];
 
+// DRAW MESSAGES - Mixed feelings 🤝
+const DRAW_MESSAGES = [
+    "Points shared today 🤝 Not bad!",
+    "Perfectly balanced ⚖️ As all things should be",
+    "A draw? We'll take it! 🤷‍♂️⚽",
+    "1 point is better than 0! 📊✨",
+    "Stalemate! Next time we win 🎯🔥",
+    "Tie game, but we're still in it! 💪🤝",
+    "Draw FC strikes again! 😅⚽"
+];
+
+// LEAGUE MESSAGES
 const LEAGUE_MESSAGES = {
-    joined: [
-        "New League Alert! 🚨 It's time to shine.",
-        "You've been drafted! 📝 Good luck in the new league.",
-        "A new challenger approaches! ⚔️ League started."
+    created: [
+        "New League Alert! 🚨 Time to shine!",
+        "You've been drafted! 📝 Let's go!",
+        "Fresh league, fresh start! ⚽🆕",
+        "A new challenger appears! ⚔️🔥",
+        "League started! Show 'em what you got! 💪✨",
+        "New season, new trophy? 🏆👀"
     ],
     finished: [
-        "League's wrapped up! 🏁 Check the final standings.",
-        "It's all over! 🛑 Did you bring home the silverware?",
-        "Season finale! 📺 See where you placed."
+        "League's wrapped! 🏁 Check the standings!",
+        "Season finale! 📺 Did you win it all?",
+        "It's all over! 🛑 Trophy time?",
+        "Final whistle! 🎵 How'd you do?",
+        "League complete! 🏆 Silverware secured?",
+        "That's a wrap! 🎬 Check your rank!"
+    ]
+};
+
+// NEWS MESSAGES - App updates & Announcements
+const NEWS_MESSAGES = {
+    appUpdate: [
+        "App updated! 🎉 Check out what's new!",
+        "New features just dropped! 🚀✨",
+        "We've leveled up! 📈 Update available!",
+        "Fresh update incoming! 🆕🔥",
+        "Your app got a glow-up! ✨💅"
+    ],
+    announcement: [
+        "Important announcement! 📢 Check it out!",
+        "News flash! 📰 Something's happening!",
+        "Heads up! 🔔 New announcement!",
+        "Breaking news! 🗞️ Don't miss this!",
+        "PSA: Important update! 📣✨"
     ]
 };
 
@@ -104,7 +156,7 @@ class NotificationService {
         } else if (userScore < opponentScore) {
             this.send("Defeat 💔", this.getRandomMessage(LOSS_MESSAGES), `match-${match.id}`);
         } else {
-            this.send("Draw 🤝", "Points shared today. Not great, not terrible.", `match-${match.id}`);
+            this.send("Draw 🤝", this.getRandomMessage(DRAW_MESSAGES), `match-${match.id}`);
         }
 
         // Table Position Check (Every 3 matches)
@@ -171,15 +223,44 @@ class NotificationService {
         if (!this.isEnabled(userId, 'leagues')) return;
 
         if (type === 'INSERT') {
-            this.send("League Started! ⚽", this.getRandomMessage(LEAGUE_MESSAGES.joined), `league-${league.id}`);
+            this.send("League Started! ⚽", this.getRandomMessage(LEAGUE_MESSAGES.created), `league-${league.id}`);
         } else if (type === 'UPDATE' && league.status === 'finished') {
             this.send("League Finished 🏁", this.getRandomMessage(LEAGUE_MESSAGES.finished), `league-end-${league.id}`);
         }
     }
 
-    // 3. NEWS (Placeholder)
-    handleNews(newsItem: any) {
-        // Future dev
+    // 3. NEWS NOTIFICATIONS
+    /**
+     * Send news notifications to users
+     * @param type - 'appUpdate' or 'announcement'
+     * @param userId - User ID to send to (or 'all' for broadcast)
+     * @param customMessage - Optional custom message (overrides random selection)
+     */
+    handleNews(type: 'appUpdate' | 'announcement', userId: string, customMessage?: string) {
+        // Only run if enabled
+        if (!this.isEnabled(userId, 'news')) return;
+
+        const messages = type === 'appUpdate' ? NEWS_MESSAGES.appUpdate : NEWS_MESSAGES.announcement;
+        const message = customMessage || this.getRandomMessage(messages);
+        const title = type === 'appUpdate' ? "App Update 🎉" : "Announcement 📢";
+
+        this.send(title, message, `news-${type}-${Date.now()}`);
+    }
+
+    /**
+     * Broadcast news to all users (respects individual preferences)
+     * Call this when you want to notify everyone about an update/announcement
+     */
+    async broadcastNews(type: 'appUpdate' | 'announcement', customMessage?: string) {
+        try {
+            const users = await dataService.getUsers();
+            users.forEach(user => {
+                this.handleNews(type, user.id, customMessage);
+            });
+            console.log(`📢 Broadcast sent to ${users.length} users`);
+        } catch (error) {
+            console.error('Error broadcasting news:', error);
+        }
     }
 }
 
