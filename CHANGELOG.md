@@ -7,6 +7,109 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0-beta] - 2025-12-24
+
+### 🚀 Major Features
+
+#### T-Rex Notification System (Cross-Device Notifications)
+- **Pure T-Rex Approach** - All notifications via database INSERT triggers
+  - Match result notifications (Victory/Defeat/Draw)
+  - League notifications (Started/Finished)
+  - Table position notifications (every 3 matches)
+  - System notifications with sound and vibration
+- **Random Message Banks** - Variety in notification messages
+  - 10 different win messages
+  - 10 different loss messages
+  - 8 different draw messages
+  - 5 different league messages
+- **Cross-Device Sync** - Notifications appear on all devices instantly
+  - Works on PC and smartphone PWA
+  - Realtime delivery via Supabase
+  - Bell icon updates automatically
+
+#### PWA Background Features
+- **Notification Permission Manager** - Auto-request on login/signup
+  - User-friendly permission dialog with explanation
+  - Welcome notification after permission granted
+  - Checks if already requested (won't ask twice)
+- **Background Sync** - Keeps PWA active
+  - Periodic sync every 1 hour
+  - Allows notifications when app is closed
+  - Service worker stays active
+- **Persistent Storage** - Prevents data clearing
+  - Requests persistent storage permission
+  - Ensures notifications database persists
+  - Improves PWA reliability
+
+### 🎨 UI/UX Improvements
+- **Performance Trend Chart** - Real data from matches
+  - Replaced dummy data with actual match calculations
+  - Shows goals scored per day (last 7 days)
+  - Updates automatically with new matches
+  - Resets when database is reset
+- **Mobile Notification Center** - CheckCheck icon
+  - Replaced "Mark all read" text with double check icon (✓✓)
+  - More compact and mobile-friendly
+  - Tooltip shows full text on hover
+- **Dashboard Navigation** - New League button works
+  - Clicking navigates to League Management page
+  - Same behavior as CREATE LEAGUE button
+
+### 🐛 Critical Bug Fixes
+- **User Stats UPSERT** - Fixed stats not saving for new users
+  - Changed UPDATE to UPSERT in database.ts
+  - Now works for both new and existing users
+  - All participants get stats when league finishes
+- **League Stats Distribution** - Fixed stats for all participants
+  - Now initializes stats for ALL participants
+  - Even participants who didn't play get leaguesParticipated +1
+  - Correct stat distribution
+- **Snake_case vs CamelCase** - Fixed field name mismatch
+  - Supabase returns snake_case (home_user_id)
+  - Code was checking camelCase (homeUserId)
+  - Fixed in match and league handlers
+- **Notifications Reset** - Added to database reset function
+  - Notifications table now cleared on reset
+  - Prevents stale notifications
+  - Complete database cleanup
+
+### 🔧 Code Quality
+- **Notification Service Cleanup** - Removed dead code
+  - Removed handleMatchUpdate() (not used)
+  - Removed checkTablePosition() (not used)
+  - Removed handleLeagueUpdate() (not used)
+  - Removed hasPermission() (not used)
+  - File size reduced by 44% (298 → 167 lines)
+- **Message Banks Export** - Single source of truth
+  - Exported WIN_MESSAGES, LOSS_MESSAGES, etc.
+  - Used in T-Rex handlers for consistency
+  - Easier to maintain and update
+- **File Organization** - Cleaned up project structure
+  - Moved SQL files to scripts/sql/
+  - Removed unnecessary files (icon_preview.html, metadata.json)
+  - Better project organization
+
+### 📚 Documentation
+- **DATABASE-RESET-ANALYSIS.md** - Complete reset function analysis
+  - What gets reset vs what doesn't
+  - Suggested improvements (presets, statistics)
+  - Implementation priorities
+- **PERFORMANCE-TREND-FIX.md** - Performance chart fix documentation
+  - Problem analysis (dummy data)
+  - Solution options
+  - Implementation details
+- **ANDROID-NOTIFICATIONS-FIX.md** - T-Rex solution documentation
+  - How T-Rex works
+  - Implementation guide
+  - Troubleshooting tips
+
+### 🗑️ Removed
+- Dead code from notificationService.ts (131 lines)
+- Unnecessary files (icon_preview.html, metadata.json)
+- SQL files from root (moved to scripts/sql/)
+
+---
+
 ## [1.2.0-beta] - 2025-12-23
 
 ### 🆕 Added
