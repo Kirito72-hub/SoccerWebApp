@@ -23,20 +23,26 @@ self.addEventListener('message', (event) => {
     }
 });
 
-// Activate event - cleanup old caches
+// Activate event - cleanup old caches AGGRESSIVELY
 self.addEventListener('activate', (event) => {
+    console.log('🔄 Service Worker activating - clearing old caches...');
+
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
                     if (cacheName !== CACHE_NAME) {
+                        console.log('🗑️ Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
             );
+        }).then(() => {
+            console.log('✅ Old caches cleared! New version active.');
+            // Take control of all clients immediately
+            return self.clients.claim();
         })
     );
-    self.clients.claim();
 });
 
 // Fetch event - serve from cache, then network
