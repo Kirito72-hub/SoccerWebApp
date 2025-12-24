@@ -16,10 +16,30 @@ self.addEventListener('install', (event) => {
     // Don't skip waiting automatically - let the user decide via update prompt
 });
 
-// Listen for SKIP_WAITING message from the update prompt
+// Listen for messages from the main thread
 self.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
+    }
+
+    // Handle notification requests from main thread
+    if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+        const { title, options } = event.data;
+
+        // Enhanced options for Android
+        const notificationOptions = {
+            ...options,
+            icon: options.icon || '/icons/pwa-192x192.png',
+            badge: options.badge || '/icons/pwa-192x192.png',
+            vibrate: options.vibrate || [200, 100, 200, 100, 200],
+            requireInteraction: true,
+            silent: false,
+            renotify: true
+        };
+
+        event.waitUntil(
+            self.registration.showNotification(title, notificationOptions)
+        );
     }
 });
 
@@ -84,18 +104,37 @@ self.addEventListener('fetch', (event) => {
     );
 });
 
-// Push notification event
+// Push notification event - Enhanced for Android
 self.addEventListener('push', (event) => {
     if (!event.data) return;
 
     const data = event.data.json();
+
+    // Enhanced notification options for Android
     const options = {
         body: data.body,
-        icon: '/icons/icon.svg',
-        badge: '/icons/icon.svg',
+        icon: '/icons/pwa-192x192.png',
+        badge: '/icons/pwa-192x192.png',
+        vibrate: [200, 100, 200, 100, 200],
+        requireInteraction: true,
+        silent: false,
+        tag: data.tag || 'notification',
+        renotify: true,
         data: {
-            url: data.url || '/'
-        }
+            url: data.url || '/',
+            dateOfArrival: Date.now(),
+            primaryKey: 1
+        },
+        actions: [
+            {
+                action: 'view',
+                title: 'View'
+            },
+            {
+                action: 'close',
+                title: 'Dismiss'
+            }
+        ]
     };
 
     event.waitUntil(
