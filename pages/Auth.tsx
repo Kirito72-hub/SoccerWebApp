@@ -17,6 +17,7 @@ import { User as UserType } from '../types';
 import { db } from '../services/database';
 import { storage } from '../services/storage';
 import NotificationPermissionManager from '../services/notificationPermissionManager';
+import NotificationPermissionModal from '../components/NotificationPermissionModal';
 
 interface AuthProps {
     onLogin: (user: UserType) => void;
@@ -28,6 +29,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showNotificationModal, setShowNotificationModal] = useState(false);
 
     // Login form state
     const [loginEmail, setLoginEmail] = useState('');
@@ -59,11 +61,12 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     storage.setCurrentUser(user); // Also save to localStorage for session
                     onLogin(user);
 
-                    // Initialize PWA features (notifications, background sync, persistent storage)
+                    // Show notification permission modal after login
                     setTimeout(() => {
-                        NotificationPermissionManager.initializePWA().catch(err => {
-                            console.error('Error initializing PWA:', err);
-                        });
+                        // Only show if not already requested
+                        if (!NotificationPermissionManager.hasRequestedBefore()) {
+                            setShowNotificationModal(true);
+                        }
                     }, 1000); // Delay to let the UI settle
                 } else {
                     setError('Invalid email or password');
@@ -127,11 +130,12 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 storage.setCurrentUser(newUser); // Also save to localStorage for session
                 onLogin(newUser);
 
-                // Initialize PWA features (notifications, background sync, persistent storage)
+                // Show notification permission modal after signup
                 setTimeout(() => {
-                    NotificationPermissionManager.initializePWA().catch(err => {
-                        console.error('Error initializing PWA:', err);
-                    });
+                    // Only show if not already requested
+                    if (!NotificationPermissionManager.hasRequestedBefore()) {
+                        setShowNotificationModal(true);
+                    }
                 }, 1000); // Delay to let the UI settle
             } else {
                 // Fallback to localStorage
@@ -152,6 +156,22 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleAcceptNotifications = async () => {
+        setShowNotificationModal(false);
+        try {
+            await NotificationPermissionManager.initializePWA();
+            console.log('✅ PWA initialized successfully');
+        } catch (err) {
+            console.error('Error initializing PWA:', err);
+        }
+    };
+
+    const handleDeclineNotifications = () => {
+        setShowNotificationModal(false);
+        NotificationPermissionManager.markAsRequested();
+        console.log('User declined notification permissions');
     };
 
     return (
@@ -447,6 +467,14 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     )}
                 </div>
             </div>
+
+            {/* Notification Permission Modal */}
+            {showNotificationModal && (
+                <NotificationPermissionModal
+                    onAccept={handleAcceptNotifications}
+                    onDecline={handleDeclineNotifications}
+                />
+            )}
         </div>
     );
 };
