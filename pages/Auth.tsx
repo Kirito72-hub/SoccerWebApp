@@ -16,6 +16,7 @@ import {
 import { User as UserType } from '../types';
 import { db } from '../services/database';
 import { storage } from '../services/storage';
+import NotificationPermissionManager from '../services/notificationPermissionManager';
 
 interface AuthProps {
     onLogin: (user: UserType) => void;
@@ -57,6 +58,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 if (user) {
                     storage.setCurrentUser(user); // Also save to localStorage for session
                     onLogin(user);
+
+                    // Initialize PWA features (notifications, background sync, persistent storage)
+                    setTimeout(() => {
+                        NotificationPermissionManager.initializePWA().catch(err => {
+                            console.error('Error initializing PWA:', err);
+                        });
+                    }, 1000); // Delay to let the UI settle
                 } else {
                     setError('Invalid email or password');
                 }
@@ -118,6 +126,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
 
                 storage.setCurrentUser(newUser); // Also save to localStorage for session
                 onLogin(newUser);
+
+                // Initialize PWA features (notifications, background sync, persistent storage)
+                setTimeout(() => {
+                    NotificationPermissionManager.initializePWA().catch(err => {
+                        console.error('Error initializing PWA:', err);
+                    });
+                }, 1000); // Delay to let the UI settle
             } else {
                 // Fallback to localStorage
                 const newUser = storage.register({
@@ -201,8 +216,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                         <button
                             onClick={() => { setIsLogin(true); setError(''); }}
                             className={`flex-1 py-3 rounded-xl font-black text-sm transition-all ${isLogin
-                                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
-                                    : 'text-gray-400 hover:text-white'
+                                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
+                                : 'text-gray-400 hover:text-white'
                                 }`}
                         >
                             <LogIn className="w-4 h-4 inline mr-2" />
@@ -211,8 +226,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                         <button
                             onClick={() => { setIsLogin(false); setError(''); }}
                             className={`flex-1 py-3 rounded-xl font-black text-sm transition-all ${!isLogin
-                                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
-                                    : 'text-gray-400 hover:text-white'
+                                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
+                                : 'text-gray-400 hover:text-white'
                                 }`}
                         >
                             <UserPlus className="w-4 h-4 inline mr-2" />
