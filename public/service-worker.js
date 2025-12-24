@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rakla-pwa-v1';
+const CACHE_NAME = 'rakla-pwa-v1.3.0-beta';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -13,7 +13,14 @@ self.addEventListener('install', (event) => {
             return cache.addAll(STATIC_ASSETS);
         })
     );
-    self.skipWaiting();
+    // Don't skip waiting automatically - let the user decide via update prompt
+});
+
+// Listen for SKIP_WAITING message from the update prompt
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });
 
 // Activate event - cleanup old caches
