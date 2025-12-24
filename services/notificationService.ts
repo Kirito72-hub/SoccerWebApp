@@ -116,7 +116,7 @@ class NotificationService {
         tag?: string
     ) {
         // Save to notification storage (in-app notification center) - MUST AWAIT!
-        await notificationStorage.addNotification(userId, {
+        const savedNotification = await notificationStorage.addNotification(userId, {
             type,
             title,
             message: body
@@ -130,12 +130,15 @@ class NotificationService {
 
         console.log('🔔 Sending browser push notification:', title);
 
+        // Use consistent tag based on DB ID if available
+        const notificationTag = savedNotification ? `notification-${savedNotification.id}` : (tag || `notification-${Date.now()}`);
+
         // Enhanced notification options
         const notificationOptions: NotificationOptions = {
             body,
             icon: '/icons/pwa-192x192.png',  // Fixed: Use existing PWA icon
             badge: '/icons/pwa-192x192.png', // Fixed: Use existing PWA icon
-            tag: tag || `notification-${Date.now()}`,
+            tag: notificationTag,
             vibrate: [200, 100, 200, 100, 200], // Vibration pattern
             requireInteraction: true, // Stays visible until user interacts
             silent: false, // Play sound
