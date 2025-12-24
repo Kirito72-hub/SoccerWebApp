@@ -151,7 +151,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
             setAllUsers(users);
 
             setShowResetConfirm(false);
-            alert('Database reset successfully! All data except superuser accounts has been deleted.');
+            alert('Database reset successfully! All data except superuser accounts has been deleted.\n\nDeleted:\n• All notifications\n• All matches\n• All leagues\n• All activity logs\n• All user stats\n• All non-superuser accounts');
         } catch (error) {
             console.error('Error resetting database:', error);
             alert('Failed to reset database: ' + (error as Error).message);
@@ -682,8 +682,8 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                             <button
                                 onClick={() => setAnnouncementType('announcement')}
                                 className={`flex-1 p-4 rounded-xl border-2 transition-all ${announcementType === 'announcement'
-                                        ? 'border-purple-500 bg-purple-600/20'
-                                        : 'border-white/10 bg-white/5 hover:border-white/20'
+                                    ? 'border-purple-500 bg-purple-600/20'
+                                    : 'border-white/10 bg-white/5 hover:border-white/20'
                                     }`}
                             >
                                 <Bell className={`w-6 h-6 mx-auto mb-2 ${announcementType === 'announcement' ? 'text-purple-400' : 'text-gray-500'
@@ -694,8 +694,8 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                             <button
                                 onClick={() => setAnnouncementType('appUpdate')}
                                 className={`flex-1 p-4 rounded-xl border-2 transition-all ${announcementType === 'appUpdate'
-                                        ? 'border-emerald-500 bg-emerald-600/20'
-                                        : 'border-white/10 bg-white/5 hover:border-white/20'
+                                    ? 'border-emerald-500 bg-emerald-600/20'
+                                    : 'border-white/10 bg-white/5 hover:border-white/20'
                                     }`}
                             >
                                 <CheckCircle className={`w-6 h-6 mx-auto mb-2 ${announcementType === 'appUpdate' ? 'text-emerald-400' : 'text-gray-500'

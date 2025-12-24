@@ -479,6 +479,7 @@ export const db = {
 
             // Delete all data from tables (order matters due to foreign keys)
             await supabase.from('activity_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            await supabase.from('notifications').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             await supabase.from('leagues').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             await supabase.from('user_stats').delete().neq('user_id', '00000000-0000-0000-0000-000000000000');
