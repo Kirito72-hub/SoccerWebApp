@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rakla-pwa-v1.3.0-beta';
+const CACHE_NAME = 'rakla-pwa-v1.3.1-test';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
