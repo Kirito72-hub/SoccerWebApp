@@ -108,15 +108,15 @@ class NotificationService {
     }
 
     // Send actual browser notification
-    private send(
+    private async send(
         title: string,
         body: string,
         userId: string,
         type: 'league' | 'match' | 'news' | 'system',
         tag?: string
     ) {
-        // Save to notification storage (in-app notification center)
-        notificationStorage.addNotification(userId, {
+        // Save to notification storage (in-app notification center) - MUST AWAIT!
+        await notificationStorage.addNotification(userId, {
             type,
             title,
             message: body
@@ -167,11 +167,11 @@ class NotificationService {
 
         // Result Logic
         if (userScore > opponentScore) {
-            this.send("Victory! 🏆", this.getRandomMessage(WIN_MESSAGES), userId, 'match', `match-${match.id}`);
+            await this.send("Victory! 🏆", this.getRandomMessage(WIN_MESSAGES), userId, 'match', `match-${match.id}`);
         } else if (userScore < opponentScore) {
-            this.send("Defeat 💔", this.getRandomMessage(LOSS_MESSAGES), userId, 'match', `match-${match.id}`);
+            await this.send("Defeat 💔", this.getRandomMessage(LOSS_MESSAGES), userId, 'match', `match-${match.id}`);
         } else {
-            this.send("Draw 🤝", this.getRandomMessage(DRAW_MESSAGES), userId, 'match', `match-${match.id}`);
+            await this.send("Draw 🤝", this.getRandomMessage(DRAW_MESSAGES), userId, 'match', `match-${match.id}`);
         }
 
         // Table Position Check (Every 3 matches)
@@ -222,7 +222,7 @@ class NotificationService {
             if (rank === 1) msg = "You are TOP of the league! 🥇 Everyone is chasing you!";
             else if (rank === standings.length) msg = "Currently bottom of the pile... 📉 Time to wake up!";
 
-            this.send("League Update 📋", msg, userId, 'match', `rank-${leagueId}`);
+            await this.send("League Update 📋", msg, userId, 'match', `rank-${leagueId}`);
 
         } catch (e) {
             console.error("Error checking table pos", e);
@@ -230,7 +230,7 @@ class NotificationService {
     }
 
     // 2. LEAGUE NOTIFICATIONS
-    handleLeagueUpdate(league: League, userId: string, type: 'INSERT' | 'UPDATE') {
+    async handleLeagueUpdate(league: League, userId: string, type: 'INSERT' | 'UPDATE') {
         // Only notify if user is participant
         if (!league.participantIds.includes(userId)) return;
 
@@ -238,9 +238,9 @@ class NotificationService {
         if (!this.isEnabled(userId, 'leagues')) return;
 
         if (type === 'INSERT') {
-            this.send("League Started! ⚽", this.getRandomMessage(LEAGUE_MESSAGES.created), userId, 'league', `league-${league.id}`);
+            await this.send("League Started! ⚽", this.getRandomMessage(LEAGUE_MESSAGES.created), userId, 'league', `league-${league.id}`);
         } else if (type === 'UPDATE' && league.status === 'finished') {
-            this.send("League Finished 🏁", this.getRandomMessage(LEAGUE_MESSAGES.finished), userId, 'league', `league-end-${league.id}`);
+            await this.send("League Finished 🏁", this.getRandomMessage(LEAGUE_MESSAGES.finished), userId, 'league', `league-end-${league.id}`);
         }
     }
 
@@ -251,7 +251,7 @@ class NotificationService {
      * @param userId - User ID to send to (or 'all' for broadcast)
      * @param customMessage - Optional custom message (overrides random selection)
      */
-    handleNews(type: 'appUpdate' | 'announcement', userId: string, customMessage?: string) {
+    async handleNews(type: 'appUpdate' | 'announcement', userId: string, customMessage?: string) {
         // Only run if enabled
         if (!this.isEnabled(userId, 'news')) return;
 
@@ -259,7 +259,7 @@ class NotificationService {
         const message = customMessage || this.getRandomMessage(messages);
         const title = type === 'appUpdate' ? "App Update 🎉" : "Announcement 📢";
 
-        this.send(title, message, userId, 'news', `news-${type}-${Date.now()}`);
+        await this.send(title, message, userId, 'news', `news-${type}-${Date.now()}`);
     }
 
     /**
