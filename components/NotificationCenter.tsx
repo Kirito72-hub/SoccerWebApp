@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Bell, Trophy, Users, Newspaper, CheckCircle, Trash2 } from 'lucide-react';
 import { notificationStorage, NotificationItem } from '../services/notificationStorage';
+import { supabase } from '../services/supabase';
 
 interface NotificationCenterProps {
     userId: string;
@@ -12,11 +13,34 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
 
     useEffect(() => {
         loadNotifications();
+
+        // Subscribe to Realtime updates for notifications
+        const channel = supabase
+            .channel('notifications-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'notifications',
+                    filter: `user_id=eq.${userId}`
+                },
+                (payload) => {
+                    console.log('📬 Notification Realtime update:', payload);
+                    loadNotifications(); // Reload notifications when any change occurs
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [userId]);
 
     const loadNotifications = async () => {
         const notifs = await notificationStorage.getNotifications(userId);
         setNotifications(notifs);
+        console.log('📋 Loaded notifications:', notifs.length);
     };
 
     const handleMarkAsRead = async (notificationId: string) => {
