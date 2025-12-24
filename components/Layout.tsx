@@ -22,6 +22,7 @@ import { User, UserStats, Match } from '../types';
 import { dataService } from '../services/dataService';
 import { useNotificationSystem } from '../hooks/useNotificationSystem';
 import { notificationStorage } from '../services/notificationStorage';
+import { supabase } from '../services/supabase';
 import NotificationCenter from './NotificationCenter';
 
 interface LayoutProps {
@@ -202,18 +203,41 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Update unread count
+  // Update unread count with Realtime subscription
   useEffect(() => {
     const updateUnreadCount = async () => {
       const count = await notificationStorage.getUnreadCount(user.id);
       setUnreadCount(count);
+      console.log('🔔 Unread count updated:', count);
     };
 
     updateUnreadCount();
 
-    // Update every 5 seconds
-    const interval = setInterval(updateUnreadCount, 5000);
-    return () => clearInterval(interval);
+    // Subscribe to Realtime updates for notifications
+    const channel = supabase
+      .channel('layout-notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('🔔 Notification change detected:', payload.eventType);
+          updateUnreadCount(); // Update count when notifications change
+        }
+      )
+      .subscribe();
+
+    // Also update every 10 seconds as fallback
+    const interval = setInterval(updateUnreadCount, 10000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
   }, [user.id]);
 
   useEffect(() => {
