@@ -17,8 +17,14 @@ export const useNotificationSystem = (user: User | null) => {
                 { event: 'UPDATE', schema: 'public', table: 'matches' },
                 (payload) => {
                     console.log('🔔 Match Update Received:', payload);
-                    const newMatch = payload.new as Match;
-                    notificationService.handleMatchUpdate(newMatch, user.id);
+                    try {
+                        const newMatch = payload.new as Match;
+                        console.log('🎯 Calling handleMatchUpdate for user:', user.id);
+                        notificationService.handleMatchUpdate(newMatch, user.id);
+                        console.log('✅ handleMatchUpdate call completed');
+                    } catch (error) {
+                        console.error('❌ Error in match update handler:', error);
+                    }
                 }
             )
             .subscribe();
