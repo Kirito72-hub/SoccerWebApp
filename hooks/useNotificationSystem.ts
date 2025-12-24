@@ -1,6 +1,12 @@
 import { useEffect } from 'react';
 import { supabase } from '../services/supabase';
-import { notificationService } from '../services/notificationService';
+import {
+    notificationService,
+    WIN_MESSAGES,
+    LOSS_MESSAGES,
+    DRAW_MESSAGES,
+    LEAGUE_MESSAGES
+} from '../services/notificationService';
 import { User, Match, League } from '../types';
 
 export const useNotificationSystem = (user: User | null) => {
@@ -52,19 +58,19 @@ export const useNotificationSystem = (user: User | null) => {
                             return;
                         }
 
-                        // Determine notification
+                        // Determine notification with random messages
                         let title = '';
                         let message = '';
 
                         if (userScore > opponentScore) {
                             title = 'Victory! 🏆';
-                            message = 'You won the match! Great job!';
+                            message = notificationService.getRandomMessage(WIN_MESSAGES);
                         } else if (userScore < opponentScore) {
                             title = 'Defeat 💔';
-                            message = 'Better luck next time!';
+                            message = notificationService.getRandomMessage(LOSS_MESSAGES);
                         } else {
                             title = 'Draw 🤝';
-                            message = 'A hard-fought draw!';
+                            message = notificationService.getRandomMessage(DRAW_MESSAGES);
                         }
 
                         console.log('🎯 Saving match notification:', { title, message });
@@ -187,11 +193,11 @@ export const useNotificationSystem = (user: User | null) => {
 
                         if (eventType === 'INSERT') {
                             title = 'League Started! ⚽';
-                            message = `${newLeague.name} has begun! Good luck!`;
+                            message = notificationService.getRandomMessage(LEAGUE_MESSAGES.created);
                             shouldNotify = true;
                         } else if (eventType === 'UPDATE' && newLeague.status === 'finished') {
                             title = 'League Finished 🏁';
-                            message = `${newLeague.name} has ended! Check the final standings!`;
+                            message = notificationService.getRandomMessage(LEAGUE_MESSAGES.finished);
                             shouldNotify = true;
                         }
 
