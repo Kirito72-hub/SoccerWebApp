@@ -159,7 +159,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             <TrendingUp className="w-3 h-3 lg:w-4 lg:h-4" /> Export Stats
           </button>
           <button
-            onClick={() => navigate('/league-management')}
+            onClick={() => navigate('/manage')}
             className="px-3 lg:px-4 py-2 bg-purple-600 rounded-xl text-xs lg:text-sm font-bold shadow-lg shadow-purple-600/20 hover:scale-105 transition-transform"
           >
             New League
