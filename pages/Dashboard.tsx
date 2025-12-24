@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Trophy,
   Users,
@@ -90,16 +90,49 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     { title: 'Toughest Rival', value: toughOpp, icon: Star, color: 'text-rose-400', bg: 'bg-rose-400/10' },
   ];
 
-  // Dummy chart data
-  const chartData = [
-    { name: 'Mon', goals: 2 },
-    { name: 'Tue', goals: 4 },
-    { name: 'Wed', goals: 1 },
-    { name: 'Thu', goals: 5 },
-    { name: 'Fri', goals: 3 },
-    { name: 'Sat', goals: 8 },
-    { name: 'Sun', goals: 6 },
-  ];
+  // Calculate performance from real match data (last 7 days)
+  const chartData = useMemo(() => {
+    const last7Days = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const recentMatches = userMatches.filter(m => m.date >= last7Days && m.status === 'completed');
+
+    // Initialize last 7 days with day names
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date().getDay();
+    const last7DaysData = [];
+
+    // Create array for last 7 days (oldest to newest)
+    for (let i = 6; i >= 0; i--) {
+      const dayIndex = (today - i + 7) % 7;
+      const date = Date.now() - (i * 24 * 60 * 60 * 1000);
+      last7DaysData.push({
+        name: days[dayIndex],
+        goals: 0,
+        date: date,
+        dayOfWeek: dayIndex
+      });
+    }
+
+    // Add goals from actual matches
+    recentMatches.forEach(match => {
+      const matchDate = new Date(match.date);
+      const matchDay = matchDate.getDay();
+
+      // Find the corresponding day in our last 7 days
+      const dayData = last7DaysData.find(d => {
+        const dDate = new Date(d.date);
+        return dDate.toDateString() === matchDate.toDateString();
+      });
+
+      if (dayData) {
+        const isHome = match.homeUserId === user.id;
+        const userGoals = isHome ? (match.homeScore || 0) : (match.awayScore || 0);
+        dayData.goals += userGoals;
+      }
+    });
+
+    // Return only name and goals for the chart
+    return last7DaysData.map(({ name, goals }) => ({ name, goals }));
+  }, [userMatches, user.id]);
 
   if (loading) {
     return (
