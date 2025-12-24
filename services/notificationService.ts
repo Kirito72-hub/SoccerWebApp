@@ -139,6 +139,7 @@ class NotificationService {
             vibrate: [200, 100, 200, 100, 200], // Vibration pattern
             requireInteraction: true, // Stays visible until user interacts
             silent: false, // Play sound
+            renotify: true, // Alert even if tag exists
             timestamp: Date.now(),
             data: {
                 url: window.location.origin,
@@ -303,10 +304,13 @@ class NotificationService {
     async broadcastNews(type: 'appUpdate' | 'announcement', customMessage?: string) {
         try {
             const users = await dataService.getUsers();
-            users.forEach(user => {
-                this.handleNews(type, user.id, customMessage);
-            });
-            console.log(`📢 Broadcast sent to ${users.length} users`);
+
+            // Execute sequentially to prevent race conditions/rate limits
+            console.log(`📢 Starting broadcast to ${users.length} users...`);
+            for (const user of users) {
+                await this.handleNews(type, user.id, customMessage);
+            }
+            console.log(`✅ Broadcast complete to ${users.length} users`);
         } catch (error) {
             console.error('Error broadcasting news:', error);
         }
