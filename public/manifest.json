@@ -1,12 +1,20 @@
 {
     "name": "Rakla Football Manager",
     "short_name": "Rakla",
-    "start_url": ".",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
     "background_color": "#1a1a2e",
     "theme_color": "#7c3aed",
-    "description": "A modern football league management system.",
+    "description": "A modern football league management system with real-time notifications.",
     "orientation": "portrait",
+    "categories": [
+        "sports",
+        "games",
+        "productivity"
+    ],
+    "prefer_related_applications": false,
+    "gcm_sender_id": "103953800507",
     "icons": [
         {
             "src": "/icons/pwa-192x192.png",
@@ -37,6 +45,32 @@
             "sizes": "192x192 512x512",
             "type": "image/svg+xml",
             "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Dashboard",
+            "short_name": "Dashboard",
+            "description": "View your dashboard",
+            "url": "/#/dashboard",
+            "icons": [
+                {
+                    "src": "/icons/pwa-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Notifications",
+            "short_name": "Notifications",
+            "description": "View notifications",
+            "url": "/#/dashboard",
+            "icons": [
+                {
+                    "src": "/icons/pwa-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }
