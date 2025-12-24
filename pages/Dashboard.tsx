@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Trophy,
   Users,
@@ -20,6 +21,7 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ user }) => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -156,7 +158,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           <button className="px-3 lg:px-4 py-2 glass border border-white/5 rounded-xl text-xs lg:text-sm font-bold flex items-center gap-2 hover:bg-white/10">
             <TrendingUp className="w-3 h-3 lg:w-4 lg:h-4" /> Export Stats
           </button>
-          <button className="px-3 lg:px-4 py-2 bg-purple-600 rounded-xl text-xs lg:text-sm font-bold shadow-lg shadow-purple-600/20 hover:scale-105 transition-transform">
+          <button
+            onClick={() => navigate('/league-management')}
+            className="px-3 lg:px-4 py-2 bg-purple-600 rounded-xl text-xs lg:text-sm font-bold shadow-lg shadow-purple-600/20 hover:scale-105 transition-transform"
+          >
             New League
           </button>
         </div>
