@@ -24,6 +24,8 @@ import { useNotificationSystem } from '../hooks/useNotificationSystem';
 import { notificationStorage } from '../services/notificationStorage';
 import { supabase } from '../services/supabase';
 import NotificationCenter from './NotificationCenter';
+import NotificationPermissionModal from './NotificationPermissionModal';
+import NotificationPermissionManager from '../services/notificationPermissionManager';
 
 interface LayoutProps {
   user: User;
@@ -200,6 +202,7 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [showNotificationCenter, setShowNotificationCenter] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -264,6 +267,18 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
     };
   }, [user.id]);
 
+  // Show notification permission modal on first load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!NotificationPermissionManager.hasRequestedBefore()) {
+        console.log('📱 Showing notification permission modal...');
+        setShowNotificationModal(true);
+      }
+    }, 2000); // Wait 2 seconds for UI to settle
+
+    return () => clearTimeout(timer);
+  }, []); // Only run once on mount
+
   useEffect(() => {
     loadData();
   }, []);
@@ -279,6 +294,22 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Error loading layout data:', error);
     }
+  };
+
+  const handleAcceptNotifications = async () => {
+    setShowNotificationModal(false);
+    try {
+      await NotificationPermissionManager.initializePWA();
+      console.log('✅ PWA initialized successfully');
+    } catch (err) {
+      console.error('Error initializing PWA:', err);
+    }
+  };
+
+  const handleDeclineNotifications = () => {
+    setShowNotificationModal(false);
+    NotificationPermissionManager.markAsRequested();
+    console.log('User declined notification permissions');
   };
 
   const menuItems = [
@@ -463,6 +494,14 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
               setUnreadCount(count);
             });
           }}
+        />
+      )}
+
+      {/* Notification Permission Modal */}
+      {showNotificationModal && (
+        <NotificationPermissionModal
+          onAccept={handleAcceptNotifications}
+          onDecline={handleDeclineNotifications}
         />
       )}
     </div>
