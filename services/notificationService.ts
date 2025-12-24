@@ -133,8 +133,8 @@ class NotificationService {
         // Enhanced notification options
         const notificationOptions: NotificationOptions = {
             body,
-            icon: '/icons/icon-192x192.png',
-            badge: '/icons/icon-72x72.png',
+            icon: '/icons/pwa-192x192.png',  // Fixed: Use existing PWA icon
+            badge: '/icons/pwa-192x192.png', // Fixed: Use existing PWA icon
             tag: tag || `notification-${Date.now()}`,
             vibrate: [200, 100, 200, 100, 200], // Vibration pattern
             requireInteraction: true, // Stays visible until user interacts
@@ -148,8 +148,7 @@ class NotificationService {
             actions: [
                 {
                     action: 'view',
-                    title: 'View',
-                    icon: '/icons/icon-72x72.png'
+                    title: 'View'
                 },
                 {
                     action: 'close',
