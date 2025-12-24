@@ -1,5 +1,6 @@
 import { dataService } from './dataService';
 import { User, Match, League } from '../types';
+import { notificationStorage } from './notificationStorage';
 
 // Message Banks - Funny, short, emoji-rich
 
@@ -107,7 +108,21 @@ class NotificationService {
     }
 
     // Send actual browser notification
-    private send(title: string, body: string, tag?: string) {
+    private send(
+        title: string,
+        body: string,
+        userId: string,
+        type: 'league' | 'match' | 'news' | 'system',
+        tag?: string
+    ) {
+        // Save to notification storage (in-app notification center)
+        notificationStorage.addNotification(userId, {
+            type,
+            title,
+            message: body
+        });
+
+        // Send browser notification if permission granted
         if (!this.hasPermission()) return;
 
         // Try to use Service Worker registration if available (for mobile support)
@@ -152,11 +167,11 @@ class NotificationService {
 
         // Result Logic
         if (userScore > opponentScore) {
-            this.send("Victory! 🏆", this.getRandomMessage(WIN_MESSAGES), `match-${match.id}`);
+            this.send("Victory! 🏆", this.getRandomMessage(WIN_MESSAGES), userId, 'match', `match-${match.id}`);
         } else if (userScore < opponentScore) {
-            this.send("Defeat 💔", this.getRandomMessage(LOSS_MESSAGES), `match-${match.id}`);
+            this.send("Defeat 💔", this.getRandomMessage(LOSS_MESSAGES), userId, 'match', `match-${match.id}`);
         } else {
-            this.send("Draw 🤝", this.getRandomMessage(DRAW_MESSAGES), `match-${match.id}`);
+            this.send("Draw 🤝", this.getRandomMessage(DRAW_MESSAGES), userId, 'match', `match-${match.id}`);
         }
 
         // Table Position Check (Every 3 matches)
@@ -207,7 +222,7 @@ class NotificationService {
             if (rank === 1) msg = "You are TOP of the league! 🥇 Everyone is chasing you!";
             else if (rank === standings.length) msg = "Currently bottom of the pile... 📉 Time to wake up!";
 
-            this.send("League Update 📋", msg, `rank-${leagueId}`);
+            this.send("League Update 📋", msg, userId, 'match', `rank-${leagueId}`);
 
         } catch (e) {
             console.error("Error checking table pos", e);
@@ -223,9 +238,9 @@ class NotificationService {
         if (!this.isEnabled(userId, 'leagues')) return;
 
         if (type === 'INSERT') {
-            this.send("League Started! ⚽", this.getRandomMessage(LEAGUE_MESSAGES.created), `league-${league.id}`);
+            this.send("League Started! ⚽", this.getRandomMessage(LEAGUE_MESSAGES.created), userId, 'league', `league-${league.id}`);
         } else if (type === 'UPDATE' && league.status === 'finished') {
-            this.send("League Finished 🏁", this.getRandomMessage(LEAGUE_MESSAGES.finished), `league-end-${league.id}`);
+            this.send("League Finished 🏁", this.getRandomMessage(LEAGUE_MESSAGES.finished), userId, 'league', `league-end-${league.id}`);
         }
     }
 
@@ -244,7 +259,7 @@ class NotificationService {
         const message = customMessage || this.getRandomMessage(messages);
         const title = type === 'appUpdate' ? "App Update 🎉" : "Announcement 📢";
 
-        this.send(title, message, `news-${type}-${Date.now()}`);
+        this.send(title, message, userId, 'news', `news-${type}-${Date.now()}`);
     }
 
     /**

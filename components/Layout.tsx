@@ -21,6 +21,8 @@ import {
 import { User, UserStats, Match } from '../types';
 import { dataService } from '../services/dataService';
 import { useNotificationSystem } from '../hooks/useNotificationSystem';
+import { notificationStorage } from '../services/notificationStorage';
+import NotificationCenter from './NotificationCenter';
 
 interface LayoutProps {
   user: User;
@@ -195,8 +197,24 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
   const [selectedUserForStats, setSelectedUserForStats] = useState<User | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
+  const [showNotificationCenter, setShowNotificationCenter] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Update unread count
+  useEffect(() => {
+    const updateUnreadCount = () => {
+      const count = notificationStorage.getUnreadCount(user.id);
+      setUnreadCount(count);
+    };
+
+    updateUnreadCount();
+
+    // Update every 5 seconds
+    const interval = setInterval(updateUnreadCount, 5000);
+    return () => clearInterval(interval);
+  }, [user.id]);
 
   useEffect(() => {
     loadData();
@@ -362,9 +380,14 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
                 className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-purple-600 p-0.5"
               />
             </div>
-            <button className="relative p-2 hover:bg-white/5 rounded-lg text-gray-400 hidden sm:block">
+            <button
+              onClick={() => setShowNotificationCenter(true)}
+              className="relative p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors hidden sm:block"
+            >
               <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-purple-500 rounded-full"></span>
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
+              )}
             </button>
           </div>
         </header>
@@ -379,6 +402,18 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
           user={selectedUserForStats}
           onClose={() => setSelectedUserForStats(null)}
           allMatches={allMatches}
+        />
+      )}
+
+      {showNotificationCenter && (
+        <NotificationCenter
+          userId={user.id}
+          onClose={() => {
+            setShowNotificationCenter(false);
+            // Update unread count after closing
+            const count = notificationStorage.getUnreadCount(user.id);
+            setUnreadCount(count);
+          }}
         />
       )}
     </div>
