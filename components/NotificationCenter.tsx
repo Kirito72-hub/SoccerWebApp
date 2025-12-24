@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Bell, Trophy, Users, Newspaper, CheckCircle, Trash2 } from 'lucide-react';
+import { X, Bell, Trophy, Users, Newspaper, CheckCircle, Trash2, CheckCheck } from 'lucide-react';
 import { notificationStorage, NotificationItem } from '../services/notificationStorage';
 import { supabase } from '../services/supabase';
 
@@ -114,9 +114,10 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
                             <>
                                 <button
                                     onClick={handleMarkAllAsRead}
-                                    className="px-3 py-1.5 text-xs font-bold text-purple-400 hover:bg-purple-600/10 rounded-lg transition-all"
+                                    className="p-2 text-purple-400 hover:bg-purple-600/10 rounded-lg transition-all"
+                                    title="Mark all as read"
                                 >
-                                    Mark all read
+                                    <CheckCheck className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={handleClearAll}
