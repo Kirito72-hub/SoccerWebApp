@@ -235,9 +235,12 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
           if (payload.eventType === 'INSERT' && payload.new) {
             const newNotif = payload.new as any;
             console.log('📬 New notification received via Realtime:', newNotif.title);
+            console.log('🔍 Notification permission:', Notification.permission);
+            console.log('🔍 Service Worker controller:', navigator.serviceWorker.controller);
 
             // Trigger Service Worker notification
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+              console.log('📤 Sending notification to Service Worker...');
               navigator.serviceWorker.controller.postMessage({
                 type: 'SHOW_NOTIFICATION',
                 title: newNotif.title,
@@ -252,6 +255,11 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
                   }
                 }
               });
+              console.log('✅ Notification message sent to Service Worker');
+            } else {
+              console.error('❌ Service Worker not available!');
+              console.error('  - serviceWorker in navigator:', 'serviceWorker' in navigator);
+              console.error('  - controller:', navigator.serviceWorker?.controller);
             }
           }
         }

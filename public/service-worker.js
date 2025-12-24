@@ -24,6 +24,10 @@ self.addEventListener('message', (event) => {
 
     // Handle notification requests from main thread
     if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+        console.log('🔔 Service Worker received SHOW_NOTIFICATION message');
+        console.log('  - Title:', event.data.title);
+        console.log('  - Permission:', Notification.permission);
+
         const { title, options } = event.data;
 
         // Enhanced options for Android
@@ -37,8 +41,16 @@ self.addEventListener('message', (event) => {
             renotify: true
         };
 
+        console.log('📱 Showing notification with options:', notificationOptions);
+
         event.waitUntil(
             self.registration.showNotification(title, notificationOptions)
+                .then(() => {
+                    console.log('✅ Notification shown successfully!');
+                })
+                .catch((error) => {
+                    console.error('❌ Failed to show notification:', error);
+                })
         );
     }
 });
