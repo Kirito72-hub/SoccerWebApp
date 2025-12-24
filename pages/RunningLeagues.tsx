@@ -308,8 +308,15 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
       const leagueMatches = matches.filter(m => m.leagueId === leagueId);
       const statsUpdates: Record<string, { played: number; goalsScored: number; goalsConceded: number }> = {};
 
+      // Initialize stats for ALL participants (even if they didn't play)
+      selectedLeague.participantIds.forEach(participantId => {
+        statsUpdates[participantId] = { played: 0, goalsScored: 0, goalsConceded: 0 };
+      });
+
+      // Update stats from completed matches
       leagueMatches.forEach(match => {
         if (match.status === 'completed') {
+          // Ensure users exist in statsUpdates (they should from initialization above)
           if (!statsUpdates[match.homeUserId]) {
             statsUpdates[match.homeUserId] = { played: 0, goalsScored: 0, goalsConceded: 0 };
           }
