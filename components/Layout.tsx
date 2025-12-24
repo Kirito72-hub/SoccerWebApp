@@ -382,7 +382,7 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
             </div>
             <button
               onClick={() => setShowNotificationCenter(true)}
-              className="relative p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors hidden sm:block"
+              className="relative p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
             >
               <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
               {unreadCount > 0 && (
