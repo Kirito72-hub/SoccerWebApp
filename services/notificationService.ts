@@ -115,12 +115,20 @@ class NotificationService {
         type: 'league' | 'match' | 'news' | 'system',
         tag?: string
     ) {
+        console.log('📤 send() called:', { title, userId, type, tag });
+
         // Save to notification storage (in-app notification center) - MUST AWAIT!
-        await notificationStorage.addNotification(userId, {
-            type,
-            title,
-            message: body
-        });
+        try {
+            await notificationStorage.addNotification(userId, {
+                type,
+                title,
+                message: body
+            });
+            console.log('✅ Notification saved to Supabase database');
+        } catch (error) {
+            console.error('❌ Failed to save notification to database:', error);
+            throw error;
+        }
 
         // NOTE: We no longer send browser notifications directly here!
         // Instead, we rely on the T-Rex Solution (Realtime subscription in Layout.tsx)
@@ -135,27 +143,49 @@ class NotificationService {
 
     // 1. MATCH NOTIFICATIONS
     async handleMatchUpdate(match: Match, userId: string) {
+        console.log('🎮 handleMatchUpdate called:', { matchId: match.id, userId, status: match.status });
+
         // Only run if user is involved
-        if (match.homeUserId !== userId && match.awayUserId !== userId) return;
+        if (match.homeUserId !== userId && match.awayUserId !== userId) {
+            console.log('❌ User not involved in match');
+            return;
+        }
+        console.log('✅ User is involved in match');
 
         // Only run if notifications enabled
-        if (!this.isEnabled(userId, 'matches')) return;
+        if (!this.isEnabled(userId, 'matches')) {
+            console.log('❌ Match notifications disabled for user');
+            return;
+        }
+        console.log('✅ Match notifications enabled');
 
         // Skip if match not completed
-        if (match.status !== 'completed') return;
+        if (match.status !== 'completed') {
+            console.log('❌ Match not completed, status:', match.status);
+            return;
+        }
+        console.log('✅ Match is completed');
 
         const isHome = match.homeUserId === userId;
         const userScore = isHome ? match.homeScore : match.awayScore;
         const opponentScore = isHome ? match.awayScore : match.homeScore;
 
-        if (userScore === undefined || opponentScore === undefined) return;
+        console.log('📊 Scores:', { userScore, opponentScore, isHome });
+
+        if (userScore === undefined || opponentScore === undefined) {
+            console.log('❌ Scores are undefined');
+            return;
+        }
 
         // Result Logic
         if (userScore > opponentScore) {
+            console.log('🏆 Victory! Sending notification...');
             await this.send("Victory! 🏆", this.getRandomMessage(WIN_MESSAGES), userId, 'match', `match-${match.id}`);
         } else if (userScore < opponentScore) {
+            console.log('💔 Defeat! Sending notification...');
             await this.send("Defeat 💔", this.getRandomMessage(LOSS_MESSAGES), userId, 'match', `match-${match.id}`);
         } else {
+            console.log('🤝 Draw! Sending notification...');
             await this.send("Draw 🤝", this.getRandomMessage(DRAW_MESSAGES), userId, 'match', `match-${match.id}`);
         }
 
