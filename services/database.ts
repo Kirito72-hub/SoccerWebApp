@@ -409,18 +409,23 @@ export const db = {
     },
 
     async updateUserStats(userId: string, stats: Partial<UserStats>): Promise<void> {
-        const dbUpdates: any = {};
+        const dbUpdates: any = {
+            user_id: userId  // Required for upsert
+        };
 
         if (stats.matchesPlayed !== undefined) dbUpdates.matches_played = stats.matchesPlayed;
         if (stats.leaguesParticipated !== undefined) dbUpdates.leagues_participated = stats.leaguesParticipated;
         if (stats.goalsScored !== undefined) dbUpdates.goals_scored = stats.goalsScored;
         if (stats.goalsConceded !== undefined) dbUpdates.goals_conceded = stats.goalsConceded;
         if (stats.championshipsWon !== undefined) dbUpdates.championships_won = stats.championshipsWon;
+        if (stats.updatedAt !== undefined) dbUpdates.updated_at = new Date(stats.updatedAt).toISOString();
 
+        // Use UPSERT to insert if not exists, update if exists
         const { error } = await supabase
             .from('user_stats')
-            .update(dbUpdates)
-            .eq('user_id', userId);
+            .upsert(dbUpdates, {
+                onConflict: 'user_id'  // Update based on user_id conflict
+            });
 
         if (error) throw error;
     },
