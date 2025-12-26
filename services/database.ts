@@ -176,6 +176,11 @@ export const db = {
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) return null;
 
+        // Check if email is verified
+        if (!user.email_verified) {
+            throw new Error('Please verify your email before logging in. Check your inbox for the verification link.');
+        }
+
         // Convert snake_case to camelCase
         return {
             id: user.id,
