@@ -9,6 +9,9 @@ import FinishedLeaguesLog from './pages/FinishedLeaguesLog';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import RealtimeTest from './pages/RealtimeTest';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 import Layout from './components/Layout';
 import { dataService } from './services/dataService';
 import { User } from './types';
@@ -45,6 +48,11 @@ const App: React.FC = () => {
           path="/"
           element={currentUser ? <Navigate to="/dashboard" /> : <Auth onLogin={handleLogin} />}
         />
+
+        {/* Public routes (no auth required) */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
 
         {currentUser && (
           <Route element={<Layout user={currentUser} onLogout={handleLogout} />}>

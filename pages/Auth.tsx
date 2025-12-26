@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
     Mail,
     Lock,
@@ -303,6 +304,16 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
+                            </div>
+
+                            {/* Forgot Password Link */}
+                            <div className="flex justify-end">
+                                <Link
+                                    to="/forgot-password"
+                                    className="text-sm text-purple-400 hover:text-purple-300 font-bold transition-colors"
+                                >
+                                    Forgot Password?
+                                </Link>
                             </div>
 
                             <button
