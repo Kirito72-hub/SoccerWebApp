@@ -574,6 +574,8 @@ export const db = {
      * Verify a token and return the user ID if valid
      */
     async verifyToken(token: string, type: 'email_verification' | 'password_reset'): Promise<string | null> {
+        console.log(`🔍 Verifying token: ${token.substring(0, 20)}... Type: ${type}`);
+
         const { data, error } = await supabase
             .from('verification_tokens')
             .select('*')
@@ -583,12 +585,30 @@ export const db = {
             .single();
 
         if (error || !data) {
-            console.log('❌ Token not found or already used');
+            console.log('❌ Token not found or already used', error);
             return null;
         }
 
+        console.log('📋 Token found:', {
+            id: data.id,
+            user_id: data.user_id,
+            created_at: data.created_at,
+            expires_at: data.expires_at,
+            used_at: data.used_at
+        });
+
         // Check if expired
-        if (new Date(data.expires_at) < new Date()) {
+        const expiresAt = new Date(data.expires_at);
+        const now = new Date();
+
+        console.log('⏰ Time comparison:', {
+            expires_at: expiresAt.toISOString(),
+            now: now.toISOString(),
+            expired: expiresAt < now,
+            time_diff_minutes: Math.round((expiresAt.getTime() - now.getTime()) / 1000 / 60)
+        });
+
+        if (expiresAt < now) {
             console.log('❌ Token expired');
             return null;
         }
