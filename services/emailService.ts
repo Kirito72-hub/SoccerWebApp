@@ -1,7 +1,25 @@
 import { Resend } from 'resend';
 
-// Initialize Resend with API key from environment
-const resend = new Resend(process.env.RESEND_API_KEY || '');
+// Lazy initialization - only create Resend instance when actually sending emails
+// This prevents initialization errors on the client-side
+let resendInstance: Resend | null = null;
+
+const getResendInstance = (): Resend => {
+    if (!resendInstance) {
+        // Check if we're in a browser environment
+        if (typeof window !== 'undefined') {
+            throw new Error('Email service cannot be used in the browser');
+        }
+
+        const apiKey = process.env.RESEND_API_KEY;
+        if (!apiKey) {
+            throw new Error('RESEND_API_KEY environment variable is not set');
+        }
+
+        resendInstance = new Resend(apiKey);
+    }
+    return resendInstance;
+};
 
 // Get base URL for links
 const getBaseUrl = (): string => {
@@ -17,8 +35,9 @@ export const emailService = {
      */
     async sendVerificationEmail(email: string, token: string, username: string): Promise<void> {
         const verificationUrl = `${getBaseUrl()}/#/verify-email?token=${token}`;
-        
+
         try {
+            const resend = getResendInstance();
             await resend.emails.send({
                 from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
                 to: email,
@@ -89,7 +108,7 @@ export const emailService = {
                     </div>
                 `
             });
-            
+
             console.log('✅ Verification email sent to:', email);
         } catch (error) {
             console.error('❌ Failed to send verification email:', error);
@@ -102,8 +121,9 @@ export const emailService = {
      */
     async sendPasswordResetEmail(email: string, token: string, username: string): Promise<void> {
         const resetUrl = `${getBaseUrl()}/#/reset-password?token=${token}`;
-        
+
         try {
+            const resend = getResendInstance();
             await resend.emails.send({
                 from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
                 to: email,
@@ -176,7 +196,7 @@ export const emailService = {
                     </div>
                 `
             });
-            
+
             console.log('✅ Password reset email sent to:', email);
         } catch (error) {
             console.error('❌ Failed to send password reset email:', error);
