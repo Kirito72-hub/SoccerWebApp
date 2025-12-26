@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { User, League, Match, UserStats, ActivityLog } from '../types';
 import bcrypt from 'bcryptjs';
+import { emailService } from './emailService';
 
 // Default anime avatar options for new users
 const DEFAULT_AVATARS = [
@@ -28,6 +29,15 @@ const DEFAULT_AVATARS = [
 // Helper function to get random avatar
 const getRandomAvatar = (): string => {
     return DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)];
+};
+
+// Helper function to generate secure random token
+const generateToken = (): string => {
+    // Generate a random UUID + timestamp for extra uniqueness
+    const uuid = crypto.randomUUID();
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 15);
+    return `${uuid}-${timestamp}-${random}`;
 };
 
 // Database service that works with Supabase
@@ -193,10 +203,22 @@ export const db = {
         }
 
         // Create user with normal_user role
-        return await db.createUser({
+        const newUser = await db.createUser({
             ...userData,
             role: 'normal_user'
         });
+
+        // Send verification email
+        try {
+            const token = await this.createVerificationToken(newUser.id, 'email_verification');
+            await emailService.sendVerificationEmail(newUser.email, token, newUser.username);
+            console.log(`✅ Verification email sent to ${newUser.email}`);
+        } catch (error) {
+            console.error('Error sending verification email:', error);
+            // Don't fail registration if email fails - user can request new verification email later
+        }
+
+        return newUser;
     },
 
     async updateUserRole(userId: string, newRole: 'superuser' | 'pro_manager' | 'normal_user'): Promise<void> {
@@ -511,5 +533,153 @@ export const db = {
             console.error('Error resetting database:', error);
             throw error;
         }
+    },
+
+    // ==================== EMAIL VERIFICATION & PASSWORD RESET ====================
+
+    /**
+     * Create a verification token for email verification or password reset
+     */
+    async createVerificationToken(userId: string, type: 'email_verification' | 'password_reset'): Promise<string> {
+        const token = generateToken();
+        const expiresAt = new Date();
+
+        // Email verification: 24 hours
+        // Password reset: 1 hour
+        if (type === 'email_verification') {
+            expiresAt.setHours(expiresAt.getHours() + 24);
+        } else {
+            expiresAt.setHours(expiresAt.getHours() + 1);
+        }
+
+        const { error } = await supabase
+            .from('verification_tokens')
+            .insert({
+                user_id: userId,
+                token,
+                type,
+                expires_at: expiresAt.toISOString()
+            });
+
+        if (error) {
+            console.error('Error creating verification token:', error);
+            throw error;
+        }
+
+        console.log(`✅ Created ${type} token for user ${userId}`);
+        return token;
+    },
+
+    /**
+     * Verify a token and return the user ID if valid
+     */
+    async verifyToken(token: string, type: 'email_verification' | 'password_reset'): Promise<string | null> {
+        const { data, error } = await supabase
+            .from('verification_tokens')
+            .select('*')
+            .eq('token', token)
+            .eq('type', type)
+            .is('used_at', null)
+            .single();
+
+        if (error || !data) {
+            console.log('❌ Token not found or already used');
+            return null;
+        }
+
+        // Check if expired
+        if (new Date(data.expires_at) < new Date()) {
+            console.log('❌ Token expired');
+            return null;
+        }
+
+        // Mark as used
+        await supabase
+            .from('verification_tokens')
+            .update({ used_at: new Date().toISOString() })
+            .eq('id', data.id);
+
+        console.log(`✅ Token verified for user ${data.user_id}`);
+        return data.user_id;
+    },
+
+    /**
+     * Mark user's email as verified
+     */
+    async verifyEmail(userId: string): Promise<void> {
+        const { error } = await supabase
+            .from('users')
+            .update({
+                email_verified: true,
+                email_verified_at: new Date().toISOString()
+            })
+            .eq('id', userId);
+
+        if (error) {
+            console.error('Error verifying email:', error);
+            throw error;
+        }
+
+        console.log(`✅ Email verified for user ${userId}`);
+    },
+
+    /**
+     * Request password reset - sends email with reset link
+     */
+    async requestPasswordReset(email: string): Promise<void> {
+        // Get user by email
+        const { data: users } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email);
+
+        if (!users || users.length === 0) {
+            // Don't reveal if email exists (security best practice)
+            console.log('Password reset requested for non-existent email (silent fail)');
+            return;
+        }
+
+        const user = users[0];
+
+        // Create reset token
+        const token = await this.createVerificationToken(user.id, 'password_reset');
+
+        // Send email
+        try {
+            await emailService.sendPasswordResetEmail(user.email, token, user.username);
+            console.log(`✅ Password reset email sent to ${email}`);
+        } catch (error) {
+            console.error('Error sending password reset email:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Reset password using a valid token
+     */
+    async resetPassword(token: string, newPassword: string): Promise<boolean> {
+        // Verify token
+        const userId = await this.verifyToken(token, 'password_reset');
+        if (!userId) {
+            console.log('❌ Invalid or expired reset token');
+            return false;
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update password
+        const { error } = await supabase
+            .from('users')
+            .update({ password: hashedPassword })
+            .eq('id', userId);
+
+        if (error) {
+            console.error('Error resetting password:', error);
+            throw error;
+        }
+
+        console.log(`✅ Password reset successfully for user ${userId}`);
+        return true;
     }
 };
