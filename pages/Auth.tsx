@@ -31,6 +31,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showNotificationModal, setShowNotificationModal] = useState(false);
+    const [signupSuccess, setSignupSuccess] = useState(false);
+    const [signupEmail, setSignupEmail] = useState('');
 
     // Login form state
     const [loginEmail, setLoginEmail] = useState('');
@@ -119,7 +121,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             // Check if Supabase is configured
             if (db.isOnline()) {
                 // Use Supabase
-                const newUser = await db.register({
+                await db.register({
                     firstName: signupData.firstName,
                     lastName: signupData.lastName,
                     username: signupData.username,
@@ -128,16 +130,9 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     dateOfBirth: signupData.dateOfBirth
                 });
 
-                storage.setCurrentUser(newUser); // Also save to localStorage for session
-                onLogin(newUser);
-
-                // Show notification permission modal after signup
-                setTimeout(() => {
-                    // Only show if not already requested
-                    if (!NotificationPermissionManager.hasRequestedBefore()) {
-                        setShowNotificationModal(true);
-                    }
-                }, 1000); // Delay to let the UI settle
+                // Show success message instead of auto-login
+                setSignupEmail(signupData.email);
+                setSignupSuccess(true);
             } else {
                 // Fallback to localStorage
                 const newUser = storage.register({
@@ -174,6 +169,35 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         NotificationPermissionManager.markAsRequested();
         console.log('User declined notification permissions');
     };
+
+    // Show success message after signup
+    if (signupSuccess) {
+        return (
+            <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center p-4">
+                <div className="glass rounded-3xl p-8 max-w-md w-full text-center border border-white/10">
+                    <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Mail className="w-8 h-8 text-purple-400" />
+                    </div>
+                    <h2 className="text-2xl font-black mb-4">Check Your Email! 📧</h2>
+                    <p className="text-gray-400 mb-6">
+                        We've sent a verification link to <span className="text-purple-400 font-bold">{signupEmail}</span>
+                    </p>
+                    <p className="text-sm text-gray-500 mb-6">
+                        Please click the link in the email to verify your account before logging in.
+                    </p>
+                    <button
+                        onClick={() => {
+                            setSignupSuccess(false);
+                            setIsLogin(true);
+                        }}
+                        className="w-full py-3 bg-purple-600 rounded-xl font-bold hover:bg-purple-500 transition-all"
+                    >
+                        Go to Login
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center p-4 relative overflow-hidden">
