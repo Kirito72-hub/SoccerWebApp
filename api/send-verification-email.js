@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://rakla.vercel.app'}/#/verify-email?token=${token}`;
 
         await resend.emails.send({
-            from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+            from: process.env.RESEND_FROM_EMAIL || 'Rakla <onboarding@resend.dev>',
             to: email,
             subject: 'Verify Your Email - Rakla Football Manager',
             html: `
