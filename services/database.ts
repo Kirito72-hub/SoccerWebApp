@@ -582,14 +582,15 @@ export const db = {
             .eq('token', token)
             .eq('type', type)
             .is('used_at', null)
+            .gt('expires_at', new Date().toISOString())  // Check expiration in database
             .single();
 
         if (error || !data) {
-            console.log('❌ Token not found or already used', error);
+            console.log('❌ Token not found, already used, or expired', error);
             return null;
         }
 
-        console.log('📋 Token found:', {
+        console.log('📋 Token found and valid:', {
             id: data.id,
             user_id: data.user_id,
             created_at: data.created_at,
@@ -597,27 +598,16 @@ export const db = {
             used_at: data.used_at
         });
 
-        // Check if expired
-        const expiresAt = new Date(data.expires_at);
-        const now = new Date();
-
-        console.log('⏰ Time comparison:', {
-            expires_at: expiresAt.toISOString(),
-            now: now.toISOString(),
-            expired: expiresAt < now,
-            time_diff_minutes: Math.round((expiresAt.getTime() - now.getTime()) / 1000 / 60)
-        });
-
-        if (expiresAt < now) {
-            console.log('❌ Token expired');
-            return null;
-        }
-
         // Mark as used
-        await supabase
+        const { error: updateError } = await supabase
             .from('verification_tokens')
             .update({ used_at: new Date().toISOString() })
             .eq('id', data.id);
+
+        if (updateError) {
+            console.error('❌ Error marking token as used:', updateError);
+            throw updateError;
+        }
 
         console.log(`✅ Token verified for user ${data.user_id}`);
         return data.user_id;
