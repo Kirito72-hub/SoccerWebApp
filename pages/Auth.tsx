@@ -19,6 +19,7 @@ import { db } from '../services/database';
 import { storage } from '../services/storage';
 import NotificationPermissionManager from '../services/notificationPermissionManager';
 import NotificationPermissionModal from '../components/NotificationPermissionModal';
+import { REQUIRE_EMAIL_VERIFICATION } from '../config/features';
 
 interface AuthProps {
     onLogin: (user: UserType) => void;
@@ -121,7 +122,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             // Check if Supabase is configured
             if (db.isOnline()) {
                 // Use Supabase
-                await db.register({
+                const newUser = await db.register({
                     firstName: signupData.firstName,
                     lastName: signupData.lastName,
                     username: signupData.username,
@@ -130,9 +131,15 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     dateOfBirth: signupData.dateOfBirth
                 });
 
-                // Show success message instead of auto-login
-                setSignupEmail(signupData.email);
-                setSignupSuccess(true);
+                if (REQUIRE_EMAIL_VERIFICATION) {
+                    // Show success message instead of auto-login
+                    setSignupEmail(signupData.email);
+                    setSignupSuccess(true);
+                } else {
+                    // Auto-login (email verification disabled)
+                    storage.setCurrentUser(newUser);
+                    onLogin(newUser);
+                }
             } else {
                 // Fallback to localStorage
                 const newUser = storage.register({

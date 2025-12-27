@@ -2,6 +2,7 @@ import { supabase, isSupabaseConfigured } from './supabase';
 import { User, League, Match, UserStats, ActivityLog } from '../types';
 import bcrypt from 'bcryptjs';
 import { emailService } from './emailService';
+import { REQUIRE_EMAIL_VERIFICATION } from '../config/features';
 
 // Default anime avatar options for new users
 const DEFAULT_AVATARS = [
@@ -176,8 +177,8 @@ export const db = {
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) return null;
 
-        // Check if email is verified
-        if (!user.email_verified) {
+        // Check if email is verified (controlled by feature flag in config/features.ts)
+        if (REQUIRE_EMAIL_VERIFICATION && !user.email_verified) {
             throw new Error('Please verify your email before logging in. Check your inbox for the verification link.');
         }
 
