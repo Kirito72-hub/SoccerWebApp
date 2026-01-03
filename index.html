@@ -3,67 +3,86 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#7c3aed">
-    
+
     <!-- Cache Control - Force fresh content -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
-    
+    <link rel="icon" type="image/png" href="/icons/pwa-192x192.png">
+
     <!-- iOS-Specific Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Rakla">
     <meta name="mobile-web-app-capable" content="yes">
-    
+
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="/icons/pwa-192x192.png">
     <link rel="apple-touch-icon" sizes="152x152" href="/icons/pwa-192x192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/pwa-192x192.png">
     <link rel="apple-touch-icon" sizes="167x167" href="/icons/pwa-192x192.png">
-    
+
     <!-- iOS Splash Screens -->
     <!-- iPhone X, XS, 11 Pro -->
-    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/splash/iphone-x.png">
+    <link rel="apple-touch-startup-image"
+        media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)"
+        href="/splash/iphone-x.png">
     <!-- iPhone XR, 11 -->
-    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="/splash/iphone-xr.png">
+    <link rel="apple-touch-startup-image"
+        media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)"
+        href="/splash/iphone-xr.png">
     <!-- iPhone XS Max, 11 Pro Max -->
-    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="/splash/iphone-xs-max.png">
+    <link rel="apple-touch-startup-image"
+        media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)"
+        href="/splash/iphone-xs-max.png">
     <!-- iPhone 12, 13, 14 -->
-    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/splash/iphone-12.png">
+    <link rel="apple-touch-startup-image"
+        media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
+        href="/splash/iphone-12.png">
     <!-- iPhone 12 Pro Max, 13 Pro Max, 14 Plus -->
-    <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" href="/splash/iphone-12-pro-max.png">
+    <link rel="apple-touch-startup-image"
+        media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)"
+        href="/splash/iphone-12-pro-max.png">
     <!-- iPad Mini, Air -->
-    <link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" href="/splash/ipad-air.png">
+    <link rel="apple-touch-startup-image"
+        media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)"
+        href="/splash/ipad-air.png">
     <!-- iPad Pro 11" -->
-    <link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" href="/splash/ipad-pro-11.png">
+    <link rel="apple-touch-startup-image"
+        media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)"
+        href="/splash/ipad-pro-11.png">
     <!-- iPad Pro 12.9" -->
-    <link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" href="/splash/ipad-pro-12.png">
-    
+    <link rel="apple-touch-startup-image"
+        media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)"
+        href="/splash/ipad-pro-12.png">
+
     <!-- SEO and Social Meta Tags -->
-    <meta name="description" content="Rakla Football Manager - A modern football league management system with real-time notifications and PWA support.">
+    <meta name="description"
+        content="Rakla Football Manager - A modern football league management system with real-time notifications and PWA support.">
     <meta name="keywords" content="football, manager, league, soccer, pwa, sports">
     <meta name="author" content="Rakla">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://rakla.vercel.app/">
     <meta property="og:title" content="Rakla Football Manager">
     <meta property="og:description" content="A modern football league management system with real-time notifications.">
     <meta property="og:image" content="https://rakla.vercel.app/icons/pwa-512x512.png">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://rakla.vercel.app/">
     <meta property="twitter:title" content="Rakla Football Manager">
-    <meta property="twitter:description" content="A modern football league management system with real-time notifications.">
+    <meta property="twitter:description"
+        content="A modern football league management system with real-time notifications.">
     <meta property="twitter:image" content="https://rakla.vercel.app/icons/pwa-512x512.png">
-    
+
     <title>Rakla Football Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"

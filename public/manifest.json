@@ -48,12 +48,6 @@
             "purpose": "maskable"
         },
         {
-            "src": "/icons/icon.svg",
-            "sizes": "any",
-            "type": "image/svg+xml",
-            "purpose": "any maskable"
-        },
-        {
             "src": "/icons/pwa-192x192.png",
             "sizes": "152x152",
             "type": "image/png",
