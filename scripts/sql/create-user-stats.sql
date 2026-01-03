@@ -1,5 +1,31 @@
+-- =====================================================
+-- USER STATS TABLE CREATION SCRIPT
+-- =====================================================
+-- This script creates the user_stats table and related triggers
+-- for automatic stats creation when a new user signs up.
+--
+-- IMPORTANT: Run this script in your Supabase SQL Editor
+--
+-- What this script does:
+-- 1. Cleans up any old/conflicting triggers and functions
+-- 2. Creates the user_stats table with proper schema
+-- 3. Sets up Row Level Security (RLS) policies
+-- 4. Creates a trigger to auto-create stats on user signup
+-- 5. Creates a trigger to auto-update timestamps
+-- =====================================================
+
+-- =====================================================
+-- STEP 0: CLEANUP OLD TRIGGERS AND FUNCTIONS
+-- =====================================================
+-- Drop any old triggers that might conflict
+DROP TRIGGER IF EXISTS on_user_created ON public.users;
+DROP FUNCTION IF EXISTS create_user_stats();
+
+-- This prevents conflicts with old deployments
+-- =====================================================
+
 -- ============================================
--- CREATE USER_STATS TABLE
+-- STEP 1: CREATE USER_STATS TABLE
 -- ============================================
 -- This table stores statistics for each user
 

@@ -16,7 +16,7 @@ import Layout from './components/Layout';
 import { dataService } from './services/dataService';
 import { User } from './types';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
-import PWAUpdatePrompt from './components/PWAUpdatePrompt';
+
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(dataService.getCurrentUser());
@@ -70,7 +70,6 @@ const App: React.FC = () => {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <PWAInstallPrompt />
-      <PWAUpdatePrompt />
     </HashRouter>
   );
 };

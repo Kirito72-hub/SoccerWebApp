@@ -7,6 +7,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2025-12-31
+
+### 🐛 Critical Bug Fixes
+
+#### User Stats Table Fix
+- **Fixed "relation 'user_stats' does not exist" error** - Signup now works correctly
+  - Root cause: Duplicate trigger `on_user_created` calling broken function `create_user_stats()`
+  - Solution: Dropped old trigger and function, kept only `create_user_stats_trigger`
+  - Updated `create-user-stats.sql` to include cleanup of old triggers
+  - Added comprehensive documentation in `docs/USER-STATS-FIX.md`
+- **Fixed RLS Policies** - Updated to work with custom authentication
+  - Removed `auth.uid()` dependencies (not using Supabase Auth)
+  - Simplified policies to allow operations, app handles security
+  - Trigger now runs with `SECURITY DEFINER` for proper permissions
+
+### ✨ Features
+
+#### Email Verification System
+- **Feature Flag System** - Centralized feature management
+  - Created `config/features.ts` for easy feature toggling
+  - `REQUIRE_EMAIL_VERIFICATION` flag (currently disabled for Vercel subdomain)
+  - All email verification code intact for future use
+- **Email Verification Flow** - Complete implementation
+  - Verification emails sent via Resend API
+  - Secure token generation and validation
+  - Email verification page with success/error handling
+  - Login blocked for unverified users (when enabled)
+- **Password Reset** - Full password reset functionality
+  - Forgot password page with email input
+  - Reset password page with token validation
+  - Secure password hashing with bcryptjs
+  - Email enumeration protection
+
+### 🔒 Security Enhancements
+- **Immutable Search Paths** - Fixed Supabase security warnings
+  - Set `search_path = ''` on `update_updated_at_column()` function
+  - Set `search_path = ''` on `create_user_stats()` function
+  - Prevents SQL injection via search_path manipulation
+- **RLS on Activity Logs** - Enabled Row Level Security
+  - Users can only view their own activity logs
+  - Admins can view all logs
+  - Proper policies for INSERT/SELECT operations
+- **RLS on Notifications** - Enabled Row Level Security
+  - Users can only view/update their own notifications
+  - System can insert notifications for any user
+  - Secure notification delivery
+
+### 📚 Documentation
+- **USER-STATS-FIX.md** - Complete troubleshooting guide
+  - Root cause analysis
+  - Solution steps
+  - Testing results
+  - Deployment notes
+  - Lessons learned
+- **EMAIL-VERIFICATION.md** - Email verification documentation
+  - Current status (disabled for Vercel subdomain)
+  - How to enable when custom domain is available
+  - Testing instructions
+  - Troubleshooting guide
+  - Resend integration details
+
+### 🔧 Database Changes
+- **SQL Scripts** - Updated and organized
+  - `scripts/sql/create-user-stats.sql` - Now includes cleanup
+  - `scripts/sql/rollback-user-stats.sql` - Rollback script
+  - `scripts/sql/fix-security-warnings.sql` - Security fixes
+  - `scripts/sql/rollback-security-fixes.sql` - Rollback security fixes
+
+### 🧪 Testing
+- ✅ Signup flow tested and working
+- ✅ User stats automatically created on signup
+- ✅ Trigger function verified in database
+- ✅ RLS policies tested
+- ✅ Email verification flow tested (when enabled)
+- ✅ Password reset flow tested
+
+---
+
+
 ## [1.4.0-beta] - 2025-12-24
 
 ### 🚀 Major Features
