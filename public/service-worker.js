@@ -14,7 +14,7 @@
 
 // Dynamic cache version - will be updated automatically on each deployment
 // The timestamp ensures old caches are invalidated
-const CACHE_VERSION = 'v1.6.0';
+const CACHE_VERSION = 'v1.7.0-beta';
 const CACHE_NAME = `rakla-pwa-${CACHE_VERSION}-${Date.now()}`;
 
 // Cache names for different types of content
