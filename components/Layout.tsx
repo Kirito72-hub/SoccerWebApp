@@ -275,12 +275,20 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
     };
   }, [user.id]);
 
-  // Show notification permission modal on first load
+  // Show notification permission modal on first load (PWA users only)
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (!NotificationPermissionManager.hasRequestedBefore()) {
-        console.log('📱 Showing notification permission modal...');
+      // Check if running as PWA (standalone mode)
+      const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true || // iOS
+        document.referrer.includes('android-app://'); // Android
+
+      // Only show for PWA users who haven't been asked before
+      if (isPWA && !NotificationPermissionManager.hasRequestedBefore()) {
+        console.log('📱 Showing notification permission modal (PWA user)...');
         setShowNotificationModal(true);
+      } else if (!isPWA) {
+        console.log('🌐 Skipping notification modal (not PWA)');
       }
     }, 2000); // Wait 2 seconds for UI to settle
 
