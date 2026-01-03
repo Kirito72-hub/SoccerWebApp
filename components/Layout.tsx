@@ -26,6 +26,11 @@ import { supabase } from '../services/supabase';
 import NotificationCenter from './NotificationCenter';
 import NotificationPermissionModal from './NotificationPermissionModal';
 import NotificationPermissionManager from '../services/notificationPermissionManager';
+import NotificationPreview from './NotificationPreview';
+import NotificationPreferences from './NotificationPreferences';
+import ToastNotification from './ToastNotification';
+import { notificationSound } from '../services/notificationSound';
+import { ToastNotificationData } from '../types/notifications';
 
 interface LayoutProps {
   user: User;
@@ -203,6 +208,10 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
   const [showNotificationCenter, setShowNotificationCenter] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
+  const [toasts, setToasts] = useState<ToastNotificationData[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -214,7 +223,13 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
       console.log('🔔 Unread count updated:', count);
     };
 
+    const loadNotifications = async () => {
+      const notifs = await notificationStorage.getNotifications(user.id);
+      setNotifications(notifs);
+    };
+
     updateUnreadCount();
+    loadNotifications();
 
     // Subscribe to Realtime updates for notifications + Trigger System Notification
     const channel = supabase
@@ -230,13 +245,30 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
         async (payload) => {
           console.log('🔔 Notification change detected:', payload.eventType);
           updateUnreadCount(); // Update count when notifications change
+          loadNotifications(); // Reload notifications
 
-          // If NEW notification received, trigger system notification
+          // If NEW notification received, trigger system notification + toast + sound
           if (payload.eventType === 'INSERT' && payload.new) {
             const newNotif = payload.new as any;
             console.log('📬 New notification received via Realtime:', newNotif.title);
             console.log('🔍 Notification permission:', Notification.permission);
             console.log('🔍 Service Worker controller:', navigator.serviceWorker.controller);
+
+            // Show toast notification
+            const toastData: ToastNotificationData = {
+              id: newNotif.id,
+              title: newNotif.title,
+              message: newNotif.message,
+              category: newNotif.category || 'system',
+              priority: newNotif.priority || 'medium',
+              action_url: newNotif.action_url,
+              action_label: newNotif.action_label,
+              duration: 5000
+            };
+            setToasts(prev => [...prev, toastData]);
+
+            // Play notification sound
+            await notificationSound.playNotification();
 
             // Trigger Service Worker notification
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -475,19 +507,37 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
                 className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-purple-600 p-0.5"
               />
             </div>
-            <button
-              onClick={() => setShowNotificationCenter(true)}
-              className="relative p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
+            <div className="relative"
+              onMouseEnter={() => setShowPreview(true)}
+              onMouseLeave={() => setShowPreview(false)}
             >
-              <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
+              <button
+                onClick={() => setShowNotificationCenter(true)}
+                className="relative p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
+              >
+                <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
 
-              {/* Unread Count Badge */}
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 animate-pulse border-2 border-[#0f0f23]">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
-            </button>
+                {/* Unread Count Badge */}
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 animate-pulse border-2 border-[#0f0f23]">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Preview Dropdown */}
+              <NotificationPreview
+                notifications={notifications}
+                onViewAll={() => {
+                  setShowPreview(false);
+                  setShowNotificationCenter(true);
+                }}
+                onMarkAsRead={async (id) => {
+                  await notificationStorage.markAsRead(user.id, id);
+                }}
+                isOpen={showPreview}
+              />
+            </div>
           </div>
         </header>
 
@@ -524,6 +574,31 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
           onDecline={handleDeclineNotifications}
         />
       )}
+
+      {/* Notification Preferences Modal */}
+      {showPreferences && (
+        <NotificationPreferences
+          userId={user.id}
+          onClose={() => setShowPreferences(false)}
+        />
+      )}
+
+      {/* Toast Notifications */}
+      <div className="fixed top-4 right-4 z-[100] space-y-2">
+        {toasts.map((toast) => (
+          <ToastNotification
+            key={toast.id}
+            {...toast}
+            onClose={(id) => {
+              setToasts(prev => prev.filter(t => t.id !== id));
+            }}
+            onClick={() => {
+              setShowNotificationCenter(true);
+              setToasts(prev => prev.filter(t => t.id !== toast.id));
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 };
