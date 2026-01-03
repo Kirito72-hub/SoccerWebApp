@@ -8,6 +8,8 @@ import { notificationStorage, NotificationItem } from '../services/notificationS
 import { supabase } from '../services/supabase';
 import { NotificationCategory } from '../types/notifications';
 import NotificationFilters from './NotificationFilters';
+import { useSwipe } from '../hooks/useSwipe';
+import SwipeableNotificationItem from './SwipeableNotificationItem';
 
 interface NotificationCenterProps {
     userId: string;
@@ -236,8 +238,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
                                 setBatchMode(false);
                             }}
                             className={`p-2 rounded-lg transition-all ${showArchived
-                                    ? 'bg-purple-600 text-white'
-                                    : 'text-gray-500 hover:bg-white/10 hover:text-white'
+                                ? 'bg-purple-600 text-white'
+                                : 'text-gray-500 hover:bg-white/10 hover:text-white'
                                 }`}
                             title={showArchived ? 'Show active' : 'Show archived'}
                         >
@@ -251,8 +253,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
                                 setSelectedIds(new Set());
                             }}
                             className={`p-2 rounded-lg transition-all ${batchMode
-                                    ? 'bg-purple-600 text-white'
-                                    : 'text-gray-500 hover:bg-white/10 hover:text-white'
+                                ? 'bg-purple-600 text-white'
+                                : 'text-gray-500 hover:bg-white/10 hover:text-white'
                                 }`}
                             title="Batch select"
                         >
@@ -380,82 +382,20 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
                         </div>
                     ) : (
                         filteredNotifications.map((notification) => (
-                            <div
+                            <SwipeableNotificationItem
                                 key={notification.id}
-                                className={`p-4 rounded-xl border transition-all group ${notification.read
-                                        ? 'bg-white/5 border-white/5'
-                                        : 'bg-purple-600/10 border-purple-500/30'
-                                    } ${selectedIds.has(notification.id) ? 'ring-2 ring-purple-500' : ''}`}
-                            >
-                                <div className="flex items-start gap-3">
-                                    {/* Checkbox (batch mode) */}
-                                    {batchMode && (
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedIds.has(notification.id)}
-                                            onChange={() => toggleSelect(notification.id)}
-                                            className="mt-1 w-4 h-4 rounded bg-white/10 border-white/20 text-purple-600"
-                                        />
-                                    )}
-
-                                    {/* Icon */}
-                                    <div className={`p-2 rounded-lg ${notification.read ? 'bg-white/5' : 'bg-white/10'}`}>
-                                        {getIcon(notification.type, notification.category)}
-                                    </div>
-
-                                    {/* Content */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-start justify-between gap-2">
-                                            <h3 className={`font-bold text-sm ${notification.read ? 'text-gray-400' : 'text-white'}`}>
-                                                {notification.title}
-                                            </h3>
-                                            <span className="text-[10px] text-gray-600 whitespace-nowrap">
-                                                {formatTime(notification.created_at)}
-                                            </span>
-                                        </div>
-                                        <p className={`text-xs mt-1 ${notification.read ? 'text-gray-600' : 'text-gray-400'}`}>
-                                            {notification.message}
-                                        </p>
-
-                                        {/* Actions */}
-                                        <div className="flex items-center gap-2 mt-2">
-                                            {!notification.read && !showArchived && (
-                                                <button
-                                                    onClick={() => handleMarkAsRead(notification.id)}
-                                                    className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-purple-400 hover:bg-purple-600/10 rounded transition-all"
-                                                >
-                                                    <CheckCircle className="w-3 h-3" />
-                                                    Mark read
-                                                </button>
-                                            )}
-                                            {!showArchived ? (
-                                                <button
-                                                    onClick={() => handleArchive(notification.id)}
-                                                    className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-gray-600 hover:text-blue-400 hover:bg-blue-600/10 rounded transition-all opacity-0 group-hover:opacity-100"
-                                                >
-                                                    <Archive className="w-3 h-3" />
-                                                    Archive
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleUnarchive(notification.id)}
-                                                    className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-blue-400 hover:bg-blue-600/10 rounded transition-all"
-                                                >
-                                                    <ArchiveRestore className="w-3 h-3" />
-                                                    Restore
-                                                </button>
-                                            )}
-                                            <button
-                                                onClick={() => handleDelete(notification.id)}
-                                                className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-gray-600 hover:text-red-400 hover:bg-red-600/10 rounded transition-all opacity-0 group-hover:opacity-100"
-                                            >
-                                                <Trash2 className="w-3 h-3" />
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                notification={notification}
+                                isSelected={selectedIds.has(notification.id)}
+                                showArchived={showArchived}
+                                batchMode={batchMode}
+                                onToggleSelect={() => toggleSelect(notification.id)}
+                                onMarkAsRead={() => handleMarkAsRead(notification.id)}
+                                onArchive={() => handleArchive(notification.id)}
+                                onUnarchive={() => handleUnarchive(notification.id)}
+                                onDelete={() => handleDelete(notification.id)}
+                                getIcon={getIcon}
+                                formatTime={formatTime}
+                            />
                         ))
                     )}
                 </div>
