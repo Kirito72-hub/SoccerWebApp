@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Landing from './pages/Landing';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import RunningLeagues from './pages/RunningLeagues';
@@ -44,10 +45,14 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <Routes>
+        {/* Landing Page - Public */}
         <Route
           path="/"
-          element={currentUser ? <Navigate to="/dashboard" /> : <Auth onLogin={handleLogin} />}
+          element={currentUser ? <Navigate to="/dashboard" /> : <Landing />}
         />
+
+        {/* Auth Page - Public */}
+        <Route path="/auth" element={currentUser ? <Navigate to="/dashboard" /> : <Auth onLogin={handleLogin} />} />
 
         {/* Public routes (no auth required) */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
