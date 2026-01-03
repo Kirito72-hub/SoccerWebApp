@@ -7,8 +7,22 @@ const Landing: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0f0f23] text-white relative overflow-hidden">
-      {/* Animated Background */}
+      {/* 3D Soccer Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+          style={{
+            backgroundImage: 'url(/soccer-3d-bg.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        ></div>
+
+        {/* Gradient Overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0f0f23]/80 via-[#0f0f23]/60 to-[#0f0f23]/90"></div>
+
+        {/* Animated gradient blobs */}
         <div className="absolute top-[-20%] right-[-10%] w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-purple-600/20 blur-[150px] rounded-full animate-pulse"></div>
         <div className="absolute bottom-[-20%] left-[-10%] w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-blue-600/10 blur-[120px] rounded-full animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] md:w-[400px] md:h-[400px] bg-emerald-600/10 blur-[100px] rounded-full animate-pulse delay-500"></div>
