@@ -7,6 +7,229 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-01-04
+
+### 🔔 Major Notification System Upgrade
+
+**Complete redesign and enhancement of the notification system with 23 new features!**
+
+#### Database Enhancements
+- **Enhanced Notifications Table**
+  - Added `priority` column (high, medium, low)
+  - Added `category` column (match, league, social, achievement, announcement, alert, system)
+  - Added `archived` flag for archiving notifications
+  - Added `snoozed_until` timestamp for snooze functionality
+  - Added `metadata` JSONB field for extensibility
+  - Added `action_url` and `action_label` for action buttons
+  - Created indexes for better query performance
+
+- **New Tables**
+  - `user_notification_preferences` - User notification settings
+  - `notification_analytics` - Engagement tracking
+  - Full RLS (Row Level Security) policies
+  - Auto-create default preferences for new users
+
+#### Core Services
+
+- **Enhanced Storage Service** (`notificationStorage.ts`)
+  - 11 new methods (17 total, was 6)
+  - `archiveNotification()` / `unarchiveNotification()`
+  - `snoozeNotification()` - Snooze until specific time
+  - `batchMarkAsRead()` / `batchDelete()` / `batchArchive()`
+  - `searchNotifications()` - Full-text search
+  - `getByCategory()` / `getByPriority()` / `getArchived()`
+  - `getFiltered()` - Advanced multi-filter queries
+
+- **Notification Preferences Service** (`notificationPreferences.ts`)
+  - Complete user preferences management
+  - 15 methods for settings control
+  - Category-based filtering (6 categories)
+  - Do Not Disturb mode with time ranges
+  - Sound/email/push notification toggles
+  - Auto-create defaults for new users
+  - Reset to defaults functionality
+
+- **Notification Sound Service** (`notificationSound.ts`)
+  - Audio management with preloading
+  - 4 sound types (notification, mark-read, delete, achievement)
+  - Volume control (0.0 to 1.0)
+  - Mute toggle with localStorage persistence
+  - Category-based sound selection
+  - Test mode for sound preview
+
+#### UI Components
+
+- **Enhanced NotificationCenter** (Complete Redesign)
+  - Filter by category (All, Matches, Leagues, Social, Achievements, News, Alerts)
+  - Real-time search functionality
+  - Batch selection mode
+  - Archive view toggle
+  - Select all checkbox
+  - Batch actions (mark read, archive, delete)
+  - Loading states with spinner
+  - Empty states (no notifications, no search results)
+  - Smooth animations and transitions
+  - ~550 lines (was ~210)
+
+- **NotificationFilters** (New Component)
+  - 7 category filter tabs
+  - Active state highlighting
+  - Count badges per category
+  - Horizontal scrollable layout
+  - Category icons
+  - Responsive design
+
+- **NotificationPreview** (New Component)
+  - Hover dropdown on bell icon
+  - Shows last 3 unread notifications
+  - Quick mark as read action
+  - "View All" button
+  - Empty state ("All caught up!")
+  - Smooth slide-in animation
+  - Auto-positioning
+
+- **NotificationPreferences** (New Component)
+  - Complete settings UI
+  - 6 category toggles
+  - 3 delivery method toggles (sound, email, push)
+  - Do Not Disturb mode with time picker
+  - Save/Reset buttons
+  - Loading states
+  - Change detection
+  - Full service integration
+
+- **ToastNotification** (New Component)
+  - Slide-in from right
+  - Auto-dismiss with progress bar
+  - Priority-based styling (red/purple/gray)
+  - Category icons
+  - Click to open notification center
+  - Smooth animations
+  - Duration control
+
+#### Advanced Features
+
+- **Toast Management Hook** (`useToastNotifications.ts`)
+  - Custom React hook for toast queue
+  - Helper methods (showSuccess, showError, showInfo)
+  - Auto sound playback
+  - Duration control
+  - Type-safe
+
+- **Notification Grouping** (`notificationGrouping.ts`)
+  - Group by category
+  - Group similar notifications (1-hour window)
+  - Smart grouping detection (30% duplicate threshold)
+  - Group title/summary generation
+  - Time-based grouping
+
+#### Layout Integration
+
+- **Enhanced Layout.tsx**
+  - Toast notification container (top-right)
+  - Notification preview on bell hover
+  - Preferences modal integration
+  - Real-time notification loading
+  - Sound playback on new notifications
+  - Toast queue management
+  - Preview dropdown with hover state
+
+#### TypeScript Types
+
+- **Comprehensive Type System** (`types/notifications.ts`)
+  - 14 new types and interfaces
+  - `NotificationPriority` / `NotificationCategory`
+  - `EnhancedNotification` / `NotificationPreferences`
+  - `NotificationAnalytics` / `ToastNotificationData`
+  - `NotificationFilters` / `NotificationGroup`
+  - Helper types for batch actions, sounds, etc.
+
+#### Features Summary
+
+**23 New Features:**
+1. ✅ Toast notifications with sound
+2. ✅ Notification preview dropdown
+3. ✅ Filter by category (7 categories)
+4. ✅ Search functionality
+5. ✅ Batch selection & actions
+6. ✅ Archive/unarchive workflow
+7. ✅ Snooze notifications
+8. ✅ Priority levels (high/medium/low)
+9. ✅ Action buttons in notifications
+10. ✅ Notification preferences UI
+11. ✅ Do Not Disturb mode
+12. ✅ Sound notifications (4 types)
+13. ✅ Volume control
+14. ✅ Category-based filtering
+15. ✅ Real-time search
+16. ✅ Loading states
+17. ✅ Empty states
+18. ✅ Smooth animations
+19. ✅ Mobile-optimized
+20. ✅ Notification grouping
+21. ✅ Toast queue management
+22. ✅ Preferences persistence
+23. ✅ Analytics tracking (database ready)
+
+#### Technical Improvements
+
+- **Performance**
+  - Audio preloading for instant playback
+  - Efficient state management
+  - Optimized re-renders
+  - Limit 50 results for performance
+
+- **Code Quality**
+  - Full TypeScript typing
+  - Comprehensive error handling
+  - Modular architecture
+  - Reusable components
+  - ~3,000+ lines of new code
+
+- **User Experience**
+  - Professional-grade animations
+  - Glassmorphism design
+  - Purple accent theme
+  - Responsive layout
+  - Touch-friendly UI
+  - Custom scrollbar
+
+#### Documentation
+
+- **New Documentation Files**
+  - `NOTIFICATION-SYSTEM-UPGRADE.md` - Full implementation plan
+  - `NOTIFICATION-QUICK-START.md` - Quick start guide
+  - `NOTIFICATION-IMPLEMENTATION-PLAN.md` - Step-by-step plan
+  - `PHASE-8-ADVANCED-FEATURES.md` - Advanced features guide
+  - `PHASE-9-ANIMATIONS-POLISH.md` - Animations guide
+
+#### Breaking Changes
+- None! All changes are additive and backward compatible
+
+#### Migration
+- Run `scripts/sql/upgrade-notifications.sql` in Supabase SQL Editor
+- Existing notifications will continue to work
+- New columns have sensible defaults
+- User preferences auto-created on first access
+
+#### Files Changed
+- **Created**: 15+ new files
+- **Modified**: 4 existing files
+- **Deleted**: 1 unused file (NotificationPermissionHelper.tsx)
+
+### 🐛 Bug Fixes
+- Fixed SQL typo in notification migration script
+- Improved notification bell icon clarity with visible count badge
+
+### 🎨 UI/UX Improvements
+- Reverted to original Bell icon (from lucide-react)
+- Enhanced unread count badge (shows exact number, not just dot)
+- Badge displays "99+" for counts over 99
+- Purple badge with white text for better visibility
+- Pulsing animation on unread badge
+
+---
+
 ## [1.5.3-beta] - 2026-01-03
 
 ### 🎨 Interactive Features
