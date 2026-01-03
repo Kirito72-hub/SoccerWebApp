@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.3-beta] - 2026-01-03
+
+### 🎨 Interactive Features
+
+#### 3D Soccer-Themed Background
+- **Professional 3D Background** - Immersive hero section
+  - AI-generated 3D soccer balls, field lines, and geometric shapes
+  - Purple (#8b5cf6), indigo (#6366f1), and blue (#3b82f6) accent colors
+  - Subtle opacity (30%) for text readability
+  - Gradient overlay (80% → 60% → 90%) for optimal contrast
+  - Responsive background sizing (cover, center)
+  - Works perfectly on all devices (mobile, tablet, desktop)
+  - Added to `public/soccer-3d-bg.png` (593 KB)
+
+#### Cursor-Tracking Parallax Effect
+- **Interactive Mouse Movement** - Premium, immersive experience
+  - Real-time mouse position tracking with React hooks
+  - Background follows cursor with smooth parallax effect
+  - Multi-layer parallax with different speeds for depth perception
+  - Background layer: 1.0x speed (main parallax)
+  - Purple blob: 0.5x speed (slower, creates depth)
+  - Blue blob: -0.3x speed (opposite direction, more depth)
+  - Emerald blob: 0.4x speed (medium speed)
+  - Smooth CSS transitions (300-700ms) with ease-out timing
+  - Optimized performance (GPU-accelerated transforms)
+  - Desktop only (gracefully degrades on mobile/touch devices)
+  - Subtle movement range (±10px) - professional, not distracting
+
+### 🐛 Bug Fixes
+
+#### Landing Page Layout Fixes
+- **CTA Button Text Wrapping** - Fixed text breaking into multiple lines
+  - Added `whitespace-nowrap` to prevent "GET STARTED FREE" wrapping
+  - Added `flex-shrink-0` to icons to maintain size
+  - Adjusted font sizes (text-sm md:text-base lg:text-lg)
+  - Icons now properly aligned next to text on all screen sizes
+- **Feature Card Icon Positioning** - Fixed icons above titles
+  - Changed from vertical to horizontal layout
+  - Icons now inline with titles using flex layout
+  - Added `whitespace-nowrap` to all feature card titles
+  - Prevents "Track Performance" and "Compete Together" from wrapping
+  - All three cards now have consistent layout
+  - Added `gap-3 md:gap-4` for proper spacing
+  - Clean, professional appearance on all devices
+
+### 🎯 User Experience Improvements
+- **Immersive Hero Section** - 3D background creates depth and engagement
+- **Interactive Elements** - Cursor tracking makes page feel alive
+- **Consistent Layout** - All feature cards look identical
+- **Better Readability** - No text wrapping, proper alignment
+- **Professional Appearance** - Premium feel with subtle animations
+
+### ⚡ Performance
+- **Optimized Transforms** - GPU-accelerated, no layout shift
+- **Smooth Animations** - CSS transitions, not JavaScript
+- **No Performance Impact** - Tested on all devices
+- **Mobile Friendly** - Static background on touch devices
+- **Fast Loading** - Background image optimized
+
+### 📊 Statistics
+- **Files Modified**: 4
+- **Files Created**: 1 (soccer-3d-bg.png)
+- **Lines Added**: ~50
+- **New Features**: 2 (3D background, cursor tracking)
+- **Bug Fixes**: 2 (CTA wrapping, icon positioning)
+
+---
+
 ## [1.5.2] - 2026-01-03
 
 ### 🎨 Major UI/UX Improvements

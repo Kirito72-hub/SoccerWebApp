@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       // Inject build timestamp for cache versioning
       '__BUILD_TIMESTAMP__': JSON.stringify(buildTimestamp),
-      '__APP_VERSION__': JSON.stringify(env.npm_package_version || '1.5.2')
+      '__APP_VERSION__': JSON.stringify(env.npm_package_version || '1.5.3-beta')
     },
     build: {
       // Generate unique filenames for cache busting
