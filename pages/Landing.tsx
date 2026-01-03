@@ -1,31 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Sparkles, TrendingUp, Users, ArrowRight, Play } from 'lucide-react';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Track mouse movement for parallax effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Calculate mouse position as percentage of viewport
+      const x = (e.clientX / window.innerWidth - 0.5) * 20; // -10 to 10
+      const y = (e.clientY / window.innerHeight - 0.5) * 20; // -10 to 10
+      setMousePosition({ x, y });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0f0f23] text-white relative overflow-hidden">
       {/* 3D Soccer Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Background Image */}
+        {/* Background Image with Cursor Tracking */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30 transition-transform duration-300 ease-out"
           style={{
             backgroundImage: 'url(/soccer-3d-bg.png)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
+            transform: `translate(${mousePosition.x}px, ${mousePosition.y}px) scale(1.1)`,
           }}
         ></div>
 
         {/* Gradient Overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0f0f23]/80 via-[#0f0f23]/60 to-[#0f0f23]/90"></div>
 
-        {/* Animated gradient blobs */}
-        <div className="absolute top-[-20%] right-[-10%] w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-purple-600/20 blur-[150px] rounded-full animate-pulse"></div>
-        <div className="absolute bottom-[-20%] left-[-10%] w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-blue-600/10 blur-[120px] rounded-full animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] md:w-[400px] md:h-[400px] bg-emerald-600/10 blur-[100px] rounded-full animate-pulse delay-500"></div>
+        {/* Animated gradient blobs with parallax */}
+        <div
+          className="absolute top-[-20%] right-[-10%] w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-purple-600/20 blur-[150px] rounded-full animate-pulse transition-transform duration-500 ease-out"
+          style={{ transform: `translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px)` }}
+        ></div>
+        <div
+          className="absolute bottom-[-20%] left-[-10%] w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-blue-600/10 blur-[120px] rounded-full animate-pulse delay-1000 transition-transform duration-700 ease-out"
+          style={{ transform: `translate(${mousePosition.x * -0.3}px, ${mousePosition.y * -0.3}px)` }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] md:w-[400px] md:h-[400px] bg-emerald-600/10 blur-[100px] rounded-full animate-pulse delay-500 transition-transform duration-600 ease-out"
+          style={{ transform: `translate(calc(-50% + ${mousePosition.x * 0.4}px), calc(-50% + ${mousePosition.y * 0.4}px))` }}
+        ></div>
       </div>
 
       {/* Header */}
