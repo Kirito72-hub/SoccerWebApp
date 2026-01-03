@@ -11,6 +11,7 @@ import {
   X,
   Activity,
   Search,
+  Bell,
   FileText,
   Target,
   ShieldCheck,
@@ -476,14 +477,9 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
             </div>
             <button
               onClick={() => setShowNotificationCenter(true)}
-              className="relative p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors group"
+              className="relative p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
             >
-              {/* Animated Ringing Bell */}
-              <img
-                src="/bell-ringing.png"
-                alt="Notifications"
-                className="w-5 h-5 lg:w-6 lg:h-6 group-hover:scale-110 transition-transform"
-              />
+              <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
 
               {/* Unread Count Badge */}
               {unreadCount > 0 && (
