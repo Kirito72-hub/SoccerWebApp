@@ -7,6 +7,93 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.1-beta] - 2026-01-03
+
+### 🚀 Major Features
+
+#### PWA iOS Fixes and Aggressive Cache Busting
+- **Solution 1: Aggressive Cache Busting** - Automatic cache updates
+  - Dynamic cache versioning with build timestamps
+  - Network-First strategy for HTML/JS/CSS (always fresh when online)
+  - Cache-First strategy for images/assets (fast loading)
+  - Automatic old cache deletion on activation
+  - Immediate activation (skipWaiting) for instant updates
+  - Cache size limits to prevent storage bloat (50/100/60 entries)
+  - Complete service worker rewrite with modern caching strategies
+- **Solution 2: iOS-Specific PWA Optimizations** - Better iOS experience
+  - Added iOS meta tags for full-screen PWA support
+  - Configured Apple Touch Icons (multiple sizes: 152x152, 180x180, 167x167)
+  - Added splash screen support (placeholders for all iOS devices)
+  - Enhanced manifest.json for iOS compatibility
+  - Improved viewport handling for iPhone notches (viewport-fit=cover)
+  - Added SEO and social media meta tags (Open Graph, Twitter)
+  - Full-screen mode with translucent status bar
+  - Better PWA installation experience on iOS Safari
+- **Solution 3: Network-First Refinement** - Included in Solution 1
+  - Network-First for critical files ensures fresh content
+  - Cache-First for static assets ensures fast loading
+  - Graceful offline fallback
+
+### 🗑️ Removed
+- **PWAUpdatePrompt Component** - Eliminated annoying update popups
+  - Archived to `components/archive/` for backup
+  - Users now get updates automatically without popups
+  - Better UX with silent background updates
+
+### 🐛 Bug Fixes
+- **Fixed Missing icon.svg** - Removed 404 errors
+  - Replaced icon.svg references with pwa-192x192.png
+  - Updated manifest.json to remove non-existent SVG icon
+  - Clean console logs without 404 errors
+
+### 📚 Documentation
+- **Comprehensive PWA Documentation** - Complete guides created
+  - `CACHE-BUSTING-IMPLEMENTATION.md` - Full technical details
+  - `SOLUTION-1-COMPLETE.md` - Cache busting summary
+  - `SOLUTION-2-COMPLETE.md` - iOS fixes details
+  - `PWA-IOS-FIXES-SUMMARY.md` - Overall summary
+  - `CACHE-BUSTING-QUICK-REF.md` - Quick reference guide
+  - `PWA-UPDATE-PROMPT-REMOVAL.md` - Update prompt removal docs
+  - `DEPLOYMENT-SUMMARY.md` - Deployment procedures
+  - `public/splash/README.md` - Splash screen info
+
+### 🔧 Technical Changes
+- **Vite Configuration** - Build timestamp injection
+  - Added `__BUILD_TIMESTAMP__` for dynamic cache versioning
+  - Added `__APP_VERSION__` injection
+  - Configured hash-based filenames for automatic cache invalidation
+  - Enabled source maps for development
+- **Service Worker** - Complete rewrite
+  - 328 lines of optimized caching logic
+  - Network-First and Cache-First strategies
+  - Automatic cache cleanup
+  - Cache size management
+  - Immediate activation
+- **TypeScript Declarations** - Added `vite-env.d.ts`
+  - Type safety for build-time variables
+  - Proper TypeScript support
+
+### 🎯 Impact
+- ✅ Users always get latest version automatically
+- ✅ No manual cache clearing needed on iOS
+- ✅ No annoying update popups
+- ✅ Better PWA experience on iOS Safari
+- ✅ Professional native-like appearance
+- ✅ Works offline with fresh content when online
+- ✅ Handles iPhone notches correctly
+- ✅ Faster loading with cached images
+- ✅ Better SEO and social media sharing
+
+### 📊 Statistics
+- **Files Modified**: 6
+- **Files Created**: 10
+- **Lines Added**: 2,374
+- **Lines Removed**: 104
+- **Net Change**: +2,270 lines
+- **Documentation**: 8 new files
+
+---
+
 ## [1.5.0] - 2025-12-31
 
 ### 🐛 Critical Bug Fixes
