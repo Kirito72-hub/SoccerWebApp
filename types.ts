@@ -79,3 +79,6 @@ export interface ActivityLog {
     score?: string;
   };
 }
+
+// Export enhanced notification types
+export * from './types/notifications';
