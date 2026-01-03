@@ -83,7 +83,7 @@ const Landing: React.FC = () => {
               <div className="w-12 h-12 md:w-14 md:h-14 bg-emerald-600/20 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                 <Sparkles className="w-6 h-6 md:w-7 md:h-7 text-emerald-400" />
               </div>
-              <h3 className="font-black text-lg md:text-xl">Create Leagues</h3>
+              <h3 className="font-black text-lg md:text-xl whitespace-nowrap">Create Leagues</h3>
             </div>
             <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
               Organize custom tournaments with round-robin or knockout formats
@@ -96,7 +96,7 @@ const Landing: React.FC = () => {
               <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-600/20 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                 <TrendingUp className="w-6 h-6 md:w-7 md:h-7 text-blue-400" />
               </div>
-              <h3 className="font-black text-lg md:text-xl">Track Performance</h3>
+              <h3 className="font-black text-lg md:text-xl whitespace-nowrap">Track Performance</h3>
             </div>
             <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
               Monitor detailed stats, rankings, and player achievements in real-time
@@ -109,7 +109,7 @@ const Landing: React.FC = () => {
               <div className="w-12 h-12 md:w-14 md:h-14 bg-purple-600/20 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                 <Users className="w-6 h-6 md:w-7 md:h-7 text-purple-400" />
               </div>
-              <h3 className="font-black text-lg md:text-xl">Compete Together</h3>
+              <h3 className="font-black text-lg md:text-xl whitespace-nowrap">Compete Together</h3>
             </div>
             <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
               Join leagues, challenge friends, and climb the leaderboards
