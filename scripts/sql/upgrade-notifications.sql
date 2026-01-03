@@ -20,7 +20,6 @@ ADD COLUMN IF NOT EXISTS archived BOOLEAN DEFAULT false;
 -- Add snooze functionality
 ALTER TABLE notifications 
 ADD COLUMN IF NOT EXISTS snoozed_until TIMESTAMP;
-
 -- Add metadata for extra data (JSON)
 ALTER TABLE notifications 
 ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
