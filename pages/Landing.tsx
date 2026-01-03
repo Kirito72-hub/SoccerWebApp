@@ -61,16 +61,16 @@ const Landing: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mb-12 md:mb-20 w-full max-w-md px-4 sm:px-0">
           <button
             onClick={() => navigate('/auth')}
-            className="group relative flex items-center justify-center gap-2 md:gap-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 active:from-purple-700 active:to-indigo-700 text-white px-6 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-base md:text-lg transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-purple-600/50 w-full sm:w-auto"
+            className="group relative flex items-center justify-center gap-2 md:gap-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 active:from-purple-700 active:to-indigo-700 text-white px-6 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-sm md:text-base lg:text-lg transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-purple-600/50 w-full sm:w-auto whitespace-nowrap"
           >
             GET STARTED FREE
-            <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
           </button>
           <button
             onClick={() => navigate('/auth')}
-            className="flex items-center justify-center gap-2 md:gap-3 glass border border-white/10 px-6 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-base md:text-lg hover:bg-white/5 active:bg-white/10 transition-all w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 md:gap-3 glass border border-white/10 px-6 md:px-10 py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-sm md:text-base lg:text-lg hover:bg-white/5 active:bg-white/10 transition-all w-full sm:w-auto whitespace-nowrap"
           >
-            <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" />
+            <Play className="w-4 h-4 md:w-5 md:h-5 fill-current flex-shrink-0" />
             VIEW DEMO
           </button>
         </div>
@@ -79,10 +79,12 @@ const Landing: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-5xl w-full px-4">
           {/* Feature 1 */}
           <div className="glass p-6 md:p-8 rounded-xl md:rounded-2xl border border-white/5 hover:border-purple-500/30 active:border-purple-500/50 transition-all group">
-            <div className="w-12 h-12 md:w-14 md:h-14 bg-emerald-600/20 rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform">
-              <Sparkles className="w-6 h-6 md:w-7 md:h-7 text-emerald-400" />
+            <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 bg-emerald-600/20 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <Sparkles className="w-6 h-6 md:w-7 md:h-7 text-emerald-400" />
+              </div>
+              <h3 className="font-black text-lg md:text-xl">Create Leagues</h3>
             </div>
-            <h3 className="font-black text-lg md:text-xl mb-2">Create Leagues</h3>
             <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
               Organize custom tournaments with round-robin or knockout formats
             </p>
@@ -90,10 +92,12 @@ const Landing: React.FC = () => {
 
           {/* Feature 2 */}
           <div className="glass p-6 md:p-8 rounded-xl md:rounded-2xl border border-white/5 hover:border-purple-500/30 active:border-purple-500/50 transition-all group">
-            <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-600/20 rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform">
-              <TrendingUp className="w-6 h-6 md:w-7 md:h-7 text-blue-400" />
+            <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-600/20 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <TrendingUp className="w-6 h-6 md:w-7 md:h-7 text-blue-400" />
+              </div>
+              <h3 className="font-black text-lg md:text-xl">Track Performance</h3>
             </div>
-            <h3 className="font-black text-lg md:text-xl mb-2">Track Performance</h3>
             <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
               Monitor detailed stats, rankings, and player achievements in real-time
             </p>
@@ -101,10 +105,12 @@ const Landing: React.FC = () => {
 
           {/* Feature 3 */}
           <div className="glass p-6 md:p-8 rounded-xl md:rounded-2xl border border-white/5 hover:border-purple-500/30 active:border-purple-500/50 transition-all group sm:col-span-2 lg:col-span-1">
-            <div className="w-12 h-12 md:w-14 md:h-14 bg-purple-600/20 rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform">
-              <Users className="w-6 h-6 md:w-7 md:h-7 text-purple-400" />
+            <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 bg-purple-600/20 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <Users className="w-6 h-6 md:w-7 md:h-7 text-purple-400" />
+              </div>
+              <h3 className="font-black text-lg md:text-xl">Compete Together</h3>
             </div>
-            <h3 className="font-black text-lg md:text-xl mb-2">Compete Together</h3>
             <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
               Join leagues, challenge friends, and climb the leaderboards
             </p>
