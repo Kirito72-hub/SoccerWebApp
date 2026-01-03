@@ -7,6 +7,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.2] - 2026-01-03
+
+### 🎨 Major UI/UX Improvements
+
+#### Professional Landing Page
+- **New Landing Page** - Modern hero section with clear value proposition
+  - Animated gradient backgrounds with purple/blue/emerald effects
+  - Large, bold headline: "DOMINATE YOUR FOOTBALL LEAGUE"
+  - Gradient text effects on main heading
+  - Two CTA buttons: "GET STARTED FREE" and "VIEW DEMO"
+  - Feature highlights section (Create Leagues, Track Performance, Compete Together)
+  - Stats section showing 100+ users, 50+ leagues, 500+ matches
+  - Professional header with Rakla branding
+  - Clean footer with copyright
+- **Updated Routing** - Separated landing and authentication
+  - Landing page at root (/) for new visitors
+  - Auth page moved to /auth
+  - Logged-in users automatically redirect to dashboard
+  - Clean separation between marketing and application
+
+#### Mobile Responsiveness
+- **Landing Page Mobile Optimization** - Perfect experience on all devices
+  - Responsive header (smaller logo/text on mobile)
+  - Adaptive font sizes (text-4xl on mobile → text-8xl on desktop)
+  - Mobile-friendly button sizes with full-width on small screens
+  - Condensed badge text on mobile ("PWA Support" vs full text)
+  - Responsive feature grid (1 column mobile, 2 tablet, 3 desktop)
+  - Smaller background blur effects on mobile (300px vs 600px)
+  - Touch-friendly buttons with active states
+  - Optimized padding and margins (p-4 → p-12)
+  - Stats section with smaller fonts on mobile (text-3xl → text-5xl)
+- **Auth Page Mobile Optimization** - Easy-to-use forms on mobile
+  - Reduced padding on mobile (p-3 sm:p-4 md:p-6)
+  - Smaller background effects for mobile (w-64 → w-96)
+  - Responsive form container (p-6 sm:p-8 md:p-10)
+  - Better spacing between form elements
+  - Pointer-events-none on backgrounds (prevent touch interference)
+  - Touch-friendly input fields
+- **Responsive Breakpoints** - Optimized for all screen sizes
+  - Mobile: < 640px (default)
+  - Tablet: 640px - 1024px (sm-lg)
+  - Desktop: > 1024px (lg+)
+  - Tested on iPhone SE, iPhone 12/13/14, iPad, Android devices
+
+#### PWA UI Improvements
+- **Icon-Only Install Button** - Cleaner, less intrusive UI
+  - Floating purple download icon in bottom-right corner
+  - Hover tooltip shows "Install App"
+  - Removed large card with text
+  - Maintains same functionality
+  - Better user experience
+- **PWA-Only Notification Modal** - Smarter notification requests
+  - Only shows for users running app as PWA (standalone mode)
+  - Detects iOS standalone mode
+  - Detects Android PWA mode
+  - Regular browser users won't see the modal
+  - Better UX - only ask when notifications will actually work
+
+### 🎯 User Flow Improvements
+- **New Visitor Flow**: Landing page → Click "Get Started" → Auth page → Login/Signup → Dashboard
+- **Returning Visitor Flow**: Auto-redirect to dashboard (skip landing page)
+- **Clear Call-to-Action**: Prominent "GET STARTED FREE" button
+- **Professional First Impression**: Modern landing page showcases app value
+
+### 📱 Mobile Experience
+- **Touch-Friendly UI** - All buttons ≥ 44px height (Apple guidelines)
+- **Readable Typography** - Proper font sizes and line heights on all screens
+- **No Horizontal Scroll** - All content fits within viewport
+- **Active States** - Visual feedback on touch
+- **Optimized Spacing** - Comfortable padding and margins
+
+### 🎨 Design Features
+- **Glassmorphism Effects** - Modern glass-like UI elements
+- **Gradient Text** - Eye-catching gradient on main heading
+- **Smooth Animations** - Hover effects and transitions
+- **Responsive Design** - Mobile-first approach
+- **Purple/Indigo Theme** - Consistent brand colors
+- **Professional Typography** - Clean, modern fonts
+
+### 📊 Statistics
+- **Files Modified**: 4
+- **Files Created**: 1 (Landing.tsx)
+- **Lines Added**: ~200
+- **Responsive Breakpoints**: 3 (mobile, tablet, desktop)
+- **Tested Devices**: 10+ (iOS, Android, tablets)
+
+---
+
 ## [1.5.1-beta] - 2026-01-03
 
 ### 🚀 Major Features
