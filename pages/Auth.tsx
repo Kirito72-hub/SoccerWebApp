@@ -207,17 +207,17 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     }
 
     return (
-        <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center p-3 sm:p-4 md:p-6 relative overflow-hidden">
             {/* Animated Background */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-1/4 -left-20 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-1/4 -left-20 w-64 h-64 md:w-96 md:h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-1/4 -right-20 w-64 h-64 md:w-96 md:h-96 bg-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-96 md:h-96 bg-emerald-600/10 rounded-full blur-3xl animate-pulse delay-500"></div>
             </div>
 
-            <div className="relative z-10 w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center">
+            <div className="relative z-10 w-full max-w-6xl grid md:grid-cols-2 gap-6 md:gap-8 items-center">
                 {/* Left Side - Branding */}
-                <div className="hidden md:block space-y-8 animate-in slide-in-from-left duration-700">
+                <div className="hidden md:block space-y-6 lg:space-y-8 animate-in slide-in-from-left duration-700">
                     <div className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.5)]">
                             <Trophy className="w-10 h-10 text-white" />
@@ -262,9 +262,9 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                 </div>
 
                 {/* Right Side - Auth Forms */}
-                <div className="glass rounded-3xl border border-purple-500/30 p-8 md:p-10 shadow-2xl animate-in slide-in-from-right duration-700">
+                <div className="glass rounded-2xl md:rounded-3xl border border-purple-500/30 p-6 sm:p-8 md:p-10 shadow-2xl animate-in slide-in-from-right duration-700">
                     {/* Toggle Tabs */}
-                    <div className="flex gap-2 mb-8 p-1 glass bg-white/5 rounded-2xl">
+                    <div className="flex gap-2 mb-6 md:mb-8 p-1 glass bg-white/5 rounded-xl md:rounded-2xl">
                         <button
                             onClick={() => { setIsLogin(true); setError(''); }}
                             className={`flex-1 py-3 rounded-xl font-black text-sm transition-all ${isLogin
