@@ -343,20 +343,8 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                     </div>
                     <p className="text-sm lg:text-base text-gray-500 font-medium">Manage user roles and permissions</p>
                 </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                    {/* Reset Database Button */}
-                    <button
-                        onClick={() => setShowResetConfirm(true)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 rounded-xl text-red-400 font-bold text-sm transition-all hover:scale-105"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                        <span className="hidden sm:inline">Reset Database</span>
-                        <span className="sm:hidden">Reset DB</span>
-                    </button>
-                </div>
             </div>
+
 
             {/* Tab Navigation */}
             <div className="flex gap-2 p-1 glass rounded-2xl border border-white/5 w-fit">
@@ -825,7 +813,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
             {/* Backup/Restore Tab */}
             {activeTab === 'backup' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Backup Card */}
                     <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8">
                         <div className="flex items-center gap-3 mb-6">
@@ -900,6 +888,44 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                         >
                             <Database className="w-5 h-5" />
                             Restore from File
+                        </button>
+                    </div>
+
+                    {/* Reset Database Card */}
+                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-3 bg-red-600/20 rounded-xl">
+                                <Trash2 className="w-6 h-6 text-red-400" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black">RESET DATABASE</h2>
+                                <p className="text-sm text-gray-500">Clear all data</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 mb-6">
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-red-500/20">
+                                <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-bold text-sm text-red-400">Permanent Action</p>
+                                    <p className="text-xs text-gray-400">This cannot be undone</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-red-500/20">
+                                <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-bold text-sm text-red-400">Deletes Everything</p>
+                                    <p className="text-xs text-gray-400">All leagues, matches, and data will be lost</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setShowResetConfirm(true)}
+                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-red-600 hover:bg-red-700 rounded-xl font-bold text-white shadow-lg shadow-red-600/20 transition-all hover:scale-105"
+                        >
+                            <Trash2 className="w-5 h-5" />
+                            Reset Database
                         </button>
                     </div>
                 </div>
