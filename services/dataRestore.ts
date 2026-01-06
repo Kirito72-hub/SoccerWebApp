@@ -106,7 +106,7 @@ class DataRestoreService {
 
                     // Check for duplicates in file
                     if (matchIds.has(match.id)) {
-                        result.duplicateMatches.push(match.id);
+                        result.stats.duplicateMatches.push(match.id);
                         result.warnings.push(`Duplicate match ID in file: ${match.id}`);
                     }
                     matchIds.add(match.id);
@@ -137,7 +137,7 @@ class DataRestoreService {
 
                     // Check for duplicates in file
                     if (leagueIds.has(league.id)) {
-                        result.duplicateLeagues.push(league.id);
+                        result.stats.duplicateLeagues.push(league.id);
                         result.warnings.push(`Duplicate league ID in file: ${league.id}`);
                     }
                     leagueIds.add(league.id);

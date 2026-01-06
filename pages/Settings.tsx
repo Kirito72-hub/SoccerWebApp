@@ -13,12 +13,14 @@ import {
     UserX,
     Wifi,
     Bell,
-    Send
+    Send,
+    Database
 } from 'lucide-react';
 import { User, UserRole } from '../types';
 import { dataService } from '../services/dataService';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 import { sendAppUpdateNotification, sendSystemAnnouncement } from '../services/newsUtils';
+import { DataRestoreModal } from '../components/DataRestoreModal';
 
 interface SettingsProps {
     user: User;
@@ -47,6 +49,9 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     const [announcementMessage, setAnnouncementMessage] = useState('');
     const [sendingAnnouncement, setSendingAnnouncement] = useState(false);
     const [announcementSuccess, setAnnouncementSuccess] = useState(false);
+
+    // Data Restore state
+    const [showRestoreModal, setShowRestoreModal] = useState(false);
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -319,15 +324,28 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                     <p className="text-sm lg:text-base text-gray-500 font-medium">Manage user roles and permissions</p>
                 </div>
 
-                {/* Reset Database Button */}
-                <button
-                    onClick={() => setShowResetConfirm(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 rounded-xl text-red-400 font-bold text-sm transition-all hover:scale-105"
-                >
-                    <Trash2 className="w-4 h-4" />
-                    <span className="hidden sm:inline">Reset Database</span>
-                    <span className="sm:hidden">Reset DB</span>
-                </button>
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                    {/* Restore Data Button */}
+                    <button
+                        onClick={() => setShowRestoreModal(true)}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-xl text-purple-400 font-bold text-sm transition-all hover:scale-105"
+                    >
+                        <Database className="w-4 h-4" />
+                        <span className="hidden sm:inline">Restore Data</span>
+                        <span className="sm:hidden">Restore</span>
+                    </button>
+
+                    {/* Reset Database Button */}
+                    <button
+                        onClick={() => setShowResetConfirm(true)}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 rounded-xl text-red-400 font-bold text-sm transition-all hover:scale-105"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        <span className="hidden sm:inline">Reset Database</span>
+                        <span className="sm:hidden">Reset DB</span>
+                    </button>
+                </div>
             </div>
 
             {/* Tab Navigation */}
@@ -784,6 +802,16 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                     )}
                 </div>
             )}
+
+            {/* Data Restore Modal */}
+            <DataRestoreModal
+                isOpen={showRestoreModal}
+                onClose={() => setShowRestoreModal(false)}
+                onSuccess={() => {
+                    // Refresh page after successful restore
+                    window.location.reload();
+                }}
+            />
         </div>
     );
 };
