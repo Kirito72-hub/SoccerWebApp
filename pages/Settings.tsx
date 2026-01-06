@@ -347,10 +347,10 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
 
             {/* Tab Navigation */}
-            <div className="flex gap-2 p-1 glass rounded-2xl border border-white/5 w-fit">
+            <div className="flex gap-2 p-1 glass rounded-2xl border border-white/5 w-full sm:w-fit overflow-x-auto no-scrollbar">
                 <button
                     onClick={() => setActiveTab('users')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'users'
+                    className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${activeTab === 'users'
                         ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
@@ -360,7 +360,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                 </button>
                 <button
                     onClick={() => setActiveTab('announcements')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'announcements'
+                    className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${activeTab === 'announcements'
                         ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
@@ -370,7 +370,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                 </button>
                 <button
                     onClick={() => setActiveTab('backup')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'backup'
+                    className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${activeTab === 'backup'
                         ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
