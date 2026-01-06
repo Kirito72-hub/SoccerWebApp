@@ -813,9 +813,9 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
             {/* Backup/Restore Tab */}
             {activeTab === 'backup' && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-fr">
                     {/* Backup Card */}
-                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8">
+                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8 flex flex-col h-full">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-3 bg-emerald-600/20 rounded-xl">
                                 <Database className="w-6 h-6 text-emerald-400" />
@@ -826,19 +826,19 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                             </div>
                         </div>
 
-                        <div className="space-y-4 mb-6">
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-emerald-500/20">
+                        <div className="space-y-4 mb-6 flex-1">
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-emerald-500/20 h-full">
                                 <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-bold text-sm text-emerald-400">Safe & Secure</p>
-                                    <p className="text-xs text-gray-400">Your data is exported as a JSON file</p>
+                                    <p className="text-xs text-gray-400 mt-1">Your data is exported as a JSON file</p>
                                 </div>
                             </div>
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-emerald-500/20">
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-emerald-500/20 h-full">
                                 <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-bold text-sm text-emerald-400">Complete Backup</p>
-                                    <p className="text-xs text-gray-400">Includes all leagues, matches, and standings</p>
+                                    <p className="text-xs text-gray-400 mt-1">Includes all leagues, matches, and standings</p>
                                 </div>
                             </div>
                         </div>
@@ -854,7 +854,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                     </div>
 
                     {/* Restore Card */}
-                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8">
+                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8 flex flex-col h-full">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-3 bg-purple-600/20 rounded-xl">
                                 <Database className="w-6 h-6 text-purple-400" />
@@ -865,19 +865,19 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                             </div>
                         </div>
 
-                        <div className="space-y-4 mb-6">
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-purple-500/20">
+                        <div className="space-y-4 mb-6 flex-1">
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-purple-500/20 h-full">
                                 <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-bold text-sm text-yellow-400">Validation First</p>
-                                    <p className="text-xs text-gray-400">File is validated before importing</p>
+                                    <p className="text-xs text-gray-400 mt-1">File is validated before importing</p>
                                 </div>
                             </div>
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-purple-500/20">
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-purple-500/20 h-full">
                                 <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-bold text-sm text-yellow-400">Smart Duplicates</p>
-                                    <p className="text-xs text-gray-400">Automatically skips existing records</p>
+                                    <p className="text-xs text-gray-400 mt-1">Automatically skips existing records</p>
                                 </div>
                             </div>
                         </div>
@@ -892,7 +892,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                     </div>
 
                     {/* Reset Database Card */}
-                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8">
+                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8 flex flex-col h-full">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-3 bg-red-600/20 rounded-xl">
                                 <Trash2 className="w-6 h-6 text-red-400" />
@@ -903,19 +903,19 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                             </div>
                         </div>
 
-                        <div className="space-y-4 mb-6">
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-red-500/20">
+                        <div className="space-y-4 mb-6 flex-1">
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-red-500/20 h-full">
                                 <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-bold text-sm text-red-400">Permanent Action</p>
-                                    <p className="text-xs text-gray-400">This cannot be undone</p>
+                                    <p className="text-xs text-gray-400 mt-1">This cannot be undone</p>
                                 </div>
                             </div>
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-red-500/20">
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-red-500/20 h-full">
                                 <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-bold text-sm text-red-400">Deletes Everything</p>
-                                    <p className="text-xs text-gray-400">All leagues, matches, and data will be lost</p>
+                                    <p className="text-xs text-gray-400 mt-1">All leagues, matches, and data will be lost</p>
                                 </div>
                             </div>
                         </div>
