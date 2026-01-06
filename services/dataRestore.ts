@@ -351,23 +351,10 @@ class DataRestoreService {
         for (let i = 0; i < leagues.length; i += batchSize) {
             const batch = leagues.slice(i, i + batchSize);
 
+
             for (const league of batch) {
                 try {
-                    // Check if league exists
-                    if (options.skipDuplicates) {
-                        const { data: existing } = await supabase
-                            .from('leagues')
-                            .select('id')
-                            .eq('id', league.id)
-                            .single();
-
-                        if (existing) {
-                            skipped++;
-                            continue;
-                        }
-                    }
-
-                    // Insert league
+                    // Insert league directly - let database handle duplicates
                     const { error } = await supabase
                         .from('leagues')
                         .insert({
@@ -382,8 +369,13 @@ class DataRestoreService {
                         });
 
                     if (error) {
-                        errors.push(`League ${league.id}: ${error.message}`);
-                        skipped++;
+                        // Check if it's a duplicate key error (code 23505)
+                        if (error.code === '23505' && options.skipDuplicates) {
+                            skipped++;
+                        } else {
+                            errors.push(`League ${league.id}: ${error.message}`);
+                            skipped++;
+                        }
                     } else {
                         imported++;
                     }
@@ -413,23 +405,10 @@ class DataRestoreService {
         for (let i = 0; i < matches.length; i += batchSize) {
             const batch = matches.slice(i, i + batchSize);
 
+
             for (const match of batch) {
                 try {
-                    // Check if match exists
-                    if (options.skipDuplicates) {
-                        const { data: existing } = await supabase
-                            .from('matches')
-                            .select('id')
-                            .eq('id', match.id)
-                            .single();
-
-                        if (existing) {
-                            skipped++;
-                            continue;
-                        }
-                    }
-
-                    // Insert match with explicit field mapping
+                    // Insert match directly - let database handle duplicates
                     const { error } = await supabase
                         .from('matches')
                         .insert({
@@ -446,8 +425,17 @@ class DataRestoreService {
                         });
 
                     if (error) {
-                        errors.push(`Match ${match.id}: ${error.message}`);
-                        skipped++;
+                        // Check if it's a duplicate key error (code 23505) or foreign key error (code 23503)
+                        if (error.code === '23505' && options.skipDuplicates) {
+                            skipped++;
+                        } else if (error.code === '23503') {
+                            // Foreign key violation - league doesn't exist
+                            errors.push(`Match ${match.id}: League not found (${match.league_id})`);
+                            skipped++;
+                        } else {
+                            errors.push(`Match ${match.id}: ${error.message}`);
+                            skipped++;
+                        }
                     } else {
                         imported++;
                     }
