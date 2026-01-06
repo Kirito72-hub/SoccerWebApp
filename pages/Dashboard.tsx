@@ -25,21 +25,24 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [leagues, setLeagues] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [userStats, matches, allUsers] = await Promise.all([
+        const [userStats, matches, allUsers, allLeagues] = await Promise.all([
           dataService.getUserStats(user.id),
           dataService.getMatches(),
-          dataService.getUsers()
+          dataService.getUsers(),
+          dataService.getLeagues()
         ]);
 
         setStats(userStats);
         setAllMatches(matches.filter(m => m.status === 'completed'));
         setUsers(allUsers);
+        setLeagues(allLeagues);
       } catch (error) {
         console.error('Error loading dashboard data:', error);
       } finally {
@@ -92,12 +95,23 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     if (val.losses > maxLosses) { maxLosses = val.losses; toughOpp = users.find(u => u.id === key)?.username || "Unknown"; }
   });
 
+  // Calculate leagues joined (where user is in participant_ids)
+  const leaguesJoined = leagues.filter(league =>
+    league.participantIds?.includes(user.id)
+  ).length;
+
+  // Calculate championships (finished leagues where user is admin - simplified)
+  // A more accurate version would check standings, but this counts leagues created and finished
+  const championships = leagues.filter(league =>
+    league.adminId === user.id && league.status === 'finished'
+  ).length;
+
   const statCards = [
     { title: 'Total Matches', value: totalMatches, icon: Activity, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { title: 'Leagues Joined', value: stats?.leaguesParticipated || 0, icon: Users, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { title: 'Leagues Joined', value: leaguesJoined, icon: Users, color: 'text-purple-400', bg: 'bg-purple-400/10' },
     { title: 'Goals Scored', value: goalsScored, icon: Target, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
     { title: 'Goals Taken', value: goalsConceded, icon: ShieldCheck, color: 'text-red-400', bg: 'bg-red-400/10' },
-    { title: 'Championships', value: stats?.championshipsWon || 0, icon: Trophy, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+    { title: 'Championships', value: championships, icon: Trophy, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
     { title: 'Win Rate', value: `${winRate}%`, icon: Zap, color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
     { title: 'Favorite Opponent', value: favOpp, icon: Flame, color: 'text-orange-400', bg: 'bg-orange-400/10' },
     { title: 'Toughest Rival', value: toughOpp, icon: Star, color: 'text-rose-400', bg: 'bg-rose-400/10' },
