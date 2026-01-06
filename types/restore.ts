@@ -29,7 +29,7 @@ export interface RestoreLeague {
     id: string;
     name: string;
     admin_id: string;
-    format: 'round_robin_1leg' | 'round_robin_2legs' | 'cup';
+    format: 'round_robin_1leg' | 'round_robin_2leg' | 'round_robin_2legs' | 'cup';
     status: 'running' | 'finished';
     participant_ids: string[];
     created_at: string;

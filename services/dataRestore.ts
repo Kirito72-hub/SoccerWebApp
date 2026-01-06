@@ -150,8 +150,9 @@ class DataRestoreService {
                         league.participant_ids.forEach(id => result.stats.uniqueUsers.add(id));
                     }
 
-                    // Validate format
-                    if (!['round_robin_1leg', 'round_robin_2legs', 'cup'].includes(league.format)) {
+
+                    // Validate format (accept both singular and plural forms)
+                    if (!['round_robin_1leg', 'round_robin_2leg', 'round_robin_2legs', 'cup'].includes(league.format)) {
                         result.warnings.push(`Invalid league format: ${league.format} for league ${league.id}`);
                     }
 
