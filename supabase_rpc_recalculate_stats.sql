@@ -11,8 +11,8 @@ DECLARE
     total_users integer := 0;
     result json;
 BEGIN
-    -- Delete all existing stats
-    DELETE FROM user_stats;
+    -- Delete all existing stats (WHERE TRUE satisfies Supabase requirement)
+    DELETE FROM user_stats WHERE TRUE;
     
     -- Recalculate and insert stats for each user
     INSERT INTO user_stats (
