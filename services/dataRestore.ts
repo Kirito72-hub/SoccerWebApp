@@ -225,7 +225,7 @@ class DataRestoreService {
         options: RestoreOptions = {
             skipDuplicates: true,
             validateOnly: false,
-            preserveIds: true
+            preserveIds: false
         }
     ): Promise<RestoreResult> {
         const startTime = Date.now();
