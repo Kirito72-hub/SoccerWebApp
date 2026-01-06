@@ -100,11 +100,20 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     league.participantIds?.includes(user.id)
   ).length;
 
-  // Calculate championships (finished leagues where user is admin - simplified)
-  // A more accurate version would check standings, but this counts leagues created and finished
-  const championships = leagues.filter(league =>
-    league.adminId === user.id && league.status === 'finished'
-  ).length;
+  // Calculate championships (finished leagues/cups where user won 1st place)
+  const championships = leagues.filter(league => {
+    // Only finished leagues/cups
+    if (league.status !== 'finished') return false;
+
+    // For knockout/cup format - check winner field
+    if (league.format?.includes('knockout') || league.format?.includes('cup')) {
+      return league.winner === user.id;
+    }
+
+    // For round-robin (league) format - check standings for 1st place
+    if (!league.standings || league.standings.length === 0) return false;
+    return league.standings[0].userId === user.id;
+  }).length;
 
   const statCards = [
     { title: 'Total Matches', value: totalMatches, icon: Activity, color: 'text-blue-400', bg: 'bg-blue-400/10' },
