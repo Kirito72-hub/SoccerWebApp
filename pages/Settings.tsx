@@ -22,6 +22,7 @@ import { dataService } from '../services/dataService';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 import { sendAppUpdateNotification, sendSystemAnnouncement } from '../services/newsUtils';
 import { DataRestoreModal } from '../components/DataRestoreModal';
+import { dataBackupService } from '../services/dataBackup';
 
 interface SettingsProps {
     user: User;
@@ -53,6 +54,9 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
     // Data Restore state
     const [showRestoreModal, setShowRestoreModal] = useState(false);
+
+    // Data Backup state
+    const [exportingBackup, setExportingBackup] = useState(false);
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -273,6 +277,20 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                 return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
         }
     };
+
+    // Handle backup export
+    const handleExportBackup = async () => {
+        setExportingBackup(true);
+        try {
+            await dataBackupService.exportAndDownload(user.id);
+        } catch (error) {
+            console.error('Error exporting backup:', error);
+            alert('Failed to export backup. Please try again.');
+        } finally {
+            setExportingBackup(false);
+        }
+    };
+
 
 
     const getRoleLabel = (role: UserRole) => {
@@ -848,10 +866,12 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                         </div>
 
                         <button
-                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-bold text-white shadow-lg shadow-emerald-600/20 transition-all hover:scale-105"
+                            onClick={handleExportBackup}
+                            disabled={exportingBackup}
+                            className={`w-full flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-bold text-white shadow-lg shadow-emerald-600/20 transition-all hover:scale-105 ${exportingBackup ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            <Database className="w-5 h-5" />
-                            Download Backup
+                            <Database className={`w-5 h-5 ${exportingBackup ? 'animate-spin' : ''}`} />
+                            {exportingBackup ? 'Exporting...' : 'Download Backup'}
                         </button>
                     </div>
 
