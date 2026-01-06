@@ -553,113 +553,6 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                         </div>
                     </div>
 
-                    {/* Reset Database Confirmation Modal */}
-                    {showResetConfirm && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-                            <div className="glass rounded-3xl border border-red-500/30 p-6 lg:p-8 max-w-md w-full space-y-6 animate-in zoom-in-95 duration-300">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-red-600/20 rounded-xl">
-                                        <AlertTriangle className="w-8 h-8 text-red-400" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl lg:text-2xl font-black text-red-400">Reset Database?</h3>
-                                        <p className="text-xs lg:text-sm text-gray-400">Choose what to delete</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <p className="text-sm text-gray-300 font-bold">Select items to delete:</p>
-
-                                    {/* Leagues Checkbox */}
-                                    <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
-                                        <input
-                                            type="checkbox"
-                                            checked={resetOptions.leagues}
-                                            onChange={(e) => setResetOptions({ ...resetOptions, leagues: e.target.checked })}
-                                            className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
-                                        />
-                                        <span className="text-sm text-gray-300">All Leagues</span>
-                                    </label>
-
-                                    {/* Matches Checkbox */}
-                                    <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
-                                        <input
-                                            type="checkbox"
-                                            checked={resetOptions.matches}
-                                            onChange={(e) => setResetOptions({ ...resetOptions, matches: e.target.checked })}
-                                            className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
-                                        />
-                                        <span className="text-sm text-gray-300">All Matches</span>
-                                    </label>
-
-                                    {/* Activity Logs Checkbox */}
-                                    <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
-                                        <input
-                                            type="checkbox"
-                                            checked={resetOptions.activityLogs}
-                                            onChange={(e) => setResetOptions({ ...resetOptions, activityLogs: e.target.checked })}
-                                            className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
-                                        />
-                                        <span className="text-sm text-gray-300">Activity Logs</span>
-                                    </label>
-
-                                    {/* Users Checkbox */}
-                                    <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
-                                        <input
-                                            type="checkbox"
-                                            checked={resetOptions.users}
-                                            onChange={(e) => setResetOptions({ ...resetOptions, users: e.target.checked })}
-                                            className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
-                                        />
-                                        <span className="text-sm text-gray-300">User Accounts (except superusers)</span>
-                                    </label>
-
-                                    {/* User Stats Checkbox */}
-                                    <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
-                                        <input
-                                            type="checkbox"
-                                            checked={resetOptions.userStats}
-                                            onChange={(e) => setResetOptions({ ...resetOptions, userStats: e.target.checked })}
-                                            className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
-                                        />
-                                        <span className="text-sm text-gray-300">User Statistics</span>
-                                    </label>
-
-                                    <p className="text-emerald-400 text-xs font-bold mt-4">
-                                        ✓ Superuser accounts will always be preserved
-                                    </p>
-                                </div>
-
-                                <div className="flex gap-3 pt-4">
-                                    <button
-                                        onClick={() => setShowResetConfirm(false)}
-                                        disabled={resetting}
-                                        className="flex-1 px-4 py-3 glass border border-white/10 rounded-xl font-bold text-sm hover:bg-white/5 transition-all disabled:opacity-50"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleResetDatabase}
-                                        disabled={resetting || !Object.values(resetOptions).some(v => v)}
-                                        className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold text-sm shadow-lg shadow-red-600/20 transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50"
-                                    >
-                                        {resetting ? (
-                                            <>
-                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                                Resetting...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Trash2 className="w-4 h-4" />
-                                                Reset Selected
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Delete Users Confirmation Modal */}
                     {showDeleteConfirm && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
@@ -978,6 +871,113 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                             <Trash2 className="w-4 h-4" />
                             Reset DB
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Reset Database Confirmation Modal */}
+            {showResetConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <div className="glass rounded-3xl border border-red-500/30 p-6 lg:p-8 max-w-md w-full space-y-6 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-red-600/20 rounded-xl">
+                                <AlertTriangle className="w-8 h-8 text-red-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl lg:text-2xl font-black text-red-400">Reset Database?</h3>
+                                <p className="text-xs lg:text-sm text-gray-400">Choose what to delete</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <p className="text-sm text-gray-300 font-bold">Select items to delete:</p>
+
+                            {/* Leagues Checkbox */}
+                            <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                <input
+                                    type="checkbox"
+                                    checked={resetOptions.leagues}
+                                    onChange={(e) => setResetOptions({ ...resetOptions, leagues: e.target.checked })}
+                                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
+                                />
+                                <span className="text-sm text-gray-300">All Leagues</span>
+                            </label>
+
+                            {/* Matches Checkbox */}
+                            <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                <input
+                                    type="checkbox"
+                                    checked={resetOptions.matches}
+                                    onChange={(e) => setResetOptions({ ...resetOptions, matches: e.target.checked })}
+                                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
+                                />
+                                <span className="text-sm text-gray-300">All Matches</span>
+                            </label>
+
+                            {/* Activity Logs Checkbox */}
+                            <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                <input
+                                    type="checkbox"
+                                    checked={resetOptions.activityLogs}
+                                    onChange={(e) => setResetOptions({ ...resetOptions, activityLogs: e.target.checked })}
+                                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
+                                />
+                                <span className="text-sm text-gray-300">Activity Logs</span>
+                            </label>
+
+                            {/* Users Checkbox */}
+                            <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                <input
+                                    type="checkbox"
+                                    checked={resetOptions.users}
+                                    onChange={(e) => setResetOptions({ ...resetOptions, users: e.target.checked })}
+                                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
+                                />
+                                <span className="text-sm text-gray-300">User Accounts (except superusers)</span>
+                            </label>
+
+                            {/* User Stats Checkbox */}
+                            <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                <input
+                                    type="checkbox"
+                                    checked={resetOptions.userStats}
+                                    onChange={(e) => setResetOptions({ ...resetOptions, userStats: e.target.checked })}
+                                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
+                                />
+                                <span className="text-sm text-gray-300">User Statistics</span>
+                            </label>
+
+                            <p className="text-emerald-400 text-xs font-bold mt-4">
+                                ✓ Superuser accounts will always be preserved
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3 pt-4">
+                            <button
+                                onClick={() => setShowResetConfirm(false)}
+                                disabled={resetting}
+                                className="flex-1 px-4 py-3 glass border border-white/10 rounded-xl font-bold text-sm hover:bg-white/5 transition-all disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleResetDatabase}
+                                disabled={resetting || !Object.values(resetOptions).some(v => v)}
+                                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold text-sm shadow-lg shadow-red-600/20 transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {resetting ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Resetting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 className="w-4 h-4" />
+                                        Reset Selected
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
