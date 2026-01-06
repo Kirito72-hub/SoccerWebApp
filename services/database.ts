@@ -498,7 +498,6 @@ export const db = {
         matches?: boolean;
         activityLogs?: boolean;
         users?: boolean;
-        userStats?: boolean;
     } = {}): Promise<void> {
         try {
             // Default to deleting everything if no options provided
@@ -506,8 +505,7 @@ export const db = {
                 leagues = true,
                 matches = true,
                 activityLogs = true,
-                users = true,
-                userStats = true
+                users = true
             } = options;
 
             // Get all superusers before deletion (always preserve)
@@ -532,30 +530,11 @@ export const db = {
                 await supabase.from('leagues').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             }
 
-            if (userStats) {
-                await supabase.from('user_stats').delete().neq('user_id', '00000000-0000-0000-0000-000000000000');
-            }
-
             // Delete users except superusers
             if (users) {
                 if (superusers.length > 0) {
                     const superuserIds = superusers.map(u => u.id);
                     await supabase.from('users').delete().not('id', 'in', `(${superuserIds.map(id => `'${id}'`).join(',')})`);
-
-                    // Reset superuser stats if userStats was selected
-                    if (userStats) {
-                        for (const su of superusers) {
-                            await supabase.from('user_stats').upsert({
-                                user_id: su.id,
-                                matches_played: 0,
-                                leagues_participated: 0,
-                                goals_scored: 0,
-                                goals_conceded: 0,
-                                championships_won: 0,
-                                updated_at: new Date().toISOString()
-                            });
-                        }
-                    }
                 } else {
                     // Delete all users if no superusers exist
                     await supabase.from('users').delete().neq('id', '00000000-0000-0000-0000-000000000000');

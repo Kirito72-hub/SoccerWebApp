@@ -205,7 +205,6 @@ export const dataService = {
         matches?: boolean;
         activityLogs?: boolean;
         users?: boolean;
-        userStats?: boolean;
     } = {}): Promise<void> {
         if (db.isOnline()) {
             await db.resetDatabase(options);

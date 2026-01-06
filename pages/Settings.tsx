@@ -63,8 +63,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
         leagues: true,
         matches: true,
         activityLogs: true,
-        users: true,
-        userStats: true
+        users: true
     });
 
     useEffect(() => {
@@ -177,7 +176,6 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
             if (resetOptions.matches) deleted.push('Matches');
             if (resetOptions.activityLogs) deleted.push('Activity Logs');
             if (resetOptions.users) deleted.push('User Accounts (except superusers)');
-            if (resetOptions.userStats) deleted.push('User Statistics');
 
             alert(`Database reset successfully!\n\nDeleted:\n${deleted.map(item => `• ${item}`).join('\n')}\n\n✓ Superuser accounts were preserved`);
         } catch (error) {
@@ -934,17 +932,6 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                                     className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
                                 />
                                 <span className="text-sm text-gray-300">User Accounts (except superusers)</span>
-                            </label>
-
-                            {/* User Stats Checkbox */}
-                            <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
-                                <input
-                                    type="checkbox"
-                                    checked={resetOptions.userStats}
-                                    onChange={(e) => setResetOptions({ ...resetOptions, userStats: e.target.checked })}
-                                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
-                                />
-                                <span className="text-sm text-gray-300">User Statistics</span>
                             </label>
 
                             <p className="text-emerald-400 text-xs font-bold mt-4">
