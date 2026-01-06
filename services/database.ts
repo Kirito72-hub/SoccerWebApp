@@ -506,38 +506,20 @@ export const db = {
                 users = true
             } = options;
 
-            // Get all superusers before deletion (always preserve)
-            const { data: superusersData } = await supabase
-                .from('users')
-                .select('*')
-                .eq('role', 'superuser');
-            const superusers = superusersData || [];
+            // Use RPC function to bypass RLS policies
+            const { data, error } = await supabase.rpc('reset_database_selective', {
+                delete_leagues: leagues,
+                delete_activity_logs: activityLogs,
+                delete_users: users
+            });
 
-            // Delete selected data from tables (order matters due to foreign keys)
-            if (activityLogs) {
-                await supabase.from('activity_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            if (error) {
+                console.error('RPC error:', error);
+                throw error;
             }
 
-            await supabase.from('notifications').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-
-            // Always delete matches when deleting leagues (foreign key dependency)
-            if (leagues) {
-                await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                await supabase.from('leagues').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            }
-
-            // Delete users except superusers
-            if (users) {
-                if (superusers.length > 0) {
-                    const superuserIds = superusers.map(u => u.id);
-                    await supabase.from('users').delete().not('id', 'in', `(${superuserIds.map(id => `'${id}'`).join(',')})`);
-                } else {
-                    // Delete all users if no superusers exist
-                    await supabase.from('users').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                }
-            }
-
-            console.log('Database reset complete with options:', options);
+            console.log('Database reset complete with counts:', data);
+            console.log('Reset options:', options);
         } catch (error) {
             console.error('Error resetting database:', error);
             throw error;
