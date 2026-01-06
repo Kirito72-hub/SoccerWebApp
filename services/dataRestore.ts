@@ -20,7 +20,6 @@ import type {
     RestoreResult,
     RestoreOptions
 } from '../types/restore';
-import { recalculateAllUserStats } from './statsRecalculation';
 
 class DataRestoreService {
     private progressCallback?: (progress: RestoreProgress) => void;
@@ -313,28 +312,6 @@ class DataRestoreService {
             result.success = result.errors.length === 0 ||
                 (result.imported.leagues > 0 || result.imported.matches > 0);
             result.duration = Date.now() - startTime;
-
-            // Recalculate user stats if matches were imported
-            if (result.imported.matches > 0) {
-                this.updateProgress({
-                    phase: 'complete',
-                    current: totalItems,
-                    total: totalItems,
-                    message: 'Recalculating user stats...',
-                    errors: result.errors
-                });
-
-                try {
-                    const statsResult = await recalculateAllUserStats();
-                    if (statsResult.success) {
-                        result.errors.push(`Stats recalculated for ${statsResult.usersUpdated} users`);
-                    } else {
-                        result.errors.push(...statsResult.errors.map(e => `Stats: ${e}`));
-                    }
-                } catch (statsError: any) {
-                    result.errors.push(`Failed to recalculate stats: ${statsError.message}`);
-                }
-            }
 
             this.updateProgress({
                 phase: 'complete',

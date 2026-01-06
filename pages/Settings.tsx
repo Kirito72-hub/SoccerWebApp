@@ -22,7 +22,6 @@ import { dataService } from '../services/dataService';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 import { sendAppUpdateNotification, sendSystemAnnouncement } from '../services/newsUtils';
 import { DataRestoreModal } from '../components/DataRestoreModal';
-import { recalculateAllUserStats } from '../services/statsRecalculation';
 
 interface SettingsProps {
     user: User;
@@ -51,10 +50,6 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     const [announcementMessage, setAnnouncementMessage] = useState('');
     const [sendingAnnouncement, setSendingAnnouncement] = useState(false);
     const [announcementSuccess, setAnnouncementSuccess] = useState(false);
-
-    // Stats recalculation state
-    const [recalculatingStats, setRecalculatingStats] = useState(false);
-    const [statsRecalculated, setStatsRecalculated] = useState(false);
 
     // Data Restore state
     const [showRestoreModal, setShowRestoreModal] = useState(false);
@@ -280,27 +275,6 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     };
 
 
-    // Recalculate Stats Handler
-    const handleRecalculateStats = async () => {
-        setRecalculatingStats(true);
-        setStatsRecalculated(false);
-        try {
-            const result = await recalculateAllUserStats();
-            if (result.success) {
-                setStatsRecalculated(true);
-                setTimeout(() => setStatsRecalculated(false), 3000);
-            } else {
-                console.error('Stats recalculation errors:', result.errors);
-                alert(`Failed to recalculate stats:\n${result.errors.join('\n')}`);
-            }
-        } catch (error) {
-            console.error('Error recalculating stats:', error);
-            alert('Failed to recalculate stats. Check console for details.');
-        } finally {
-            setRecalculatingStats(false);
-        }
-    };
-
     const getRoleLabel = (role: UserRole) => {
         switch (role) {
             case 'superuser':
@@ -362,24 +336,6 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                         <Database className="w-4 h-4" />
                         <span className="hidden sm:inline">Restore Data</span>
                         <span className="sm:hidden">Restore</span>
-                    </button>
-
-                    {/* Recalculate Stats Button */}
-                    <button
-                        onClick={handleRecalculateStats}
-                        disabled={recalculatingStats}
-                        className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl font-bold text-sm transition-all hover:scale-105 ${statsRecalculated
-                            ? 'bg-green-600/20 border-green-500/30 text-green-400'
-                            : 'bg-blue-600/20 hover:bg-blue-600/30 border-blue-500/30 text-blue-400'
-                            } ${recalculatingStats ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                        <Activity className={`w-4 h-4 ${recalculatingStats ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">
-                            {recalculatingStats ? 'Recalculating...' : statsRecalculated ? 'Stats Updated!' : 'Recalculate Stats'}
-                        </span>
-                        <span className="sm:hidden">
-                            {recalculatingStats ? '...' : statsRecalculated ? '✓' : 'Stats'}
-                        </span>
                     </button>
 
                     {/* Reset Database Button */}

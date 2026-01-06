@@ -1,0 +1,57 @@
+{
+    "_instructions": "User mapping complete - Ready for Phase 2!",
+    "_note": "Ahmed mapped to superuser account (398ebadd-1c7f-4133-864b-445e9ad31959)",
+    "_query": "SELECT id, email, username, first_name, last_name FROM users ORDER BY email;",
+    "_totalPlayers": 8,
+    "_mappedPlayers": 8,
+    "_pendingPlayers": 0,
+    "mapping": {
+        "Abdulrahman": "f726083e-8dad-4d0d-9e55-667b47b0132f",
+        "Adib": "e2aceea8-51b5-483d-91bb-883f038a6928",
+        "Ahmed": "398ebadd-1c7f-4133-864b-445e9ad31959",
+        "Modar": "fac22412-6170-433f-ad6c-c5378b3546dd",
+        "Mustaf": "9ab18914-287f-4354-ae08-0ca843013dd1",
+        "Mustafa": "9ab18914-287f-4354-ae08-0ca843013dd1",
+        "Noor": "cc115ddd-6bbc-4421-ba0d-8364a5fb05be",
+        "Yaman": "25a5a417-51aa-4a57-9dbf-575350f81721"
+    },
+    "_userDetails": {
+        "Abdulrahman": {
+            "email": "abdulrahman42@gmail.com",
+            "username": "GoToHell",
+            "name": "Abdulrahman Salem"
+        },
+        "Adib": {
+            "email": "adib22@hotmail.com",
+            "username": "Adib",
+            "name": "Adib dd"
+        },
+        "Ahmed": {
+            "email": "ahmad.moayad96@gmail.com",
+            "username": "Kirito",
+            "name": "Ahmad Test",
+            "note": "Using superuser account - UPDATE IN SUPABASE: username='Ahmed', first_name='Ahmed', last_name='YourLastName'"
+        },
+        "Modar": {
+            "email": "modar.saudi@hotmail.com",
+            "username": "Modar",
+            "name": "Muhammed Modar Saudi"
+        },
+        "Mustaf_Mustafa": {
+            "email": "mustavacim@gmail.com",
+            "username": "STEV",
+            "name": "MUSTAFA YAHYA",
+            "note": "Both 'Mustaf' and 'Mustafa' map to same user (typo in old data)"
+        },
+        "Noor": {
+            "email": "yamaneid@gmail.com",
+            "username": "yamee90",
+            "name": "YAMAN MOHAMADEID"
+        },
+        "Yaman": {
+            "email": "mn.eid94@gmail.com",
+            "username": "Noor",
+            "name": "Mohamad Eid"
+        }
+    }
+}
