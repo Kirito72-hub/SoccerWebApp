@@ -347,10 +347,10 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
 
             {/* Tab Navigation */}
-            <div className="flex gap-2 p-1 glass rounded-2xl border border-white/5 w-full sm:w-fit overflow-x-auto no-scrollbar">
+            <div className="flex gap-2 p-1 glass rounded-2xl border border-white/5 w-fit">
                 <button
                     onClick={() => setActiveTab('users')}
-                    className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${activeTab === 'users'
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'users'
                         ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
@@ -360,7 +360,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                 </button>
                 <button
                     onClick={() => setActiveTab('announcements')}
-                    className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${activeTab === 'announcements'
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'announcements'
                         ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
@@ -370,7 +370,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                 </button>
                 <button
                     onClick={() => setActiveTab('backup')}
-                    className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${activeTab === 'backup'
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'backup'
                         ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
@@ -813,119 +813,101 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
             {/* Backup/Restore Tab */}
             {activeTab === 'backup' && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-fr">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
                     {/* Backup Card */}
-                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8 flex flex-col h-full">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-3 bg-emerald-600/20 rounded-xl">
-                                <Database className="w-6 h-6 text-emerald-400" />
+                    <div className="glass rounded-2xl border border-white/5 p-4 lg:p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 lg:p-3 bg-emerald-600/20 rounded-xl">
+                                <Database className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-400" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black">BACKUP DATA</h2>
-                                <p className="text-sm text-gray-500">Export your leagues and matches</p>
+                                <h2 className="text-base lg:text-lg font-black">BACKUP</h2>
+                                <p className="text-xs text-gray-500">Export data</p>
                             </div>
                         </div>
 
-                        <div className="space-y-4 mb-6 flex-1">
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-emerald-500/20 h-full">
-                                <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="font-bold text-sm text-emerald-400">Safe & Secure</p>
-                                    <p className="text-xs text-gray-400 mt-1">Your data is exported as a JSON file</p>
-                                </div>
+                        <div className="space-y-2 mb-4">
+                            <div className="flex items-center gap-2 text-xs">
+                                <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                                <span className="text-gray-400">Safe JSON export</span>
                             </div>
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-emerald-500/20 h-full">
-                                <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="font-bold text-sm text-emerald-400">Complete Backup</p>
-                                    <p className="text-xs text-gray-400 mt-1">Includes all leagues, matches, and standings</p>
-                                </div>
+                            <div className="flex items-center gap-2 text-xs">
+                                <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                                <span className="text-gray-400">All leagues & matches</span>
                             </div>
                         </div>
 
                         <button
                             onClick={handleExportBackup}
                             disabled={exportingBackup}
-                            className={`w-full flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-bold text-white shadow-lg shadow-emerald-600/20 transition-all hover:scale-105 ${exportingBackup ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-bold text-sm text-white shadow-lg shadow-emerald-600/20 transition-all hover:scale-105 ${exportingBackup ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            <Database className={`w-5 h-5 ${exportingBackup ? 'animate-spin' : ''}`} />
-                            {exportingBackup ? 'Exporting...' : 'Download Backup'}
+                            <Database className={`w-4 h-4 ${exportingBackup ? 'animate-spin' : ''}`} />
+                            {exportingBackup ? 'Exporting...' : 'Download'}
                         </button>
                     </div>
 
                     {/* Restore Card */}
-                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8 flex flex-col h-full">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-3 bg-purple-600/20 rounded-xl">
-                                <Database className="w-6 h-6 text-purple-400" />
+                    <div className="glass rounded-2xl border border-white/5 p-4 lg:p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 lg:p-3 bg-purple-600/20 rounded-xl">
+                                <Database className="w-5 h-5 lg:w-6 lg:h-6 text-purple-400" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black">RESTORE DATA</h2>
-                                <p className="text-sm text-gray-500">Import leagues and matches</p>
+                                <h2 className="text-base lg:text-lg font-black">RESTORE</h2>
+                                <p className="text-xs text-gray-500">Import data</p>
                             </div>
                         </div>
 
-                        <div className="space-y-4 mb-6 flex-1">
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-purple-500/20 h-full">
-                                <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="font-bold text-sm text-yellow-400">Validation First</p>
-                                    <p className="text-xs text-gray-400 mt-1">File is validated before importing</p>
-                                </div>
+                        <div className="space-y-2 mb-4">
+                            <div className="flex items-center gap-2 text-xs">
+                                <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                                <span className="text-gray-400">Validates before import</span>
                             </div>
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-purple-500/20 h-full">
-                                <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="font-bold text-sm text-yellow-400">Smart Duplicates</p>
-                                    <p className="text-xs text-gray-400 mt-1">Automatically skips existing records</p>
-                                </div>
+                            <div className="flex items-center gap-2 text-xs">
+                                <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                                <span className="text-gray-400">Skips duplicates</span>
                             </div>
                         </div>
 
                         <button
                             onClick={() => setShowRestoreModal(true)}
-                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-purple-600 hover:bg-purple-700 rounded-xl font-bold text-white shadow-lg shadow-purple-600/20 transition-all hover:scale-105"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 rounded-xl font-bold text-sm text-white shadow-lg shadow-purple-600/20 transition-all hover:scale-105"
                         >
-                            <Database className="w-5 h-5" />
-                            Restore from File
+                            <Database className="w-4 h-4" />
+                            Restore File
                         </button>
                     </div>
 
                     {/* Reset Database Card */}
-                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8 flex flex-col h-full">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-3 bg-red-600/20 rounded-xl">
-                                <Trash2 className="w-6 h-6 text-red-400" />
+                    <div className="glass rounded-2xl border border-white/5 p-4 lg:p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 lg:p-3 bg-red-600/20 rounded-xl">
+                                <Trash2 className="w-5 h-5 lg:w-6 lg:h-6 text-red-400" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black">RESET DATABASE</h2>
-                                <p className="text-sm text-gray-500">Clear all data</p>
+                                <h2 className="text-base lg:text-lg font-black">RESET</h2>
+                                <p className="text-xs text-gray-500">Clear all data</p>
                             </div>
                         </div>
 
-                        <div className="space-y-4 mb-6 flex-1">
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-red-500/20 h-full">
-                                <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="font-bold text-sm text-red-400">Permanent Action</p>
-                                    <p className="text-xs text-gray-400 mt-1">This cannot be undone</p>
-                                </div>
+                        <div className="space-y-2 mb-4">
+                            <div className="flex items-center gap-2 text-xs">
+                                <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                                <span className="text-gray-400">Cannot be undone</span>
                             </div>
-                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-red-500/20 h-full">
-                                <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="font-bold text-sm text-red-400">Deletes Everything</p>
-                                    <p className="text-xs text-gray-400 mt-1">All leagues, matches, and data will be lost</p>
-                                </div>
+                            <div className="flex items-center gap-2 text-xs">
+                                <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                                <span className="text-gray-400">Deletes everything</span>
                             </div>
                         </div>
 
                         <button
                             onClick={() => setShowResetConfirm(true)}
-                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-red-600 hover:bg-red-700 rounded-xl font-bold text-white shadow-lg shadow-red-600/20 transition-all hover:scale-105"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold text-sm text-white shadow-lg shadow-red-600/20 transition-all hover:scale-105"
                         >
-                            <Trash2 className="w-5 h-5" />
-                            Reset Database
+                            <Trash2 className="w-4 h-4" />
+                            Reset DB
                         </button>
                     </div>
                 </div>
