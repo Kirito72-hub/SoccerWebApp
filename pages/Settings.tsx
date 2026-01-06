@@ -347,36 +347,39 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
 
             {/* Tab Navigation */}
-            <div className="flex gap-2 p-1 glass rounded-2xl border border-white/5 w-fit">
+            <div className="flex gap-2 p-1 glass rounded-2xl border border-white/5 overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('users')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'users'
+                    className={`flex items-center gap-2 px-4 lg:px-6 py-2 lg:py-3 rounded-xl font-bold text-xs lg:text-sm transition-all whitespace-nowrap ${activeTab === 'users'
                         ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                 >
                     <Users className="w-4 h-4" />
-                    User Management
+                    <span className="hidden sm:inline">User Management</span>
+                    <span className="sm:hidden">Users</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('announcements')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'announcements'
+                    className={`flex items-center gap-2 px-4 lg:px-6 py-2 lg:py-3 rounded-xl font-bold text-xs lg:text-sm transition-all whitespace-nowrap ${activeTab === 'announcements'
                         ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                 >
                     <Bell className="w-4 h-4" />
-                    Announcements
+                    <span className="hidden sm:inline">Announcements</span>
+                    <span className="sm:hidden">News</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('backup')}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'backup'
+                    className={`flex items-center gap-2 px-4 lg:px-6 py-2 lg:py-3 rounded-xl font-bold text-xs lg:text-sm transition-all whitespace-nowrap ${activeTab === 'backup'
                         ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                 >
                     <Database className="w-4 h-4" />
-                    Backup/Restore
+                    <span className="hidden sm:inline">Backup/Restore</span>
+                    <span className="sm:hidden">Data</span>
                 </button>
             </div>
 
