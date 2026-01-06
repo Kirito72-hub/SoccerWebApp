@@ -493,48 +493,76 @@ export const db = {
 
     // ==================== DATABASE RESET ====================
 
-    async resetDatabase(preserveSuperusers: boolean = true): Promise<void> {
+    async resetDatabase(options: {
+        leagues?: boolean;
+        matches?: boolean;
+        activityLogs?: boolean;
+        users?: boolean;
+        userStats?: boolean;
+    } = {}): Promise<void> {
         try {
-            // Get all superusers before deletion
-            let superusers: any[] = [];
-            if (preserveSuperusers) {
-                const { data } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('role', 'superuser');
-                superusers = data || [];
+            // Default to deleting everything if no options provided
+            const {
+                leagues = true,
+                matches = true,
+                activityLogs = true,
+                users = true,
+                userStats = true
+            } = options;
+
+            // Get all superusers before deletion (always preserve)
+            const { data: superusersData } = await supabase
+                .from('users')
+                .select('*')
+                .eq('role', 'superuser');
+            const superusers = superusersData || [];
+
+            // Delete selected data from tables (order matters due to foreign keys)
+            if (activityLogs) {
+                await supabase.from('activity_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             }
 
-            // Delete all data from tables (order matters due to foreign keys)
-            await supabase.from('activity_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             await supabase.from('notifications').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            await supabase.from('leagues').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            await supabase.from('user_stats').delete().neq('user_id', '00000000-0000-0000-0000-000000000000');
 
-            // Delete all users except superusers
-            if (preserveSuperusers && superusers.length > 0) {
-                const superuserIds = superusers.map(u => u.id);
-                await supabase.from('users').delete().not('id', 'in', `(${superuserIds.map(id => `'${id}'`).join(',')})`);
-
-                // Reset superuser stats
-                for (const su of superusers) {
-                    await supabase.from('user_stats').upsert({
-                        user_id: su.id,
-                        matches_played: 0,
-                        leagues_participated: 0,
-                        goals_scored: 0,
-                        goals_conceded: 0,
-                        championships_won: 0,
-                        updated_at: new Date().toISOString()
-                    });
-                }
-            } else {
-                // Delete all users
-                await supabase.from('users').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            if (matches) {
+                await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             }
 
-            console.log('Database reset complete');
+            if (leagues) {
+                await supabase.from('leagues').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            }
+
+            if (userStats) {
+                await supabase.from('user_stats').delete().neq('user_id', '00000000-0000-0000-0000-000000000000');
+            }
+
+            // Delete users except superusers
+            if (users) {
+                if (superusers.length > 0) {
+                    const superuserIds = superusers.map(u => u.id);
+                    await supabase.from('users').delete().not('id', 'in', `(${superuserIds.map(id => `'${id}'`).join(',')})`);
+
+                    // Reset superuser stats if userStats was selected
+                    if (userStats) {
+                        for (const su of superusers) {
+                            await supabase.from('user_stats').upsert({
+                                user_id: su.id,
+                                matches_played: 0,
+                                leagues_participated: 0,
+                                goals_scored: 0,
+                                goals_conceded: 0,
+                                championships_won: 0,
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+                } else {
+                    // Delete all users if no superusers exist
+                    await supabase.from('users').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                }
+            }
+
+            console.log('Database reset complete with options:', options);
         } catch (error) {
             console.error('Error resetting database:', error);
             throw error;

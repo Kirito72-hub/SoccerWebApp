@@ -200,9 +200,15 @@ export const dataService = {
 
     // ==================== DATABASE MANAGEMENT ====================
 
-    async resetDatabase(preserveSuperusers: boolean = true): Promise<void> {
+    async resetDatabase(options: {
+        leagues?: boolean;
+        matches?: boolean;
+        activityLogs?: boolean;
+        users?: boolean;
+        userStats?: boolean;
+    } = {}): Promise<void> {
         if (db.isOnline()) {
-            await db.resetDatabase(preserveSuperusers);
+            await db.resetDatabase(options);
         } else {
             throw new Error('Database reset is only available when connected to Supabase');
         }

@@ -58,6 +58,15 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     // Data Backup state
     const [exportingBackup, setExportingBackup] = useState(false);
 
+    // Reset options state
+    const [resetOptions, setResetOptions] = useState({
+        leagues: true,
+        matches: true,
+        activityLogs: true,
+        users: true,
+        userStats: true
+    });
+
     useEffect(() => {
         const loadUsers = async () => {
             try {
@@ -154,14 +163,23 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     const handleResetDatabase = async () => {
         try {
             setResetting(true);
-            await dataService.resetDatabase(true); // Preserve superusers
+            await dataService.resetDatabase(resetOptions);
 
             // Reload users
             const users = await dataService.getUsers();
             setAllUsers(users);
 
             setShowResetConfirm(false);
-            alert('Database reset successfully! All data except superuser accounts has been deleted.\n\nDeleted:\n• All notifications\n• All matches\n• All leagues\n• All activity logs\n• All user stats\n• All non-superuser accounts');
+
+            // Build message based on what was deleted
+            const deleted = [];
+            if (resetOptions.leagues) deleted.push('Leagues');
+            if (resetOptions.matches) deleted.push('Matches');
+            if (resetOptions.activityLogs) deleted.push('Activity Logs');
+            if (resetOptions.users) deleted.push('User Accounts (except superusers)');
+            if (resetOptions.userStats) deleted.push('User Statistics');
+
+            alert(`Database reset successfully!\n\nDeleted:\n${deleted.map(item => `• ${item}`).join('\n')}\n\n✓ Superuser accounts were preserved`);
         } catch (error) {
             console.error('Error resetting database:', error);
             alert('Failed to reset database: ' + (error as Error).message);
@@ -545,22 +563,70 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                                     </div>
                                     <div>
                                         <h3 className="text-xl lg:text-2xl font-black text-red-400">Reset Database?</h3>
-                                        <p className="text-xs lg:text-sm text-gray-400">This action cannot be undone</p>
+                                        <p className="text-xs lg:text-sm text-gray-400">Choose what to delete</p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 text-sm lg:text-base">
-                                    <p className="text-gray-300">
-                                        This will <strong className="text-red-400">permanently delete</strong>:
-                                    </p>
-                                    <ul className="list-disc list-inside space-y-1 text-gray-400 ml-2">
-                                        <li>All leagues and matches</li>
-                                        <li>All activity logs</li>
-                                        <li>All user accounts (except superusers)</li>
-                                        <li>All user statistics</li>
-                                    </ul>
-                                    <p className="text-emerald-400 font-bold mt-4">
-                                        ✓ Superuser accounts will be preserved
+                                <div className="space-y-3">
+                                    <p className="text-sm text-gray-300 font-bold">Select items to delete:</p>
+
+                                    {/* Leagues Checkbox */}
+                                    <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                        <input
+                                            type="checkbox"
+                                            checked={resetOptions.leagues}
+                                            onChange={(e) => setResetOptions({ ...resetOptions, leagues: e.target.checked })}
+                                            className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
+                                        />
+                                        <span className="text-sm text-gray-300">All Leagues</span>
+                                    </label>
+
+                                    {/* Matches Checkbox */}
+                                    <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                        <input
+                                            type="checkbox"
+                                            checked={resetOptions.matches}
+                                            onChange={(e) => setResetOptions({ ...resetOptions, matches: e.target.checked })}
+                                            className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
+                                        />
+                                        <span className="text-sm text-gray-300">All Matches</span>
+                                    </label>
+
+                                    {/* Activity Logs Checkbox */}
+                                    <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                        <input
+                                            type="checkbox"
+                                            checked={resetOptions.activityLogs}
+                                            onChange={(e) => setResetOptions({ ...resetOptions, activityLogs: e.target.checked })}
+                                            className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
+                                        />
+                                        <span className="text-sm text-gray-300">Activity Logs</span>
+                                    </label>
+
+                                    {/* Users Checkbox */}
+                                    <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                        <input
+                                            type="checkbox"
+                                            checked={resetOptions.users}
+                                            onChange={(e) => setResetOptions({ ...resetOptions, users: e.target.checked })}
+                                            className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
+                                        />
+                                        <span className="text-sm text-gray-300">User Accounts (except superusers)</span>
+                                    </label>
+
+                                    {/* User Stats Checkbox */}
+                                    <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                        <input
+                                            type="checkbox"
+                                            checked={resetOptions.userStats}
+                                            onChange={(e) => setResetOptions({ ...resetOptions, userStats: e.target.checked })}
+                                            className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
+                                        />
+                                        <span className="text-sm text-gray-300">User Statistics</span>
+                                    </label>
+
+                                    <p className="text-emerald-400 text-xs font-bold mt-4">
+                                        ✓ Superuser accounts will always be preserved
                                     </p>
                                 </div>
 
@@ -574,7 +640,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                                     </button>
                                     <button
                                         onClick={handleResetDatabase}
-                                        disabled={resetting}
+                                        disabled={resetting || !Object.values(resetOptions).some(v => v)}
                                         className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold text-sm shadow-lg shadow-red-600/20 transition-all hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50"
                                     >
                                         {resetting ? (
@@ -585,7 +651,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                                         ) : (
                                             <>
                                                 <Trash2 className="w-4 h-4" />
-                                                Reset Database
+                                                Reset Selected
                                             </>
                                         )}
                                     </button>
