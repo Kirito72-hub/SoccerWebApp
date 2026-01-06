@@ -106,15 +106,15 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+            <div className="glass rounded-3xl border border-white/5 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-300">
                 {/* Header */}
-                <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-                    <h2 className="text-2xl font-bold text-gray-800">Restore Data</h2>
+                <div className="sticky top-0 glass border-b border-white/5 px-6 py-4 flex justify-between items-center backdrop-blur-xl">
+                    <h2 className="text-2xl font-black text-white">RESTORE DATA</h2>
                     <button
                         onClick={handleClose}
                         disabled={isProcessing}
-                        className="text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                        className="text-gray-400 hover:text-white disabled:opacity-50 transition-colors"
                     >
                         <XCircle size={24} />
                     </button>
@@ -124,10 +124,10 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
                 <div className="p-6 space-y-6">
                     {/* File Upload */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-bold text-gray-300 mb-2">
                             Select Backup File
                         </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-500 transition-colors">
+                        <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-purple-500/50 transition-all glass">
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -141,11 +141,11 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
                                 htmlFor="restore-file-input"
                                 className="cursor-pointer flex flex-col items-center"
                             >
-                                <Upload size={48} className="text-gray-400 mb-2" />
-                                <span className="text-sm text-gray-600">
+                                <Upload size={48} className="text-gray-500 mb-2" />
+                                <span className="text-sm text-gray-300 font-medium">
                                     {selectedFile ? selectedFile.name : 'Click to select a JSON backup file'}
                                 </span>
-                                <span className="text-xs text-gray-400 mt-1">
+                                <span className="text-xs text-gray-500 mt-1">
                                     Maximum file size: 50MB
                                 </span>
                             </label>
@@ -156,14 +156,14 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
                     {validation && (
                         <div className="space-y-4">
                             {/* Status */}
-                            <div className={`p-4 rounded-lg ${validation.valid ? 'bg-green-50' : 'bg-red-50'}`}>
+                            <div className={`p-4 rounded-xl glass border ${validation.valid ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'}`}>
                                 <div className="flex items-center gap-2">
                                     {validation.valid ? (
-                                        <CheckCircle className="text-green-600" size={20} />
+                                        <CheckCircle className="text-green-400" size={20} />
                                     ) : (
-                                        <XCircle className="text-red-600" size={20} />
+                                        <XCircle className="text-red-400" size={20} />
                                     )}
-                                    <span className={`font-medium ${validation.valid ? 'text-green-800' : 'text-red-800'}`}>
+                                    <span className={`font-bold ${validation.valid ? 'text-green-400' : 'text-red-400'}`}>
                                         {validation.valid ? 'File is valid and ready to restore' : 'Validation failed'}
                                     </span>
                                 </div>
@@ -172,29 +172,29 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
                             {/* Stats */}
                             {validation.valid && (
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-blue-50 p-4 rounded-lg">
-                                        <div className="text-2xl font-bold text-blue-600">
+                                    <div className="glass border border-blue-500/20 p-4 rounded-xl">
+                                        <div className="text-2xl font-black text-blue-400">
                                             {validation.stats.leaguesCount}
                                         </div>
-                                        <div className="text-sm text-blue-800">Leagues</div>
+                                        <div className="text-sm text-gray-400">Leagues</div>
                                     </div>
-                                    <div className="bg-purple-50 p-4 rounded-lg">
-                                        <div className="text-2xl font-bold text-purple-600">
+                                    <div className="glass border border-purple-500/20 p-4 rounded-xl">
+                                        <div className="text-2xl font-black text-purple-400">
                                             {validation.stats.matchesCount}
                                         </div>
-                                        <div className="text-sm text-purple-800">Matches</div>
+                                        <div className="text-sm text-gray-400">Matches</div>
                                     </div>
                                 </div>
                             )}
 
                             {/* Errors */}
                             {validation.errors.length > 0 && (
-                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                <div className="glass border border-red-500/30 bg-red-500/10 rounded-xl p-4">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <AlertCircle className="text-red-600" size={16} />
-                                        <span className="font-medium text-red-800">Errors</span>
+                                        <AlertCircle className="text-red-400" size={16} />
+                                        <span className="font-bold text-red-400">Errors</span>
                                     </div>
-                                    <ul className="list-disc list-inside space-y-1 text-sm text-red-700">
+                                    <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
                                         {validation.errors.map((error, index) => (
                                             <li key={index}>{error}</li>
                                         ))}
@@ -204,17 +204,17 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
 
                             {/* Warnings */}
                             {validation.warnings.length > 0 && (
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <div className="glass border border-yellow-500/30 bg-yellow-500/10 rounded-xl p-4">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <AlertCircle className="text-yellow-600" size={16} />
-                                        <span className="font-medium text-yellow-800">Warnings</span>
+                                        <AlertCircle className="text-yellow-400" size={16} />
+                                        <span className="font-bold text-yellow-400">Warnings</span>
                                     </div>
-                                    <ul className="list-disc list-inside space-y-1 text-sm text-yellow-700">
+                                    <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
                                         {validation.warnings.slice(0, 5).map((warning, index) => (
                                             <li key={index}>{warning}</li>
                                         ))}
                                         {validation.warnings.length > 5 && (
-                                            <li className="text-yellow-600">
+                                            <li className="text-yellow-500">
                                                 ... and {validation.warnings.length - 5} more warnings
                                             </li>
                                         )}
@@ -228,16 +228,16 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
                     {progress && (
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">
-                                <Loader className="animate-spin text-purple-600" size={20} />
-                                <span className="font-medium text-gray-800">{progress.message}</span>
+                                <Loader className="animate-spin text-purple-400" size={20} />
+                                <span className="font-bold text-white">{progress.message}</span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="w-full glass rounded-full h-2 overflow-hidden">
                                 <div
-                                    className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                                    className="bg-gradient-to-r from-purple-600 to-purple-400 h-2 rounded-full transition-all duration-300"
                                     style={{ width: `${(progress.current / progress.total) * 100}%` }}
                                 />
                             </div>
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm text-gray-400">
                                 {progress.current} / {progress.total}
                             </div>
                         </div>
@@ -245,20 +245,20 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
 
                     {/* Result */}
                     {result && (
-                        <div className={`p-4 rounded-lg ${result.success ? 'bg-green-50' : 'bg-red-50'}`}>
+                        <div className={`p-4 rounded-xl glass border ${result.success ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'}`}>
                             <div className="flex items-center gap-2 mb-3">
                                 {result.success ? (
-                                    <CheckCircle className="text-green-600" size={20} />
+                                    <CheckCircle className="text-green-400" size={20} />
                                 ) : (
-                                    <XCircle className="text-red-600" size={20} />
+                                    <XCircle className="text-red-400" size={20} />
                                 )}
-                                <span className={`font-medium ${result.success ? 'text-green-800' : 'text-red-800'}`}>
+                                <span className={`font-bold ${result.success ? 'text-green-400' : 'text-red-400'}`}>
                                     {result.success ? 'Restore completed successfully!' : 'Restore failed'}
                                 </span>
                             </div>
 
                             {result.success && (
-                                <div className="space-y-2 text-sm text-gray-700">
+                                <div className="space-y-2 text-sm text-gray-300">
                                     <div>✅ Imported {result.imported.leagues} leagues</div>
                                     <div>✅ Imported {result.imported.matches} matches</div>
                                     {result.skipped.leagues > 0 && (
@@ -274,12 +274,12 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
                             )}
 
                             {result.errors.length > 0 && (
-                                <div className="mt-3 space-y-1 text-sm text-red-700">
+                                <div className="mt-3 space-y-1 text-sm text-red-300">
                                     {result.errors.slice(0, 5).map((error, index) => (
                                         <div key={index}>• {error}</div>
                                     ))}
                                     {result.errors.length > 5 && (
-                                        <div className="text-red-600">
+                                        <div className="text-red-400">
                                             ... and {result.errors.length - 5} more errors
                                         </div>
                                     )}
@@ -290,11 +290,11 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
                 </div>
 
                 {/* Footer */}
-                <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t">
+                <div className="sticky bottom-0 glass border-t border-white/5 px-6 py-4 flex justify-end gap-3 backdrop-blur-xl">
                     <button
                         onClick={handleClose}
                         disabled={isProcessing}
-                        className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                        className="px-4 py-2 glass border border-white/10 rounded-xl font-bold text-sm hover:bg-white/5 disabled:opacity-50 transition-all"
                     >
                         {result?.success ? 'Close' : 'Cancel'}
                     </button>
@@ -302,7 +302,7 @@ export const DataRestoreModal: React.FC<DataRestoreModalProps> = ({ isOpen, onCl
                         <button
                             onClick={handleRestore}
                             disabled={isProcessing || !selectedFile}
-                            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2"
+                            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-purple-600/20 transition-all hover:scale-105"
                         >
                             {isProcessing ? (
                                 <>
