@@ -93,9 +93,16 @@ export async function recalculateAllUserStats(): Promise<{
 
         // Update database for each user
         for (const [userId, stats] of userStatsMap.entries()) {
-            const { error: updateError } = await supabase
+            // First, try to delete existing stats (if any)
+            await supabase
                 .from('user_stats')
-                .upsert({
+                .delete()
+                .eq('user_id', userId);
+
+            // Then insert new stats
+            const { error: insertError } = await supabase
+                .from('user_stats')
+                .insert({
                     user_id: userId,
                     matches_played: stats.matches_played,
                     wins: stats.wins,
@@ -103,13 +110,13 @@ export async function recalculateAllUserStats(): Promise<{
                     draws: stats.draws,
                     total_goals: stats.total_goals,
                     total_assists: stats.total_assists,
+                    leagues_created: 0,
+                    created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
-                }, {
-                    onConflict: 'user_id'
                 });
 
-            if (updateError) {
-                errors.push(`Failed to update stats for user ${userId}: ${updateError.message}`);
+            if (insertError) {
+                errors.push(`Failed to update stats for user ${userId}: ${insertError.message}`);
             } else {
                 usersUpdated++;
             }
@@ -175,10 +182,16 @@ export async function recalculateUserStats(userId: string): Promise<{
             }
         }
 
-        // Update database
-        const { error: updateError } = await supabase
+        // Delete existing stats
+        await supabase
             .from('user_stats')
-            .upsert({
+            .delete()
+            .eq('user_id', userId);
+
+        // Insert new stats
+        const { error: insertError } = await supabase
+            .from('user_stats')
+            .insert({
                 user_id: userId,
                 matches_played,
                 wins,
@@ -186,13 +199,13 @@ export async function recalculateUserStats(userId: string): Promise<{
                 draws,
                 total_goals,
                 total_assists,
+                leagues_created: 0,
+                created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
-            }, {
-                onConflict: 'user_id'
             });
 
-        if (updateError) {
-            return { success: false, error: updateError.message };
+        if (insertError) {
+            return { success: false, error: insertError.message };
         }
 
         return { success: true };
