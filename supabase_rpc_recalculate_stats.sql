@@ -21,9 +21,13 @@ BEGIN
         wins,
         losses,
         draws,
+        goals_scored,
+        goals_conceded,
+        leagues_participated,
+        championships_won,
+        leagues_created,
         total_goals,
         total_assists,
-        leagues_created,
         created_at,
         updated_at
     )
@@ -33,9 +37,13 @@ BEGIN
         COALESCE(stats.wins, 0) as wins,
         COALESCE(stats.losses, 0) as losses,
         COALESCE(stats.draws, 0) as draws,
+        COALESCE(stats.total_goals, 0) as goals_scored,
+        COALESCE(stats.goals_conceded, 0) as goals_conceded,
+        COALESCE(participant_count.count, 0) as leagues_participated,
+        COALESCE(championships.count, 0) as championships_won,
+        COALESCE(league_count.count, 0) as leagues_created,
         COALESCE(stats.total_goals, 0) as total_goals,
         0 as total_assists,
-        COALESCE(league_count.count, 0) as leagues_created,
         NOW() as created_at,
         NOW() as updated_at
     FROM 
@@ -48,7 +56,8 @@ BEGIN
             SUM(CASE WHEN won THEN 1 ELSE 0 END) as wins,
             SUM(CASE WHEN lost THEN 1 ELSE 0 END) as losses,
             SUM(CASE WHEN draw THEN 1 ELSE 0 END) as draws,
-            SUM(goals) as total_goals
+            SUM(goals) as total_goals,
+            SUM(goals_conceded) as goals_conceded
         FROM (
             -- Home matches
             SELECT 
@@ -56,7 +65,8 @@ BEGIN
                 CASE WHEN home_score > away_score THEN true ELSE false END as won,
                 CASE WHEN home_score < away_score THEN true ELSE false END as lost,
                 CASE WHEN home_score = away_score THEN true ELSE false END as draw,
-                COALESCE(home_score, 0) as goals
+                COALESCE(home_score, 0) as goals,
+                COALESCE(away_score, 0) as goals_conceded
             FROM matches
             WHERE status = 'completed'
             
@@ -68,7 +78,8 @@ BEGIN
                 CASE WHEN away_score > home_score THEN true ELSE false END as won,
                 CASE WHEN away_score < home_score THEN true ELSE false END as lost,
                 CASE WHEN away_score = home_score THEN true ELSE false END as draw,
-                COALESCE(away_score, 0) as goals
+                COALESCE(away_score, 0) as goals,
+                COALESCE(home_score, 0) as goals_conceded
             FROM matches
             WHERE status = 'completed'
         ) all_matches
@@ -79,7 +90,22 @@ BEGIN
         SELECT admin_id, COUNT(*) as count
         FROM leagues
         GROUP BY admin_id
-    ) league_count ON u.id = league_count.admin_id;
+    ) league_count ON u.id = league_count.admin_id
+    LEFT JOIN (
+        -- Count leagues participated (where user is in participant_ids array)
+        SELECT 
+            unnest(participant_ids) as user_id,
+            COUNT(*) as count
+        FROM leagues
+        GROUP BY unnest(participant_ids)
+    ) participant_count ON u.id = participant_count.user_id
+    LEFT JOIN (
+        -- Count championships won (leagues with status='finished' where user is admin)
+        SELECT admin_id, COUNT(*) as count
+        FROM leagues
+        WHERE status = 'finished'
+        GROUP BY admin_id
+    ) championships ON u.id = championships.admin_id;
     
     -- Get count of users updated
     GET DIAGNOSTICS users_updated = ROW_COUNT;
