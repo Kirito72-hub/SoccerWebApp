@@ -23,6 +23,8 @@ import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 import { sendAppUpdateNotification, sendSystemAnnouncement } from '../services/newsUtils';
 import { DataRestoreModal } from '../components/DataRestoreModal';
 import { dataBackupService } from '../services/dataBackup';
+import { useToast } from '../hooks/useToast';
+import { ToastContainer } from '../components/Toast';
 
 interface SettingsProps {
     user: User;
@@ -64,6 +66,10 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
         activityLogs: true,
         users: true
     });
+
+    // Toast notifications
+    const toast = useToast();
+
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -175,10 +181,13 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
             if (resetOptions.activityLogs) deleted.push('Activity Logs');
             if (resetOptions.users) deleted.push('User Accounts (except superusers)');
 
-            alert(`Database reset successfully!\n\nDeleted:\n${deleted.map(item => `• ${item}`).join('\n')}\n\n✓ Superuser accounts were preserved`);
+            toast.success(
+                'Database Reset Successfully!',
+                `Deleted:\n${deleted.map(item => `• ${item}`).join('\n')}\n\n✓ Superuser accounts were preserved`
+            );
         } catch (error) {
             console.error('Error resetting database:', error);
-            alert('Failed to reset database: ' + (error as Error).message);
+            toast.error('Reset Failed', (error as Error).message);
         } finally {
             setResetting(false);
         }
@@ -968,6 +977,9 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                     window.location.reload();
                 }}
             />
+
+            {/* Toast Notifications */}
+            <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
         </div>
     );
 };
