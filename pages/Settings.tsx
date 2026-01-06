@@ -43,7 +43,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     const [flashUserId, setFlashUserId] = useState<string | null>(null);
 
     // Tab state
-    const [activeTab, setActiveTab] = useState<'users' | 'announcements'>('users');
+    const [activeTab, setActiveTab] = useState<'users' | 'announcements' | 'backup'>('users');
 
     // Announcement state
     const [announcementType, setAnnouncementType] = useState<'appUpdate' | 'announcement'>('announcement');
@@ -371,6 +371,16 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                 >
                     <Bell className="w-4 h-4" />
                     Announcements
+                </button>
+                <button
+                    onClick={() => setActiveTab('backup')}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'backup'
+                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                >
+                    <Database className="w-4 h-4" />
+                    Backup/Restore
                 </button>
             </div>
 
@@ -802,6 +812,86 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                             </div>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Backup/Restore Tab */}
+            {activeTab === 'backup' && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Backup Card */}
+                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-3 bg-emerald-600/20 rounded-xl">
+                                <Database className="w-6 h-6 text-emerald-400" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black">BACKUP DATA</h2>
+                                <p className="text-sm text-gray-500">Export your leagues and matches</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 mb-6">
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-emerald-500/20">
+                                <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-bold text-sm text-emerald-400">Safe & Secure</p>
+                                    <p className="text-xs text-gray-400">Your data is exported as a JSON file</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-emerald-500/20">
+                                <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-bold text-sm text-emerald-400">Complete Backup</p>
+                                    <p className="text-xs text-gray-400">Includes all leagues, matches, and standings</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-bold text-white shadow-lg shadow-emerald-600/20 transition-all hover:scale-105"
+                        >
+                            <Database className="w-5 h-5" />
+                            Download Backup
+                        </button>
+                    </div>
+
+                    {/* Restore Card */}
+                    <div className="glass rounded-2xl lg:rounded-3xl border border-white/5 p-6 lg:p-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-3 bg-purple-600/20 rounded-xl">
+                                <Database className="w-6 h-6 text-purple-400" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black">RESTORE DATA</h2>
+                                <p className="text-sm text-gray-500">Import leagues and matches</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 mb-6">
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-purple-500/20">
+                                <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-bold text-sm text-yellow-400">Validation First</p>
+                                    <p className="text-xs text-gray-400">File is validated before importing</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3 p-4 glass rounded-xl border border-purple-500/20">
+                                <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-bold text-sm text-yellow-400">Smart Duplicates</p>
+                                    <p className="text-xs text-gray-400">Automatically skips existing records</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setShowRestoreModal(true)}
+                            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-purple-600 hover:bg-purple-700 rounded-xl font-bold text-white shadow-lg shadow-purple-600/20 transition-all hover:scale-105"
+                        >
+                            <Database className="w-5 h-5" />
+                            Restore from File
+                        </button>
+                    </div>
                 </div>
             )}
 
