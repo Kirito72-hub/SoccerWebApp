@@ -346,16 +346,6 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
-                    {/* Restore Data Button */}
-                    <button
-                        onClick={() => setShowRestoreModal(true)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-xl text-purple-400 font-bold text-sm transition-all hover:scale-105"
-                    >
-                        <Database className="w-4 h-4" />
-                        <span className="hidden sm:inline">Restore Data</span>
-                        <span className="sm:hidden">Restore</span>
-                    </button>
-
                     {/* Reset Database Button */}
                     <button
                         onClick={() => setShowResetConfirm(true)}
