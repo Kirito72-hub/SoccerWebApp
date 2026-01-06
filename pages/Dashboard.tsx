@@ -52,10 +52,21 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const userMatches = allMatches.filter(m => m.homeUserId === user.id || m.awayUserId === user.id);
 
-  const winRate = stats?.matchesPlayed ? Math.round(((userMatches.filter(m => {
+  // Calculate all stats from matches
+  const totalMatches = userMatches.length;
+  const goalsScored = userMatches.reduce((sum, m) => {
+    const isHome = m.homeUserId === user.id;
+    return sum + (isHome ? (m.homeScore || 0) : (m.awayScore || 0));
+  }, 0);
+  const goalsConceded = userMatches.reduce((sum, m) => {
+    const isHome = m.homeUserId === user.id;
+    return sum + (isHome ? (m.awayScore || 0) : (m.homeScore || 0));
+  }, 0);
+  const wins = userMatches.filter(m => {
     const isHome = m.homeUserId === user.id;
     return isHome ? (m.homeScore! > m.awayScore!) : (m.awayScore! > m.homeScore!);
-  }).length) / stats.matchesPlayed) * 100) : 0;
+  }).length;
+  const winRate = totalMatches ? Math.round((wins / totalMatches) * 100) : 0;
 
   // Calculate Fav/Toughest Opponent
   const opponentsMap = new Map<string, { wins: number, losses: number }>();
@@ -82,10 +93,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   });
 
   const statCards = [
-    { title: 'Total Matches', value: stats?.matchesPlayed || 0, icon: Activity, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { title: 'Total Matches', value: totalMatches, icon: Activity, color: 'text-blue-400', bg: 'bg-blue-400/10' },
     { title: 'Leagues Joined', value: stats?.leaguesParticipated || 0, icon: Users, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { title: 'Goals Scored', value: stats?.goalsScored || 0, icon: Target, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { title: 'Goals Taken', value: stats?.goalsConceded || 0, icon: ShieldCheck, color: 'text-red-400', bg: 'bg-red-400/10' },
+    { title: 'Goals Scored', value: goalsScored, icon: Target, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { title: 'Goals Taken', value: goalsConceded, icon: ShieldCheck, color: 'text-red-400', bg: 'bg-red-400/10' },
     { title: 'Championships', value: stats?.championshipsWon || 0, icon: Trophy, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
     { title: 'Win Rate', value: `${winRate}%`, icon: Zap, color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
     { title: 'Favorite Opponent', value: favOpp, icon: Flame, color: 'text-orange-400', bg: 'bg-orange-400/10' },
