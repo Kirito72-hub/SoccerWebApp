@@ -495,7 +495,6 @@ export const db = {
 
     async resetDatabase(options: {
         leagues?: boolean;
-        matches?: boolean;
         activityLogs?: boolean;
         users?: boolean;
     } = {}): Promise<void> {
@@ -503,7 +502,6 @@ export const db = {
             // Default to deleting everything if no options provided
             const {
                 leagues = true,
-                matches = true,
                 activityLogs = true,
                 users = true
             } = options;
@@ -522,11 +520,9 @@ export const db = {
 
             await supabase.from('notifications').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
-            if (matches) {
-                await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            }
-
+            // Always delete matches when deleting leagues (foreign key dependency)
             if (leagues) {
+                await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000');
                 await supabase.from('leagues').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             }
 

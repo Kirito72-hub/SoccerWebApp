@@ -202,7 +202,6 @@ export const dataService = {
 
     async resetDatabase(options: {
         leagues?: boolean;
-        matches?: boolean;
         activityLogs?: boolean;
         users?: boolean;
     } = {}): Promise<void> {

@@ -61,7 +61,6 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     // Reset options state
     const [resetOptions, setResetOptions] = useState({
         leagues: true,
-        matches: true,
         activityLogs: true,
         users: true
     });
@@ -172,8 +171,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
             // Build message based on what was deleted
             const deleted = [];
-            if (resetOptions.leagues) deleted.push('Leagues');
-            if (resetOptions.matches) deleted.push('Matches');
+            if (resetOptions.leagues) deleted.push('Leagues (including all matches)');
             if (resetOptions.activityLogs) deleted.push('Activity Logs');
             if (resetOptions.users) deleted.push('User Accounts (except superusers)');
 
@@ -898,18 +896,10 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                                     onChange={(e) => setResetOptions({ ...resetOptions, leagues: e.target.checked })}
                                     className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
                                 />
-                                <span className="text-sm text-gray-300">All Leagues</span>
-                            </label>
-
-                            {/* Matches Checkbox */}
-                            <label className="flex items-center gap-3 p-3 glass rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
-                                <input
-                                    type="checkbox"
-                                    checked={resetOptions.matches}
-                                    onChange={(e) => setResetOptions({ ...resetOptions, matches: e.target.checked })}
-                                    className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-500"
-                                />
-                                <span className="text-sm text-gray-300">All Matches</span>
+                                <div>
+                                    <span className="text-sm text-gray-300">All Leagues</span>
+                                    <p className="text-xs text-gray-500">Includes all matches</p>
+                                </div>
                             </label>
 
                             {/* Activity Logs Checkbox */}
