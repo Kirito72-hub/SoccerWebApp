@@ -32,6 +32,7 @@ import NotificationPreferences from './NotificationPreferences';
 import ToastNotification from './ToastNotification';
 import { notificationSound } from '../services/notificationSound';
 import { ToastNotificationData } from '../types/notifications';
+import '../utils/notificationTest'; // Load diagnostic utility
 
 interface LayoutProps {
   user: User;
