@@ -225,7 +225,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <Activity className="w-4 h-4 lg:w-5 lg:h-5 text-purple-400" />
               Performance Trend
             </h3>
-            <select className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 lg:py-1 text-xs outline-none w-full sm:w-auto">
+            <select className="glass border border-white/10 rounded-xl px-3 py-2 text-xs font-bold outline-none w-full sm:w-auto focus:border-purple-500/50 transition-colors cursor-pointer [&>option]:bg-[#1a1a2e] [&>option]:text-white">
               <option>Last 7 Days</option>
               <option>Last 30 Days</option>
             </select>
