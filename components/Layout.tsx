@@ -424,8 +424,23 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
             };
             setToasts(prev => [...prev, toastData]);
 
-            // Play notification sound
-            await notificationSound.playNotification();
+            // Play appropriate notification sound based on title/type
+            const title = newNotif.title?.toLowerCase() || '';
+            const message = newNotif.message?.toLowerCase() || '';
+
+            if (title.includes('victory') || title.includes('win')) {
+              // Match won - play goal sound
+              await notificationSound.playMatchWinner();
+            } else if (title.includes('defeat') || title.includes('loss') || title.includes('lost')) {
+              // Match lost - play loser sound
+              await notificationSound.playMatchLoser();
+            } else if (title.includes('champion') || title.includes('league finished') || message.includes('top of the league')) {
+              // Championship or league finished - play NFL sound
+              await notificationSound.playChampionship();
+            } else {
+              // Default - play whistle
+              await notificationSound.playNotification();
+            }
 
             // Trigger Service Worker notification
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
