@@ -9,6 +9,7 @@ export interface RestoreData {
     userId: string;
     matches?: RestoreMatch[];
     leagues?: RestoreLeague[];
+    activityLogs?: RestoreActivityLog[];
     stats?: Record<string, any>;
 }
 
@@ -36,6 +37,14 @@ export interface RestoreLeague {
     finished_at?: string;
 }
 
+export interface RestoreActivityLog {
+    id: string;
+    user_id: string;
+    action: string;
+    details: any;
+    created_at: string;
+}
+
 export interface RestoreValidationResult {
     valid: boolean;
     errors: string[];
@@ -43,6 +52,7 @@ export interface RestoreValidationResult {
     stats: {
         matchesCount: number;
         leaguesCount: number;
+        activityLogsCount: number;
         uniqueUsers: Set<string>;
         duplicateMatches: string[];
         duplicateLeagues: string[];
@@ -50,7 +60,7 @@ export interface RestoreValidationResult {
 }
 
 export interface RestoreProgress {
-    phase: 'validating' | 'restoring_leagues' | 'restoring_matches' | 'complete' | 'error';
+    phase: 'validating' | 'restoring_leagues' | 'restoring_matches' | 'restoring_activity_logs' | 'complete' | 'error';
     current: number;
     total: number;
     message: string;
@@ -62,10 +72,12 @@ export interface RestoreResult {
     imported: {
         leagues: number;
         matches: number;
+        activityLogs: number;
     };
     skipped: {
         leagues: number;
         matches: number;
+        activityLogs: number;
     };
     errors: string[];
     duration: number;

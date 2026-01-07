@@ -11,11 +11,12 @@ export interface BackupData {
     userId: string;
     leagues: any[];
     matches: any[];
+    activityLogs: any[];
 }
 
 class DataBackupService {
     /**
-     * Export all leagues and matches for the current user
+     * Export all leagues, matches, and activity logs for the current user
      */
     async exportData(userId: string): Promise<BackupData> {
         try {
@@ -38,13 +39,23 @@ class DataBackupService {
 
             if (matchesError) throw matchesError;
 
+            // Fetch all activity logs for this user
+            const { data: activityLogs, error: activityLogsError } = await supabase
+                .from('activity_logs')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (activityLogsError) throw activityLogsError;
+
             // Create backup data
             const backupData: BackupData = {
                 version: '1.0.0',
                 exportDate: new Date().toISOString(),
                 userId: userId,
                 leagues: leagues || [],
-                matches: matches || []
+                matches: matches || [],
+                activityLogs: activityLogs || []
             };
 
             return backupData;

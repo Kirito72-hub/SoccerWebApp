@@ -15,6 +15,7 @@ import type {
     RestoreData,
     RestoreMatch,
     RestoreLeague,
+    RestoreActivityLog,
     RestoreValidationResult,
     RestoreProgress,
     RestoreResult,
@@ -51,6 +52,7 @@ class DataRestoreService {
             stats: {
                 matchesCount: 0,
                 leaguesCount: 0,
+                activityLogsCount: 0,
                 uniqueUsers: new Set(),
                 duplicateMatches: [],
                 duplicateLeagues: []
@@ -163,6 +165,18 @@ class DataRestoreService {
                 }
             }
 
+            // Validate activity logs
+            if (data.activityLogs) {
+                result.stats.activityLogsCount = data.activityLogs.length;
+
+                for (const log of data.activityLogs) {
+                    // Check required fields
+                    if (!log.id || !log.user_id || !log.action || !log.created_at) {
+                        result.warnings.push(`Activity log missing required fields: ${JSON.stringify(log).substring(0, 100)}`);
+                    }
+                }
+            }
+
             // Check if database has existing data
             await this.checkDuplicatesInDatabase(data, result);
 
@@ -231,8 +245,8 @@ class DataRestoreService {
         const startTime = Date.now();
         const result: RestoreResult = {
             success: false,
-            imported: { leagues: 0, matches: 0 },
-            skipped: { leagues: 0, matches: 0 },
+            imported: { leagues: 0, matches: 0, activityLogs: 0 },
+            skipped: { leagues: 0, matches: 0, activityLogs: 0 },
             errors: [],
             duration: 0
         };
@@ -306,18 +320,36 @@ class DataRestoreService {
                 result.imported.matches = matchResult.imported;
                 result.skipped.matches = matchResult.skipped;
                 result.errors.push(...matchResult.errors);
+
+                processedItems += data.matches.length;
+            }
+
+            // Phase 4: Restore Activity Logs
+            if (data.activityLogs && data.activityLogs.length > 0) {
+                this.updateProgress({
+                    phase: 'restoring_activity_logs',
+                    current: processedItems,
+                    total: totalItems,
+                    message: `Restoring ${data.activityLogs.length} activity logs...`,
+                    errors: result.errors
+                });
+
+                const activityLogResult = await this.restoreActivityLogs(data.activityLogs, options);
+                result.imported.activityLogs = activityLogResult.imported;
+                result.skipped.activityLogs = activityLogResult.skipped;
+                result.errors.push(...activityLogResult.errors);
             }
 
             // Complete
             result.success = result.errors.length === 0 ||
-                (result.imported.leagues > 0 || result.imported.matches > 0);
+                (result.imported.leagues > 0 || result.imported.matches > 0 || result.imported.activityLogs > 0);
             result.duration = Date.now() - startTime;
 
             this.updateProgress({
                 phase: 'complete',
                 current: totalItems,
                 total: totalItems,
-                message: `Restore complete! Imported ${result.imported.leagues} leagues and ${result.imported.matches} matches`,
+                message: `Restore complete! Imported ${result.imported.leagues} leagues, ${result.imported.matches} matches, and ${result.imported.activityLogs} activity logs`,
                 errors: result.errors
             });
 
@@ -452,6 +484,69 @@ class DataRestoreService {
                     current: Math.min(i + batchSize, matches.length),
                     total: matches.length,
                     message: `Restoring matches... ${Math.min(i + batchSize, matches.length)}/${matches.length}`,
+                    errors: errors.slice(-5) // Show last 5 errors
+                });
+            }
+        }
+
+        return { imported, skipped, errors };
+    }
+
+    /**
+     * Restore activity logs
+     */
+    private async restoreActivityLogs(
+        activityLogs: RestoreActivityLog[],
+        options: RestoreOptions
+    ): Promise<{ imported: number; skipped: number; errors: string[] }> {
+        let imported = 0;
+        let skipped = 0;
+        const errors: string[] = [];
+        const batchSize = 50;
+
+        for (let i = 0; i < activityLogs.length; i += batchSize) {
+            const batch = activityLogs.slice(i, i + batchSize);
+
+            for (const log of batch) {
+                try {
+                    const { error } = await supabase
+                        .from('activity_logs')
+                        .insert({
+                            id: options.preserveIds ? log.id : undefined,
+                            user_id: log.user_id,
+                            action: log.action,
+                            details: log.details,
+                            created_at: log.created_at
+                        });
+
+                    if (error) {
+                        // Check if it's a duplicate key error
+                        if (error.code === '23505' && options.skipDuplicates) {
+                            skipped++;
+                        } else if (error.code === '23503') {
+                            // Foreign key violation - user doesn't exist
+                            errors.push(`Activity log ${log.id}: User not found (${log.user_id})`);
+                            skipped++;
+                        } else {
+                            errors.push(`Activity log ${log.id}: ${error.message}`);
+                            skipped++;
+                        }
+                    } else {
+                        imported++;
+                    }
+                } catch (error: any) {
+                    errors.push(`Activity log ${log.id}: ${error.message}`);
+                    skipped++;
+                }
+            }
+
+            // Update progress every batch
+            if (this.progressCallback) {
+                this.updateProgress({
+                    phase: 'restoring_activity_logs',
+                    current: Math.min(i + batchSize, activityLogs.length),
+                    total: activityLogs.length,
+                    message: `Restoring activity logs... ${Math.min(i + batchSize, activityLogs.length)}/${activityLogs.length}`,
                     errors: errors.slice(-5) // Show last 5 errors
                 });
             }
