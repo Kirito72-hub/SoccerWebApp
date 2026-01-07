@@ -1,7 +1,7 @@
 {
   "name": "soccer-web-app",
   "private": true,
-  "version": "1.7.3-beta",
+  "version": "1.8.0-beta",
   "type": "module",
   "scripts": {
     "dev": "vite",
