@@ -397,7 +397,9 @@ class DataRestoreService {
                             status: league.status,
                             participant_ids: league.participant_ids,
                             created_at: league.created_at,
-                            finished_at: league.finished_at || null
+                            finished_at: league.finished_at || null,
+                            winner: (league as any).winner || null,
+                            standings: (league as any).standings || null
                         });
 
                     if (error) {
