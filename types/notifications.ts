@@ -123,7 +123,10 @@ export type NotificationSoundType =
     | 'new_notification'
     | 'mark_read'
     | 'delete'
-    | 'achievement';
+    | 'achievement'
+    | 'match_winner'
+    | 'match_loser'
+    | 'championship';
 
 // Helper type for creating notifications
 export type CreateNotificationInput = Omit<

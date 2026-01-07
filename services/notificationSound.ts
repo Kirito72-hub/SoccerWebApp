@@ -11,10 +11,13 @@ class NotificationSoundService {
 
     // Sound file paths
     private sounds = {
-        new_notification: '/sounds/notification.mp3',
-        mark_read: '/sounds/mark-read.mp3',
-        delete: '/sounds/delete.mp3',
-        achievement: '/sounds/achievement.mp3'
+        new_notification: '/sounds/whistle.mp3',
+        mark_read: '/sounds/whistle.mp3', // Fallback
+        delete: '/sounds/whistle.mp3', // Fallback
+        achievement: '/sounds/nfl.mp3',
+        match_winner: '/sounds/goal.mp3',
+        match_loser: '/sounds/loser.mp3',
+        championship: '/sounds/nfl.mp3'
     };
 
     // Audio instances cache
@@ -85,6 +88,27 @@ class NotificationSoundService {
      */
     async playNotification(): Promise<void> {
         await this.playSound('new_notification');
+    }
+
+    /**
+     * Play championship winner sound (NFL)
+     */
+    async playChampionship(): Promise<void> {
+        await this.playSound('championship');
+    }
+
+    /**
+     * Play match winner sound (Goal)
+     */
+    async playMatchWinner(): Promise<void> {
+        await this.playSound('match_winner');
+    }
+
+    /**
+     * Play match loser sound (Loser)
+     */
+    async playMatchLoser(): Promise<void> {
+        await this.playSound('match_loser');
     }
 
     /**
@@ -165,10 +189,26 @@ class NotificationSoundService {
     /**
      * Play sound based on notification category
      */
-    async playSoundForCategory(category: string): Promise<void> {
+    async playSoundForCategory(category: string, context?: { isWinner?: boolean }): Promise<void> {
         switch (category) {
             case 'achievement':
-                await this.playAchievement();
+                await this.playChampionship();
+                break;
+            case 'match':
+                if (context?.isWinner === true) {
+                    await this.playMatchWinner();
+                } else if (context?.isWinner === false) {
+                    await this.playMatchLoser();
+                } else {
+                    await this.playNotification();
+                }
+                break;
+            case 'league':
+                if (context?.isWinner) {
+                    await this.playChampionship();
+                } else {
+                    await this.playNotification(); // Or general whistle
+                }
                 break;
             case 'alert':
                 await this.playNotification(); // Use default notification sound
