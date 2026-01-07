@@ -19,6 +19,7 @@ import { User, League, Match, TableRow } from '../types';
 import { dataService } from '../services/dataService';
 import { getAvatarByUserId } from '../utils/avatarUtils';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
+import { usePageVisibility } from '../hooks/usePageVisibility';
 
 interface RunningLeaguesProps {
   user: User;
@@ -31,6 +32,7 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const isVisible = usePageVisibility();
 
   // Modal state for editing match results
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
@@ -41,6 +43,14 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
   useEffect(() => {
     loadData();
   }, [user.id]);
+
+  // Reload data when app becomes visible (important for mobile)
+  useEffect(() => {
+    if (isVisible && !loading) {
+      console.log('[RunningLeagues] App became visible, reloading data...');
+      loadData();
+    }
+  }, [isVisible]);
 
   const loadData = async () => {
     try {

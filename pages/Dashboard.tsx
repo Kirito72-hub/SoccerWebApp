@@ -16,6 +16,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { User, UserStats, Match } from '../types';
 import { dataService } from '../services/dataService';
 import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
+import { usePageVisibility } from '../hooks/usePageVisibility';
 
 interface DashboardProps {
   user: User;
@@ -28,31 +29,40 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [leagues, setLeagues] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const isVisible = usePageVisibility();
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [userStats, matches, allUsers, allLeagues] = await Promise.all([
+        dataService.getUserStats(user.id),
+        dataService.getMatches(),
+        dataService.getUsers(),
+        dataService.getLeagues()
+      ]);
+
+      setStats(userStats);
+      setAllMatches(matches.filter(m => m.status === 'completed'));
+      setUsers(allUsers);
+      setLeagues(allLeagues);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [userStats, matches, allUsers, allLeagues] = await Promise.all([
-          dataService.getUserStats(user.id),
-          dataService.getMatches(),
-          dataService.getUsers(),
-          dataService.getLeagues()
-        ]);
-
-        setStats(userStats);
-        setAllMatches(matches.filter(m => m.status === 'completed'));
-        setUsers(allUsers);
-        setLeagues(allLeagues);
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadData();
   }, [user.id]);
+
+  // Reload data when app becomes visible (important for mobile)
+  useEffect(() => {
+    if (isVisible && !loading) {
+      console.log('[Dashboard] App became visible, reloading data...');
+      loadData();
+    }
+  }, [isVisible]);
 
   // Realtime subscription for matches
   useRealtimeSubscription({
