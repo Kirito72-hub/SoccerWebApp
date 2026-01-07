@@ -163,7 +163,7 @@ const UserStatsModal: React.FC<{ currentUser: User; selectedUser: User; onClose:
             />
             <div>
               <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{selectedUser.username}</h2>
-              <p className="text-sm sm:text-base text-gray-400 font-medium">{selectedUser.email}</p>
+              <p className="text-sm sm:text-base text-gray-400 font-medium">Player Stats</p>
             </div>
           </div>
           <button
@@ -656,7 +656,7 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
                       />
                       <div className="min-w-0 flex-1">
                         <p className="font-bold text-xs sm:text-sm truncate">{u.username}</p>
-                        <p className="text-[10px] sm:text-xs text-gray-500 truncate">{u.email}</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500 truncate">Click to view stats</p>
                       </div>
                     </button>
                   ))}
