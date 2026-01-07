@@ -38,46 +38,24 @@ interface LayoutProps {
 }
 
 const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Match[] }> = ({ user, onClose, allMatches }) => {
-  const [stats, setStats] = useState<UserStats | null>(null);
+  const [leagues, setLeagues] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadStats = async () => {
+    const loadLeagues = async () => {
       try {
-        const userStats = await dataService.getUserStats(user.id);
-        setStats(userStats || {
-          userId: user.id,
-          matchesPlayed: 0,
-          leaguesParticipated: 0,
-          goalsScored: 0,
-          goalsConceded: 0,
-          championshipsWon: 0,
-          updatedAt: Date.now()
-        });
+        const allLeagues = await dataService.getLeagues();
+        setLeagues(allLeagues);
       } catch (error) {
-        console.error('Error loading stats:', error);
+        console.error('Error loading leagues:', error);
       } finally {
         setLoading(false);
       }
     };
-    loadStats();
-  }, [user.id]);
+    loadLeagues();
+  }, []);
 
-  const calculateWinRate = (): number => {
-    const completedMatches = allMatches.filter(m => m.status === 'completed');
-    const userMatches = completedMatches.filter(m => m.homeUserId === user.id || m.awayUserId === user.id);
-
-    if (userMatches.length === 0) return 0;
-
-    const wins = userMatches.filter(m => {
-      const isHome = m.homeUserId === user.id;
-      return isHome ? (m.homeScore! > m.awayScore!) : (m.awayScore! > m.homeScore!);
-    }).length;
-
-    return Math.round((wins / userMatches.length) * 100);
-  };
-
-  if (loading || !stats) {
+  if (loading) {
     return (
       <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div className="glass w-full max-w-2xl rounded-3xl p-8 border border-purple-500/30">
@@ -90,8 +68,44 @@ const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Ma
     );
   }
 
-  const winRate = calculateWinRate();
-  const goalDifference = stats.goalsScored - stats.goalsConceded;
+  // Calculate stats from matches (same as Dashboard)
+  const userMatches = allMatches.filter(m => m.homeUserId === user.id || m.awayUserId === user.id);
+  const completedMatches = userMatches.filter(m => m.status === 'completed');
+
+  const matchesPlayed = completedMatches.length;
+  const goalsScored = completedMatches.reduce((sum, m) => {
+    const isHome = m.homeUserId === user.id;
+    return sum + (isHome ? (m.homeScore || 0) : (m.awayScore || 0));
+  }, 0);
+  const goalsConceded = completedMatches.reduce((sum, m) => {
+    const isHome = m.homeUserId === user.id;
+    return sum + (isHome ? (m.awayScore || 0) : (m.homeScore || 0));
+  }, 0);
+  const wins = completedMatches.filter(m => {
+    const isHome = m.homeUserId === user.id;
+    return isHome ? (m.homeScore! > m.awayScore!) : (m.awayScore! > m.homeScore!);
+  }).length;
+  const winRate = matchesPlayed ? Math.round((wins / matchesPlayed) * 100) : 0;
+  const goalDifference = goalsScored - goalsConceded;
+
+  // Calculate leagues joined
+  const leaguesParticipated = leagues.filter(league =>
+    league.participantIds?.includes(user.id)
+  ).length;
+
+  // Calculate championships (same as Dashboard)
+  const championshipsWon = leagues.filter(league => {
+    if (league.status !== 'finished') return false;
+
+    // For cups - check winner field
+    if (league.format?.includes('knockout') || league.format?.includes('cup')) {
+      return league.winner === user.id;
+    }
+
+    // For leagues - check standings
+    if (!league.standings || league.standings.length === 0) return false;
+    return league.standings[0].userId === user.id;
+  }).length;
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
@@ -124,7 +138,7 @@ const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Ma
               </div>
             </div>
             <p className="text-gray-500 text-xs font-bold uppercase mb-1">Matches</p>
-            <h3 className="text-3xl font-black">{stats.matchesPlayed}</h3>
+            <h3 className="text-3xl font-black">{matchesPlayed}</h3>
           </div>
 
           <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
@@ -134,7 +148,7 @@ const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Ma
               </div>
             </div>
             <p className="text-gray-500 text-xs font-bold uppercase mb-1">Leagues</p>
-            <h3 className="text-3xl font-black">{stats.leaguesParticipated}</h3>
+            <h3 className="text-3xl font-black">{leaguesParticipated}</h3>
           </div>
 
           <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
@@ -144,7 +158,7 @@ const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Ma
               </div>
             </div>
             <p className="text-gray-500 text-xs font-bold uppercase mb-1">Goals</p>
-            <h3 className="text-3xl font-black">{stats.goalsScored}</h3>
+            <h3 className="text-3xl font-black">{goalsScored}</h3>
           </div>
 
           <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
@@ -154,7 +168,7 @@ const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Ma
               </div>
             </div>
             <p className="text-gray-500 text-xs font-bold uppercase mb-1">Conceded</p>
-            <h3 className="text-3xl font-black">{stats.goalsConceded}</h3>
+            <h3 className="text-3xl font-black">{goalsConceded}</h3>
           </div>
 
           <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
@@ -174,7 +188,7 @@ const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Ma
               </div>
             </div>
             <p className="text-gray-500 text-xs font-bold uppercase mb-1">Trophies</p>
-            <h3 className="text-3xl font-black">{stats.championshipsWon}</h3>
+            <h3 className="text-3xl font-black">{championshipsWon}</h3>
           </div>
 
           <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all col-span-2 md:col-span-3">
