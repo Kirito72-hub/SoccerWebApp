@@ -247,7 +247,9 @@ export const db = {
             adminId: league.admin_id,
             createdAt: new Date(league.created_at).getTime(),
             finishedAt: league.finished_at ? new Date(league.finished_at).getTime() : undefined,
-            participantIds: league.participant_ids || []
+            participantIds: league.participant_ids || [],
+            winner: league.winner || null,
+            standings: league.standings || undefined
         }));
     },
 
@@ -265,7 +267,9 @@ export const db = {
             adminId: data.admin_id,
             createdAt: new Date(data.created_at).getTime(),
             finishedAt: data.finished_at ? new Date(data.finished_at).getTime() : undefined,
-            participantIds: data.participant_ids || []
+            participantIds: data.participant_ids || [],
+            winner: data.winner || null,
+            standings: data.standings || undefined
         };
     },
 
@@ -302,6 +306,8 @@ export const db = {
         if (updates.status) dbUpdates.status = updates.status;
         if (updates.participantIds) dbUpdates.participant_ids = updates.participantIds;
         if (updates.finishedAt) dbUpdates.finished_at = new Date(updates.finishedAt).toISOString();
+        if (updates.winner !== undefined) dbUpdates.winner = updates.winner;
+        if (updates.standings !== undefined) dbUpdates.standings = updates.standings;
 
         const { error } = await supabase
             .from('leagues')
