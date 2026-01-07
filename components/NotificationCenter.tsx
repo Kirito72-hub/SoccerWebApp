@@ -22,8 +22,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
     const [activeFilter, setActiveFilter] = useState<NotificationCategory | 'all'>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [showArchived, setShowArchived] = useState(false);
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-    const [batchMode, setBatchMode] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -123,47 +121,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
         await loadNotifications();
     };
 
-    // Batch actions
-    const toggleSelect = (id: string) => {
-        const newSelected = new Set(selectedIds);
-        if (newSelected.has(id)) {
-            newSelected.delete(id);
-        } else {
-            newSelected.add(id);
-        }
-        setSelectedIds(newSelected);
-    };
 
-    const selectAll = () => {
-        if (selectedIds.size === filteredNotifications.length) {
-            setSelectedIds(new Set());
-        } else {
-            setSelectedIds(new Set(filteredNotifications.map(n => n.id)));
-        }
-    };
-
-    const handleBatchMarkAsRead = async () => {
-        await notificationStorage.batchMarkAsRead(userId, Array.from(selectedIds));
-        setSelectedIds(new Set());
-        setBatchMode(false);
-        await loadNotifications();
-    };
-
-    const handleBatchDelete = async () => {
-        if (confirm(`Delete ${selectedIds.size} notifications?`)) {
-            await notificationStorage.batchDelete(userId, Array.from(selectedIds));
-            setSelectedIds(new Set());
-            setBatchMode(false);
-            await loadNotifications();
-        }
-    };
-
-    const handleBatchArchive = async () => {
-        await notificationStorage.batchArchive(userId, Array.from(selectedIds));
-        setSelectedIds(new Set());
-        setBatchMode(false);
-        await loadNotifications();
-    };
 
     const getIcon = (type: string, category?: string) => {
         const cat = category || type;
@@ -232,11 +190,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
                     <div className="flex items-center gap-2">
                         {/* Archive Toggle */}
                         <button
-                            onClick={() => {
-                                setShowArchived(!showArchived);
-                                setSelectedIds(new Set());
-                                setBatchMode(false);
-                            }}
+                            onClick={() => setShowArchived(!showArchived)}
                             className={`p-2 rounded-lg transition-all ${showArchived
                                 ? 'bg-purple-600 text-white'
                                 : 'text-gray-500 hover:bg-white/10 hover:text-white'
@@ -246,22 +200,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
                             <Archive className="w-4 h-4" />
                         </button>
 
-                        {/* Batch Mode Toggle */}
-                        <button
-                            onClick={() => {
-                                setBatchMode(!batchMode);
-                                setSelectedIds(new Set());
-                            }}
-                            className={`p-2 rounded-lg transition-all ${batchMode
-                                ? 'bg-purple-600 text-white'
-                                : 'text-gray-500 hover:bg-white/10 hover:text-white'
-                                }`}
-                            title="Batch select"
-                        >
-                            <CheckCheck className="w-4 h-4" />
-                        </button>
-
-                        {!showArchived && filteredNotifications.length > 0 && !batchMode && (
+                        {!showArchived && filteredNotifications.length > 0 && (
                             <>
                                 <button
                                     onClick={handleMarkAllAsRead}
@@ -315,53 +254,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
                     </div>
                 )}
 
-                {/* Batch Actions Bar */}
-                {batchMode && selectedIds.size > 0 && (
-                    <div className="px-4 py-3 bg-purple-600/10 border-b border-purple-500/30 flex items-center justify-between">
-                        <span className="text-sm font-bold text-purple-400">
-                            {selectedIds.size} selected
-                        </span>
-                        <div className="flex items-center gap-2">
-                            {!showArchived && (
-                                <>
-                                    <button
-                                        onClick={handleBatchMarkAsRead}
-                                        className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded-lg text-xs font-bold text-white transition-all"
-                                    >
-                                        Mark Read
-                                    </button>
-                                    <button
-                                        onClick={handleBatchArchive}
-                                        className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-white transition-all"
-                                    >
-                                        Archive
-                                    </button>
-                                </>
-                            )}
-                            <button
-                                onClick={handleBatchDelete}
-                                className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 rounded-lg text-xs font-bold text-red-400 transition-all"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                )}
 
-                {/* Select All (in batch mode) */}
-                {batchMode && filteredNotifications.length > 0 && (
-                    <div className="px-4 py-2 border-b border-white/10">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={selectedIds.size === filteredNotifications.length && filteredNotifications.length > 0}
-                                onChange={selectAll}
-                                className="w-4 h-4 rounded bg-white/10 border-white/20 text-purple-600"
-                            />
-                            <span className="text-xs font-bold text-gray-400">Select All</span>
-                        </label>
-                    </div>
-                )}
 
                 {/* Notifications List */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
@@ -385,10 +278,10 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId, onClose
                             <SwipeableNotificationItem
                                 key={notification.id}
                                 notification={notification}
-                                isSelected={selectedIds.has(notification.id)}
+                                isSelected={false}
                                 showArchived={showArchived}
-                                batchMode={batchMode}
-                                onToggleSelect={() => toggleSelect(notification.id)}
+                                batchMode={false}
+                                onToggleSelect={() => { }}
                                 onMarkAsRead={() => handleMarkAsRead(notification.id)}
                                 onArchive={() => handleArchive(notification.id)}
                                 onUnarchive={() => handleUnarchive(notification.id)}
