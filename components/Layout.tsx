@@ -6,6 +6,7 @@ import {
   Trophy,
   Settings,
   User as UserIcon,
+  Users,
   LogOut,
   Menu,
   X,
@@ -37,9 +38,10 @@ interface LayoutProps {
   onLogout: () => void;
 }
 
-const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Match[] }> = ({ user, onClose, allMatches }) => {
+const UserStatsModal: React.FC<{ currentUser: User; selectedUser: User; onClose: () => void; allMatches: Match[]; allUsers: User[] }> = ({ currentUser, selectedUser, onClose, allMatches, allUsers }) => {
   const [leagues, setLeagues] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'stats' | 'compare'>('stats');
 
   useEffect(() => {
     const loadLeagues = async () => {
@@ -58,7 +60,7 @@ const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Ma
   if (loading) {
     return (
       <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div className="glass w-full max-w-2xl rounded-3xl p-8 border border-purple-500/30">
+        <div className="glass w-full max-w-4xl rounded-3xl p-8 border border-purple-500/30">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-400">Loading stats...</p>
@@ -68,141 +70,281 @@ const UserStatsModal: React.FC<{ user: User; onClose: () => void; allMatches: Ma
     );
   }
 
-  // Calculate stats from matches (same as Dashboard)
-  const userMatches = allMatches.filter(m => m.homeUserId === user.id || m.awayUserId === user.id);
-  const completedMatches = userMatches.filter(m => m.status === 'completed');
+  // Helper function to calculate stats for a user
+  const calculateUserStats = (user: User) => {
+    const userMatches = allMatches.filter(m => m.homeUserId === user.id || m.awayUserId === user.id);
+    const completedMatches = userMatches.filter(m => m.status === 'completed');
 
-  const matchesPlayed = completedMatches.length;
-  const goalsScored = completedMatches.reduce((sum, m) => {
-    const isHome = m.homeUserId === user.id;
-    return sum + (isHome ? (m.homeScore || 0) : (m.awayScore || 0));
-  }, 0);
-  const goalsConceded = completedMatches.reduce((sum, m) => {
-    const isHome = m.homeUserId === user.id;
-    return sum + (isHome ? (m.awayScore || 0) : (m.homeScore || 0));
-  }, 0);
-  const wins = completedMatches.filter(m => {
-    const isHome = m.homeUserId === user.id;
-    return isHome ? (m.homeScore! > m.awayScore!) : (m.awayScore! > m.homeScore!);
-  }).length;
-  const winRate = matchesPlayed ? Math.round((wins / matchesPlayed) * 100) : 0;
-  const goalDifference = goalsScored - goalsConceded;
+    const totalMatches = completedMatches.length;
+    const goalsScored = completedMatches.reduce((sum, m) => {
+      const isHome = m.homeUserId === user.id;
+      return sum + (isHome ? (m.homeScore || 0) : (m.awayScore || 0));
+    }, 0);
+    const goalsConceded = completedMatches.reduce((sum, m) => {
+      const isHome = m.homeUserId === user.id;
+      return sum + (isHome ? (m.awayScore || 0) : (m.homeScore || 0));
+    }, 0);
+    const wins = completedMatches.filter(m => {
+      const isHome = m.homeUserId === user.id;
+      return isHome ? (m.homeScore! > m.awayScore!) : (m.awayScore! > m.homeScore!);
+    }).length;
+    const winRate = totalMatches ? Math.round((wins / totalMatches) * 100) : 0;
 
-  // Calculate leagues joined
-  const leaguesParticipated = leagues.filter(league =>
-    league.participantIds?.includes(user.id)
-  ).length;
+    // Calculate favorite and toughest opponent
+    const opponentsMap = new Map<string, { wins: number, losses: number }>();
+    completedMatches.forEach(m => {
+      const oppId = m.homeUserId === user.id ? m.awayUserId : m.homeUserId;
+      const isHome = m.homeUserId === user.id;
+      const won = isHome ? (m.homeScore! > m.awayScore!) : (m.awayScore! > m.homeScore!);
+      const lost = isHome ? (m.homeScore! < m.awayScore!) : (m.awayScore! < m.homeScore!);
 
-  // Calculate championships (same as Dashboard)
-  const championshipsWon = leagues.filter(league => {
-    if (league.status !== 'finished') return false;
+      const entry = opponentsMap.get(oppId) || { wins: 0, losses: 0 };
+      if (won) entry.wins++;
+      if (lost) entry.losses++;
+      opponentsMap.set(oppId, entry);
+    });
 
-    // For cups - check winner field
-    if (league.format?.includes('knockout') || league.format?.includes('cup')) {
-      return league.winner === user.id;
-    }
+    let favOpp = "None";
+    let toughOpp = "None";
+    let maxWins = -1; // Initialize with -1 to handle cases where no wins/losses exist
+    let maxLosses = -1;
 
-    // For leagues - check standings
-    if (!league.standings || league.standings.length === 0) return false;
-    return league.standings[0].userId === user.id;
-  }).length;
+    opponentsMap.forEach((val, key) => {
+      if (val.wins > maxWins) {
+        maxWins = val.wins;
+        favOpp = allUsers.find(u => u.id === key)?.username || "Unknown";
+      }
+      if (val.losses > maxLosses) {
+        maxLosses = val.losses;
+        toughOpp = allUsers.find(u => u.id === key)?.username || "Unknown";
+      }
+    });
+
+    const leaguesJoined = leagues.filter(league =>
+      league.participantIds?.includes(user.id)
+    ).length;
+
+    const championships = leagues.filter(league => {
+      if (league.status !== 'finished') return false;
+      if (league.format?.includes('knockout') || league.format?.includes('cup')) {
+        return league.winner === user.id;
+      }
+      if (!league.standings || league.standings.length === 0) return false;
+      return league.standings[0].userId === user.id;
+    }).length;
+
+    return {
+      totalMatches,
+      goalsScored,
+      goalsConceded,
+      wins,
+      winRate,
+      favOpp,
+      toughOpp,
+      leaguesJoined,
+      championships
+    };
+  };
+
+  const selectedStats = calculateUserStats(selectedUser);
+  const currentStats = calculateUserStats(currentUser);
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-      <div className="glass w-full max-w-2xl rounded-3xl p-8 border border-purple-500/30 animate-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-start justify-between mb-8">
+      <div className="glass w-full max-w-4xl rounded-3xl p-6 sm:p-8 border border-purple-500/30 animate-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4">
             <img
-              src={user.avatar || `https://picsum.photos/seed/${user.id}/100`}
-              alt={user.username}
-              className="w-20 h-20 rounded-full border-4 border-purple-600 shadow-lg shadow-purple-600/30"
+              src={selectedUser.avatar || `https://picsum.photos/seed/${selectedUser.id}/100`}
+              alt={selectedUser.username}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-purple-600 shadow-lg shadow-purple-600/30"
             />
             <div>
-              <h2 className="text-3xl font-black tracking-tight">{user.username}</h2>
-              <p className="text-gray-400 font-medium">{user.email}</p>
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{selectedUser.username}</h2>
+              <p className="text-sm sm:text-base text-gray-400 font-medium">{selectedUser.email}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-white/10 rounded-lg text-gray-400 transition-colors"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-3 bg-blue-500/10 rounded-xl">
-                <Activity className="w-5 h-5 text-blue-400" />
-              </div>
-            </div>
-            <p className="text-gray-500 text-xs font-bold uppercase mb-1">Matches</p>
-            <h3 className="text-3xl font-black">{matchesPlayed}</h3>
-          </div>
-
-          <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-3 bg-purple-500/10 rounded-xl">
-                <Trophy className="w-5 h-5 text-purple-400" />
-              </div>
-            </div>
-            <p className="text-gray-500 text-xs font-bold uppercase mb-1">Leagues</p>
-            <h3 className="text-3xl font-black">{leaguesParticipated}</h3>
-          </div>
-
-          <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-3 bg-emerald-500/10 rounded-xl">
-                <Target className="w-5 h-5 text-emerald-400" />
-              </div>
-            </div>
-            <p className="text-gray-500 text-xs font-bold uppercase mb-1">Goals</p>
-            <h3 className="text-3xl font-black">{goalsScored}</h3>
-          </div>
-
-          <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-3 bg-red-500/10 rounded-xl">
-                <ShieldCheck className="w-5 h-5 text-red-400" />
-              </div>
-            </div>
-            <p className="text-gray-500 text-xs font-bold uppercase mb-1">Conceded</p>
-            <h3 className="text-3xl font-black">{goalsConceded}</h3>
-          </div>
-
-          <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-3 bg-indigo-500/10 rounded-xl">
-                <Zap className="w-5 h-5 text-indigo-400" />
-              </div>
-            </div>
-            <p className="text-gray-500 text-xs font-bold uppercase mb-1">Win Rate</p>
-            <h3 className="text-3xl font-black">{winRate}%</h3>
-          </div>
-
-          <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-3 bg-yellow-500/10 rounded-xl">
-                <Trophy className="w-5 h-5 text-yellow-400" />
-              </div>
-            </div>
-            <p className="text-gray-500 text-xs font-bold uppercase mb-1">Trophies</p>
-            <h3 className="text-3xl font-black">{championshipsWon}</h3>
-          </div>
-
-          <div className="glass p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all col-span-2 md:col-span-3">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-3 bg-cyan-500/10 rounded-xl">
-                <TrendingUp className="w-5 h-5 text-cyan-400" />
-              </div>
-            </div>
-            <p className="text-gray-500 text-xs font-bold uppercase mb-1">Goal Difference</p>
-            <h3 className={`text-3xl font-black ${goalDifference >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              {goalDifference >= 0 ? '+' : ''}{goalDifference}
-            </h3>
-          </div>
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6 border-b border-white/10">
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={`px-6 py-3 font-bold text-sm transition-all relative ${activeTab === 'stats'
+              ? 'text-purple-400'
+              : 'text-gray-500 hover:text-gray-300'
+              }`}
+          >
+            Stats
+            {activeTab === 'stats' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-600"></div>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('compare')}
+            className={`px-6 py-3 font-bold text-sm transition-all relative ${activeTab === 'compare'
+              ? 'text-purple-400'
+              : 'text-gray-500 hover:text-gray-300'
+              }`}
+          >
+            Compare
+            {activeTab === 'compare' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-600"></div>
+            )}
+          </button>
         </div>
+
+        {/* Stats Tab */}
+        {activeTab === 'stats' && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="glass p-4 sm:p-6 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-blue-500/10 rounded-lg">
+                  <Activity className="w-4 h-4 text-blue-400" />
+                </div>
+              </div>
+              <p className="text-gray-500 text-[10px] sm:text-xs font-bold uppercase mb-1">Total Matches</p>
+              <h3 className="text-2xl sm:text-3xl font-black">{selectedStats.totalMatches}</h3>
+            </div>
+
+            <div className="glass p-4 sm:p-6 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-purple-500/10 rounded-lg">
+                  <Users className="w-4 h-4 text-purple-400" />
+                </div>
+              </div>
+              <p className="text-gray-500 text-[10px] sm:text-xs font-bold uppercase mb-1">Leagues Joined</p>
+              <h3 className="text-2xl sm:text-3xl font-black">{selectedStats.leaguesJoined}</h3>
+            </div>
+
+            <div className="glass p-4 sm:p-6 rounded-2xl border border-white/5 hover:border-emerald-500/30 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-emerald-500/10 rounded-lg">
+                  <Target className="w-4 h-4 text-emerald-400" />
+                </div>
+              </div>
+              <p className="text-gray-500 text-[10px] sm:text-xs font-bold uppercase mb-1">Goals Scored</p>
+              <h3 className="text-2xl sm:text-3xl font-black">{selectedStats.goalsScored}</h3>
+            </div>
+
+            <div className="glass p-4 sm:p-6 rounded-2xl border border-white/5 hover:border-red-500/30 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-red-500/10 rounded-lg">
+                  <ShieldCheck className="w-4 h-4 text-red-400" />
+                </div>
+              </div>
+              <p className="text-gray-500 text-[10px] sm:text-xs font-bold uppercase mb-1">Goals Taken</p>
+              <h3 className="text-2xl sm:text-3xl font-black">{selectedStats.goalsConceded}</h3>
+            </div>
+
+            <div className="glass p-4 sm:p-6 rounded-2xl border border-white/5 hover:border-yellow-500/30 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-yellow-500/10 rounded-lg">
+                  <Trophy className="w-4 h-4 text-yellow-400" />
+                </div>
+              </div>
+              <p className="text-gray-500 text-[10px] sm:text-xs font-bold uppercase mb-1">Championships</p>
+              <h3 className="text-2xl sm:text-3xl font-black">{selectedStats.championships}</h3>
+            </div>
+
+            <div className="glass p-4 sm:p-6 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-indigo-500/10 rounded-lg">
+                  <Zap className="w-4 h-4 text-indigo-400" />
+                </div>
+              </div>
+              <p className="text-gray-500 text-[10px] sm:text-xs font-bold uppercase mb-1">Win Rate</p>
+              <h3 className="text-2xl sm:text-3xl font-black">{selectedStats.winRate}%</h3>
+            </div>
+
+            <div className="glass p-4 sm:p-6 rounded-2xl border border-white/5 hover:border-orange-500/30 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-orange-500/10 rounded-lg">
+                  <Activity className="w-4 h-4 text-orange-400" />
+                </div>
+              </div>
+              <p className="text-gray-500 text-[10px] sm:text-xs font-bold uppercase mb-1">Favorite Opponent</p>
+              <h3 className="text-base sm:text-lg font-black truncate">{selectedStats.favOpp}</h3>
+            </div>
+
+            <div className="glass p-4 sm:p-6 rounded-2xl border border-white/5 hover:border-rose-500/30 transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 bg-rose-500/10 rounded-lg">
+                  <Activity className="w-4 h-4 text-rose-400" />
+                </div>
+              </div>
+              <p className="text-gray-500 text-[10px] sm:text-xs font-bold uppercase mb-1">Toughest Rival</p>
+              <h3 className="text-base sm:text-lg font-black truncate">{selectedStats.toughOpp}</h3>
+            </div>
+          </div>
+        )}
+
+        {/* Compare Tab */}
+        {activeTab === 'compare' && (
+          <div className="space-y-4">
+            {/* Header Row */}
+            <div className="grid grid-cols-3 gap-4 items-center">
+              <div className="text-center">
+                <img
+                  src={currentUser.avatar || `https://picsum.photos/seed/${currentUser.id}/100`}
+                  alt={currentUser.username}
+                  className="w-16 h-16 rounded-full border-2 border-purple-600 mx-auto mb-2"
+                />
+                <p className="font-bold text-sm truncate">You</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-gray-500 font-bold uppercase">VS</p>
+              </div>
+              <div className="text-center">
+                <img
+                  src={selectedUser.avatar || `https://picsum.photos/seed/${selectedUser.id}/100`}
+                  alt={selectedUser.username}
+                  className="w-16 h-16 rounded-full border-2 border-purple-600 mx-auto mb-2"
+                />
+                <p className="font-bold text-sm truncate">{selectedUser.username}</p>
+              </div>
+            </div>
+
+            {/* Comparison Stats */}
+            {[
+              { label: 'Total Matches', key: 'totalMatches', icon: Activity, color: 'blue' },
+              { label: 'Leagues Joined', key: 'leaguesJoined', icon: Users, color: 'purple' },
+              { label: 'Goals Scored', key: 'goalsScored', icon: Target, color: 'emerald' },
+              { label: 'Goals Conceded', key: 'goalsConceded', icon: ShieldCheck, color: 'red' },
+              { label: 'Championships', key: 'championships', icon: Trophy, color: 'yellow' },
+              { label: 'Win Rate', key: 'winRate', icon: Zap, color: 'indigo', suffix: '%' },
+            ].map((stat) => {
+              const currentValue = currentStats[stat.key as keyof typeof currentStats];
+              const selectedValue = selectedStats[stat.key as keyof typeof selectedStats];
+              const currentWins = currentValue > selectedValue;
+              const tie = currentValue === selectedValue;
+
+              return (
+                <div key={stat.key} className="glass p-4 rounded-xl border border-white/5">
+                  <div className="grid grid-cols-3 gap-4 items-center">
+                    <div className={`text-center ${currentWins && !tie ? 'text-emerald-400' : tie ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <p className="text-2xl font-black">{currentValue}{stat.suffix || ''}</p>
+                    </div>
+                    <div className="text-center">
+                      <stat.icon className={`w-5 h-5 mx-auto mb-1 text-${stat.color}-400`} />
+                      <p className="text-xs text-gray-500 font-bold uppercase">{stat.label}</p>
+                    </div>
+                    <div className={`text-center ${!currentWins && !tie ? 'text-emerald-400' : tie ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <p className="text-2xl font-black">{selectedValue}{stat.suffix || ''}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -562,9 +704,11 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
 
       {selectedUserForStats && (
         <UserStatsModal
-          user={selectedUserForStats}
+          currentUser={user}
+          selectedUser={selectedUserForStats}
           onClose={() => setSelectedUserForStats(null)}
           allMatches={allMatches}
+          allUsers={allUsers}
         />
       )}
 
