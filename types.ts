@@ -26,6 +26,8 @@ export interface League {
   participantIds: string[];
   createdAt: number;
   finishedAt?: number;
+  winner?: string | null;
+  standings?: TableRow[];
 }
 
 export interface Match {
@@ -77,6 +79,8 @@ export interface ActivityLog {
     leagueName?: string;
     matchId?: string;
     score?: string;
+    champion?: string | null;
+    championName?: string;
   };
 }
 

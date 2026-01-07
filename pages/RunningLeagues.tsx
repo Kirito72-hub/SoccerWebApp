@@ -298,10 +298,27 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
       setSaving(true);
       const leagueId = selectedLeague.id;
 
-      // Update league status to finished
+      // Determine champion and standings
+      const champion = tableData.length > 0 ? tableData[0].userId : null;
+      const standings = tableData.map(row => ({
+        userId: row.userId,
+        username: row.username,
+        points: row.points,
+        played: row.played,
+        won: row.won,
+        drawn: row.drawn,
+        lost: row.lost,
+        gf: row.gf,
+        ga: row.ga,
+        gd: row.gd
+      }));
+
+      // Update league status to finished with winner and standings
       await dataService.updateLeague(leagueId, {
         status: 'finished',
-        finishedAt: Date.now()
+        finishedAt: Date.now(),
+        winner: champion,
+        standings: standings
       });
 
       // Calculate stats from matches
@@ -334,9 +351,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
         }
       });
 
-      // Determine champion
-      const champion = tableData.length > 0 ? tableData[0].userId : null;
-
       // Update each user's stats
       for (const [userId, stats] of Object.entries(statsUpdates)) {
         const currentStats = await dataService.getUserStats(userId);
@@ -361,7 +375,9 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
         timestamp: Date.now(),
         metadata: {
           leagueId: selectedLeague.id,
-          leagueName: selectedLeague.name
+          leagueName: selectedLeague.name,
+          champion: champion,
+          championName: users.find(u => u.id === champion)?.username
         }
       });
 
