@@ -298,7 +298,18 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
           <p className="text-gray-500 font-medium">Create and oversee your custom leagues</p>
         </div>
         <button
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => {
+            // Auto-generate league name from current date/time
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const year = now.getFullYear();
+            const autoName = `League ${day}/${month}/${year} ${hours}:${minutes}`;
+            setNewLeagueName(autoName);
+            setShowCreateModal(true);
+          }}
           className="bg-purple-600 hover:bg-purple-500 px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 shadow-lg shadow-purple-600/20 transition-all"
         >
           <PlusCircle className="w-5 h-5" /> CREATE LEAGUE
@@ -389,13 +400,12 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
 
             <div className="space-y-6">
               <div>
-                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">League Name</label>
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2">League Name (Auto-Generated)</label>
                 <input
                   type="text"
                   value={newLeagueName}
-                  onChange={(e) => setNewLeagueName(e.target.value)}
-                  placeholder="The Champions Invitational"
-                  className="w-full glass bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-purple-600 outline-none transition-all font-bold"
+                  readOnly
+                  className="w-full glass bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white outline-none font-bold cursor-not-allowed opacity-75"
                 />
               </div>
 
