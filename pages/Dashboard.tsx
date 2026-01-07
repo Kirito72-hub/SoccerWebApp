@@ -15,6 +15,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { User, UserStats, Match } from '../types';
 import { dataService } from '../services/dataService';
+import { useRealtimeSubscription } from '../hooks/useRealtimeSubscription';
 
 interface DashboardProps {
   user: User;
@@ -52,6 +53,90 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
     loadData();
   }, [user.id]);
+
+  // Realtime subscription for matches
+  useRealtimeSubscription({
+    table: 'matches',
+    event: '*',
+    enabled: dataService.isOnline() && !loading,
+    onInsert: (newMatch) => {
+      const match: Match = {
+        id: newMatch.id,
+        leagueId: newMatch.league_id,
+        homeUserId: newMatch.home_user_id,
+        awayUserId: newMatch.away_user_id,
+        homeScore: newMatch.home_score,
+        awayScore: newMatch.away_score,
+        status: newMatch.status,
+        date: new Date(newMatch.date).getTime(),
+        round: newMatch.round
+      };
+      if (match.status === 'completed') {
+        setAllMatches(prev => [...prev, match]);
+      }
+    },
+    onUpdate: (updatedMatch) => {
+      setAllMatches(prev =>
+        prev.map(m => {
+          if (m.id === updatedMatch.id) {
+            return {
+              ...m,
+              homeScore: updatedMatch.home_score,
+              awayScore: updatedMatch.away_score,
+              status: updatedMatch.status
+            };
+          }
+          return m;
+        }).filter(m => m.status === 'completed')
+      );
+    },
+    onDelete: (deletedMatch) => {
+      setAllMatches(prev => prev.filter(m => m.id !== deletedMatch.id));
+    }
+  });
+
+  // Realtime subscription for leagues
+  useRealtimeSubscription({
+    table: 'leagues',
+    event: '*',
+    enabled: dataService.isOnline() && !loading,
+    onInsert: (newLeague) => {
+      const league = {
+        id: newLeague.id,
+        name: newLeague.name,
+        adminId: newLeague.admin_id,
+        format: newLeague.format,
+        status: newLeague.status,
+        participantIds: newLeague.participant_ids || [],
+        createdAt: new Date(newLeague.created_at).getTime(),
+        finishedAt: newLeague.finished_at ? new Date(newLeague.finished_at).getTime() : undefined,
+        winner: newLeague.winner || null,
+        standings: newLeague.standings || undefined
+      };
+      setLeagues(prev => [...prev, league]);
+    },
+    onUpdate: (updatedLeague) => {
+      setLeagues(prev =>
+        prev.map(l => {
+          if (l.id === updatedLeague.id) {
+            return {
+              ...l,
+              name: updatedLeague.name,
+              status: updatedLeague.status,
+              participantIds: updatedLeague.participant_ids || l.participantIds,
+              finishedAt: updatedLeague.finished_at ? new Date(updatedLeague.finished_at).getTime() : undefined,
+              winner: updatedLeague.winner || null,
+              standings: updatedLeague.standings || undefined
+            };
+          }
+          return l;
+        })
+      );
+    },
+    onDelete: (deletedLeague) => {
+      setLeagues(prev => prev.filter(l => l.id !== deletedLeague.id));
+    }
+  });
 
   const userMatches = allMatches.filter(m => m.homeUserId === user.id || m.awayUserId === user.id);
 

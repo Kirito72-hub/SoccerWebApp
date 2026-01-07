@@ -99,7 +99,9 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
               name: updatedLeague.name,
               status: updatedLeague.status,
               participantIds: updatedLeague.participant_ids || l.participantIds,
-              finishedAt: updatedLeague.finished_at ? new Date(updatedLeague.finished_at).getTime() : undefined
+              finishedAt: updatedLeague.finished_at ? new Date(updatedLeague.finished_at).getTime() : undefined,
+              winner: updatedLeague.winner || null,
+              standings: updatedLeague.standings || undefined
             };
           }
           return l;
