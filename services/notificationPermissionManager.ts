@@ -88,7 +88,6 @@ export class NotificationPermissionManager {
                 body: 'You\'ll now receive notifications for matches, leagues, and updates!',
                 icon: '/icon-192x192.png',
                 badge: '/icon-192x192.png',
-                vibrate: [200, 100, 200],
                 tag: 'welcome',
                 requireInteraction: false,
                 data: {

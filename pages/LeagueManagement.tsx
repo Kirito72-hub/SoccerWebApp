@@ -262,7 +262,6 @@ const LeagueManagement: React.FC<LeagueManagementProps> = ({ user }) => {
         userId: user.id,
         username: user.username,
         description: `Deleted league "${leagueToDeleteObj.name}"`,
-        timestamp: Date.now(),
         metadata: {
           leagueId: id,
           leagueName: leagueToDeleteObj.name

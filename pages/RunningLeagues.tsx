@@ -219,7 +219,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
           userId: user.id,
           username: user.username,
           description: `Added result: ${homeUser.username} ${homeScore} - ${awayScore} ${awayUser.username}`,
-          timestamp: Date.now(),
           metadata: {
             leagueId: selectedLeagueId!,
             leagueName: selectedLeague.name,
@@ -372,7 +371,6 @@ const RunningLeagues: React.FC<RunningLeaguesProps> = ({ user }) => {
         userId: user.id,
         username: user.username,
         description: `Finished league "${selectedLeague.name}"`,
-        timestamp: Date.now(),
         metadata: {
           leagueId: selectedLeague.id,
           leagueName: selectedLeague.name,
