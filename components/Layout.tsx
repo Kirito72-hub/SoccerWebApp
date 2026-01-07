@@ -453,12 +453,12 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            {/* Search - Hidden on mobile, shown on tablet+ */}
-            <div className="hidden md:flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10 w-64 lg:w-96 relative">
-              <Search className="w-4 h-4 text-gray-500" />
+            {/* Search - Now visible on all devices */}
+            <div className="flex items-center gap-2 glass px-3 py-2 rounded-xl border border-white/10 w-full sm:w-48 md:w-64 lg:w-96 relative">
+              <Search className="w-4 h-4 text-gray-500 flex-shrink-0" />
               <input
                 type="text"
-                placeholder="Search for players..."
+                placeholder="Search players..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -466,11 +466,11 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
                 }}
                 onFocus={() => setShowSearchResults(true)}
                 onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
-                className="bg-transparent border-none focus:ring-0 text-sm w-full placeholder-gray-600 outline-none"
+                className="bg-transparent border-none focus:ring-0 text-xs sm:text-sm w-full placeholder-gray-600 outline-none"
               />
 
               {showSearchResults && filteredUsers.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 glass border border-white/10 rounded-xl overflow-hidden shadow-2xl max-h-80 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-2 glass border border-white/10 rounded-xl overflow-hidden shadow-2xl max-h-80 overflow-y-auto z-50">
                   {filteredUsers.map((u) => (
                     <button
                       key={u.id}
@@ -480,11 +480,11 @@ const Layout: React.FC<LayoutProps> = ({ user, onLogout }) => {
                       <img
                         src={u.avatar || `https://picsum.photos/seed/${u.id}/100`}
                         alt={u.username}
-                        className="w-10 h-10 rounded-full border-2 border-purple-500/30"
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-purple-500/30 flex-shrink-0"
                       />
-                      <div>
-                        <p className="font-bold text-sm">{u.username}</p>
-                        <p className="text-xs text-gray-500">{u.email}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-xs sm:text-sm truncate">{u.username}</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500 truncate">{u.email}</p>
                       </div>
                     </button>
                   ))}
