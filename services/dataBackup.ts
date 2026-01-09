@@ -147,7 +147,7 @@ class DataBackupService {
         const result: Match[] = [];
         matchesByLeague.forEach((leagueMatches, leagueId) => {
             // Sort by created_at
-            leagueMatches.sort((a, b) => 
+            leagueMatches.sort((a, b) =>
                 new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
             );
 
@@ -172,7 +172,7 @@ class DataBackupService {
     async exportData(userId: string): Promise<BackupData> {
         try {
             // Get app version from package.json
-            const version = '1.8.2-beta';
+            const version = '1.8.3-beta';
 
             // Fetch all leagues where user is admin
             const { data: leagues, error: leaguesError } = await supabase
@@ -199,7 +199,7 @@ class DataBackupService {
             // Process leagues
             const processedLeagues: League[] = (leagues || []).map(league => {
                 const leagueMatches = matches.filter(m => m.league_id === league.id);
-                
+
                 // Base league data
                 const leagueData: League = {
                     id: league.id,
@@ -214,7 +214,7 @@ class DataBackupService {
                 // Add finished_at, standings, and winner for finished leagues
                 if (league.status === 'finished') {
                     leagueData.finished_at = league.finished_at || league.created_at;
-                    
+
                     // Calculate standings
                     const standings = this.calculateStandings(
                         leagueMatches,
